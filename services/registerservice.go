@@ -1,7 +1,7 @@
 package services
 
 import (
-	"github.com/Ghjattu/tiny-tiktok/middleware"
+	"github.com/Ghjattu/tiny-tiktok/middleware/jwt"
 	"github.com/Ghjattu/tiny-tiktok/models"
 )
 
@@ -16,8 +16,8 @@ func (rs *RegisterService) Register(username string, password string) (int64, in
 	}
 
 	// Check if the username has been registered.
-	user, _ := models.GetUserByName(username)
-	if user.Name == username {
+	user, err := models.GetUserByName(username)
+	if err == nil && user.Name == username {
 		return -1, 1, "the username has been registered", ""
 	}
 
@@ -34,7 +34,7 @@ func (rs *RegisterService) Register(username string, password string) (int64, in
 	}
 
 	// Generate a token.
-	token, err := middleware.GenerateToken(returnedUser.ID, returnedUser.Name)
+	token, err := jwt.GenerateToken(returnedUser.ID, returnedUser.Name)
 	if err != nil {
 		return -1, 1, "failed to generate a token", ""
 	}

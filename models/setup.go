@@ -10,7 +10,7 @@ import (
 
 var db *gorm.DB
 
-func init() {
+func InitDatabase() {
 	mysql_username := os.Getenv("MYSQL_USERNAME")
 	mysql_password := os.Getenv("MYSQL_PASSWORD")
 	mysql_ip := os.Getenv("MYSQL_IP")

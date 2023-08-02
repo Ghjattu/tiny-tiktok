@@ -17,5 +17,5 @@ func main() {
 }
 
 func Initialize() {
-	models.InitDatabase()
+	models.InitDatabase(false)
 }

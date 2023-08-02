@@ -1,25 +1,15 @@
 package models
 
 import (
-	"os"
 	"testing"
 
-	_ "github.com/joho/godotenv/autoload"
 	"github.com/stretchr/testify/assert"
 )
-
-func beforeTest() {
-	os.Setenv("MYSQL_USERNAME", "root")
-	os.Setenv("MYSQL_PASSWORD", "")
-	os.Setenv("MYSQL_IP", "127.0.0.1")
-	os.Setenv("MYSQL_PORT", "3306")
-	os.Setenv("MYSQL_DB_NAME", "tiktok_test")
-}
 
 func TestCreateNewUser(t *testing.T) {
 	beforeTest()
 
-	InitDatabase()
+	InitDatabase(true)
 
 	testUser := &User{
 		Name:     "test",
@@ -37,7 +27,7 @@ func TestCreateNewUser(t *testing.T) {
 func TestGetUserByName(t *testing.T) {
 	beforeTest()
 
-	InitDatabase()
+	InitDatabase(true)
 
 	testUser := &User{
 		Name:     "test1",

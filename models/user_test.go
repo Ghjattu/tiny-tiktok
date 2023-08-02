@@ -7,8 +7,6 @@ import (
 )
 
 func TestCreateNewUser(t *testing.T) {
-	beforeTest()
-
 	InitDatabase(true)
 
 	testUser := &User{
@@ -25,8 +23,6 @@ func TestCreateNewUser(t *testing.T) {
 }
 
 func TestGetUserByName(t *testing.T) {
-	beforeTest()
-
 	InitDatabase(true)
 
 	testUser := &User{

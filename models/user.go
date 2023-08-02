@@ -57,7 +57,7 @@ func CreateNewUser(u *User) (*User, error) {
 //	@return error
 func GetUserByName(name string) (*User, error) {
 	user := &User{}
-	err := db.Model(&User{}).Where("name = ?", name).First(user).Error
+	err := db.Model(&User{}).Where("name = ?", name).Find(user).Error
 
 	return user, err
 }

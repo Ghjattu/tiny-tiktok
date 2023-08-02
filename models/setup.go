@@ -3,6 +3,7 @@ package models
 import (
 	"os"
 
+	"github.com/joho/godotenv"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -23,6 +24,15 @@ func getDatabaseName(isTest bool) string {
 //
 //	@param isTest bool
 func InitDatabase(isTest bool) {
+	// When running tests in Go, the test environment is isolated from
+	// the system environment variables by design.
+	// This means that the test environment does not inherit
+	// the environment variables set in our shell or system.
+	// As a result, the os.Getenv() function in the test file will not be able to
+	// access the environment variables set outside the test execution context.
+	// So we need to load the environment variables manually.
+	godotenv.Load("../.env")
+
 	mysql_username := os.Getenv("MYSQL_USERNAME")
 	mysql_password := os.Getenv("MYSQL_PASSWORD")
 	mysql_ip := os.Getenv("MYSQL_IP")
@@ -33,7 +43,6 @@ func InitDatabase(isTest bool) {
 		"@tcp(" + mysql_ip + ":" + mysql_port + ")" + "/" + mysql_db_name +
 		"?charset=utf8mb4&parseTime=True&loc=Local"
 	d, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-
 	if err != nil {
 		panic("failed to connect database")
 	}

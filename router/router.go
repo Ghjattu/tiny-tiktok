@@ -6,7 +6,8 @@ import (
 )
 
 func RegisterRouter(r *gin.Engine) {
-	api := r.Group("/api")
+	api := r.Group("/api/douyin")
 
 	api.POST("/user/register", controllers.Register)
+	api.POST("/user/login", controllers.Login)
 }

@@ -16,8 +16,14 @@ func (rs *RegisterService) Register(username string, password string) (int64, in
 		return -1, 1, "invalid username or password", ""
 	}
 
-	if len(password) < 6 {
+	// Check password length.
+	if len([]rune(password)) < 6 {
 		return -1, 1, "password is too short", ""
+	}
+
+	// Check username and password length.
+	if len([]rune(username)) > 32 || len([]rune(password)) > 32 {
+		return -1, 1, "username or password is too long", ""
 	}
 
 	// Check if the username has been registered.

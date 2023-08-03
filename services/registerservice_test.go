@@ -49,7 +49,7 @@ func TestRegisterWithLongPassword(t *testing.T) {
 
 	assert.Equal(t, int64(-1), user_id)
 	assert.Equal(t, int32(1), status_code)
-	assert.Equal(t, "password length exceeds 72 bytes", status_msg)
+	assert.Equal(t, "username or password is too long", status_msg)
 }
 
 func TestRegisterWithRegisteredUsername(t *testing.T) {

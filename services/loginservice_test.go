@@ -7,6 +7,19 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestLoginWithLongPassword(t *testing.T) {
+	models.InitDatabase(true)
+
+	ls := &LoginService{}
+
+	user_id, status_code, status_msg, _ := ls.Login("test",
+		"1234567890123456789012345678901234567890123456789012345678901234567890")
+
+	assert.Equal(t, int64(-1), user_id)
+	assert.Equal(t, int32(1), status_code)
+	assert.Equal(t, "username or password is too long", status_msg)
+}
+
 func TestLoginWithNotExistName(t *testing.T) {
 	models.InitDatabase(true)
 

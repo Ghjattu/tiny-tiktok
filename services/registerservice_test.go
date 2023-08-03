@@ -27,6 +27,31 @@ func TestRegisterWithEmptyPassword(t *testing.T) {
 	assert.Equal(t, "invalid username or password", status_msg)
 }
 
+func TestRegisterWithShortPassword(t *testing.T) {
+	models.InitDatabase(true)
+
+	rs := &RegisterService{}
+
+	user_id, status_code, status_msg, _ := rs.Register("test", "123")
+
+	assert.Equal(t, int64(-1), user_id)
+	assert.Equal(t, int32(1), status_code)
+	assert.Equal(t, "password is too short", status_msg)
+}
+
+func TestRegisterWithLongPassword(t *testing.T) {
+	models.InitDatabase(true)
+
+	rs := &RegisterService{}
+
+	user_id, status_code, status_msg, _ := rs.Register("test",
+		"12345678901234567890123456789012345678901234567890123456789012345678901234567890")
+
+	assert.Equal(t, int64(-1), user_id)
+	assert.Equal(t, int32(1), status_code)
+	assert.Equal(t, "password length exceeds 72 bytes", status_msg)
+}
+
 func TestRegisterWithRegisteredUsername(t *testing.T) {
 	models.InitDatabase(true)
 

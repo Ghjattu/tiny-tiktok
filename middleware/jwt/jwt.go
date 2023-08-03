@@ -1,6 +1,7 @@
 package jwt
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 	"time"
@@ -30,6 +31,11 @@ func init() {
 }
 
 // GenerateToken generates a json web token using HMAC-SHA256.
+//
+//	@param userID int64
+//	@param username string
+//	@return string "token"
+//	@return error
 func GenerateToken(userID int64, username string) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id": userID,
@@ -42,37 +48,28 @@ func GenerateToken(userID int64, username string) (string, error) {
 	return token.SignedString([]byte(key))
 }
 
-// // ValidateToken parses and validates a token using the HMAC signing method.
-// // see https://pkg.go.dev/github.com/golang-jwt/jwt/v5#example-Parse-Hmac
-// func ValidateToken(c *fiber.Ctx) error {
-// 	tokenString := ExtractToken(c)
-// 	_, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
-// 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-// 			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
-// 		}
+// ValidateToken parses and validates a token using the HMAC signing method.
+// see https://pkg.go.dev/github.com/golang-jwt/jwt/v5#example-Parse-Hmac.
+//
+//	@param tokenString string
+//	@return int64 "user_id"
+//	@return string "name"
+//	@return error
+func ValidateToken(tokenString string) (int64, string, error) {
+	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
+		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
+		}
 
-// 		return []byte(key), nil
-// 	})
+		return []byte(key), nil
+	})
 
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }
+	if clams, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		userID := int64(clams["user_id"].(float64))
+		name := clams["name"].(string)
 
-// // ExtractToken extracts the token from query string parameter or Header.
-// func ExtractToken(c *fiber.Ctx) string {
-// 	// from query string parameter
-// 	token := c.Query("token")
-// 	if token != "" {
-// 		return token
-// 	}
+		return userID, name, nil
+	}
 
-// 	// from Header Authorization field
-// 	bearerToken := c.GetReqHeaders()["Authorization"]
-// 	if len(strings.Split(bearerToken, " ")) == 2 {
-// 		return strings.Split(bearerToken, " ")[1]
-// 	}
-
-// 	return ""
-// }
+	return -1, "", err
+}

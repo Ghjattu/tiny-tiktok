@@ -42,3 +42,24 @@ func TestGetUserByName(t *testing.T) {
 
 	assert.Equal(t, testUser.Name, returnedUser.Name)
 }
+
+func TestGetUserByUserID(t *testing.T) {
+	InitDatabase(true)
+
+	testUser := &User{
+		Name:     "test",
+		Password: "test",
+	}
+
+	_, err := CreateNewUser(testUser)
+	if err != nil {
+		t.Fatalf("Error when creating a new user: %v", err)
+	}
+
+	returnedUser, err := GetUserByUserID(testUser.ID)
+	if err != nil {
+		t.Fatalf("Error when getting a user: %v", err)
+	}
+
+	assert.Equal(t, testUser.Name, returnedUser.Name)
+}

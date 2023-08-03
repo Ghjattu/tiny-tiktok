@@ -62,6 +62,10 @@ func GetUserByName(name string) (*User, error) {
 	return user, err
 }
 
+// GetUserByUserID gets a user by its id.
+//
+//	@param id int64
+//	@return *User
 func GetUserByUserID(id int64) (*User, error) {
 	user := &User{}
 	err := db.Model(&User{}).Where("id = ?", id).First(user).Error

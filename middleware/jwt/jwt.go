@@ -30,7 +30,7 @@ func init() {
 }
 
 // GenerateToken generates a json web token using HMAC-SHA256.
-func GenerateToken(userID uint, username string) (string, error) {
+func GenerateToken(userID int64, username string) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id": userID,
 		"name":    username,

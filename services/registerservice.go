@@ -47,5 +47,5 @@ func (rs *RegisterService) Register(username string, password string) (int64, in
 		return -1, 1, "failed to generate a token", ""
 	}
 
-	return int64(returnedUser.ID), 0, "register successfully", token
+	return returnedUser.ID, 0, "register successfully", token
 }

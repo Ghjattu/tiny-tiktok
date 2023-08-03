@@ -39,5 +39,5 @@ func (ls *LoginService) Login(username string, password string) (int64, int32, s
 		return -1, 1, "failed to generate a token", ""
 	}
 
-	return int64(user.ID), 0, "login successfully", token
+	return user.ID, 0, "login successfully", token
 }

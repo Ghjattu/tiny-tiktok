@@ -9,7 +9,7 @@ import (
 )
 
 type User struct {
-	gorm.Model
+	ID              int64  `gorm:"primaryKey;autoIncrement" json:"id"`
 	Name            string `gorm:"type:varchar(255);not null;unique" json:"name"`
 	Password        string `gorm:"type:varchar(255);not null" json:"password"`
 	FollowCount     int64  `gorm:"type:int;not null" json:"follow_count"`

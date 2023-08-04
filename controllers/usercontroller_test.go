@@ -83,6 +83,28 @@ func TestGetUserByUserIDAndTokenWithNotExistUserID(t *testing.T) {
 	assert.Equal(t, "user not found", ur.StatusMsg)
 }
 
+func TestGetUserByUserIDAndTokenWithEmptyToken(t *testing.T) {
+	req := httptest.NewRequest("POST",
+		"http://127.0.0.1/douyin/user/register/?username=test&password=123456", nil)
+
+	w, rr, _ := beforeUserTest(req, true, false)
+
+	assert.Equal(t, 200, w.Code)
+	assert.Equal(t, int32(0), rr.StatusCode)
+	assert.Equal(t, "register successfully", rr.StatusMsg)
+
+	userID := rr.UserID
+
+	url := "http://127.0.0.1/douyin/user/?user_id=" + strconv.Itoa(int(userID)) + "&token="
+	req = httptest.NewRequest("GET", url, nil)
+
+	w, _, ur := beforeUserTest(req, false, true)
+
+	assert.Equal(t, 401, w.Code)
+	assert.Equal(t, int32(1), ur.StatusCode)
+	assert.Equal(t, "invalid token", ur.StatusMsg)
+}
+
 func TestGetUserByUserIDAndTokenWithInvalidToken(t *testing.T) {
 	req := httptest.NewRequest("POST",
 		"http://127.0.0.1/douyin/user/register/?username=test&password=123456", nil)

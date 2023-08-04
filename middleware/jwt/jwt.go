@@ -56,6 +56,11 @@ func GenerateToken(userID int64, username string) (string, error) {
 //	@return string "name"
 //	@return error
 func ValidateToken(tokenString string) (int64, string, error) {
+	// If the token is empty, return an error.
+	if tokenString == "" {
+		return -1, "", fmt.Errorf("empty token")
+	}
+
 	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])

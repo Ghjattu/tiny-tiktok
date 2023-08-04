@@ -23,7 +23,9 @@ func (us *UserService) GetUserByUserID(userID int64) (int32, string, *models.Use
 		return 1, "failed to get user", nil
 	}
 
+	// Hide user password.
 	user.Password = ""
+
 	// TODO: Update IsFollow field.
 	return 0, "get user successfully", user
 }

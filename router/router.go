@@ -13,4 +13,5 @@ func RegisterRouter(r *gin.Engine) {
 	api.POST("/user/login/", controllers.Login)
 	api.GET("/user/", jwt.AuthorizationGet(), controllers.GetUserByUserIDAndToken)
 	api.POST("/publish/action/", jwt.AuthorizationPost(), controllers.PublishNewVideo)
+	api.GET("/publish/list/", jwt.AuthorizationGet(), controllers.GetPublishListByAuthorID)
 }

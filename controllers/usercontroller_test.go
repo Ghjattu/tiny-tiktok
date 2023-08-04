@@ -55,7 +55,7 @@ func TestGetUserByUserIDAndTokenWithInvalidUserID(t *testing.T) {
 
 	assert.Equal(t, 400, w.Code)
 	assert.Equal(t, int32(1), ur.StatusCode)
-	assert.Equal(t, "incorrect user id type", ur.StatusMsg)
+	assert.Equal(t, "invalid syntax", ur.StatusMsg)
 	assert.Equal(t, (*models.User)(nil), ur.User)
 }
 

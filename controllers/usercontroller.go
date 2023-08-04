@@ -2,10 +2,10 @@ package controllers
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/Ghjattu/tiny-tiktok/models"
 	"github.com/Ghjattu/tiny-tiktok/services"
+	"github.com/Ghjattu/tiny-tiktok/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -17,13 +17,13 @@ type UserResponse struct {
 func GetUserByUserIDAndToken(c *gin.Context) {
 	userIDString := c.Query("user_id")
 
-	// Check if the user id is a number string.
-	userID, err := strconv.ParseInt(userIDString, 10, 64)
-	if err != nil {
+	// Check user id is valid.
+	statusCode, statusMsg, userID := utils.ParseInt64(userIDString)
+	if statusCode == 1 {
 		c.JSON(http.StatusBadRequest, UserResponse{
 			Response: Response{
-				StatusCode: 1,
-				StatusMsg:  "incorrect user id type",
+				StatusCode: statusCode,
+				StatusMsg:  statusMsg,
 			},
 			User: nil,
 		})

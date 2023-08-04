@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"net/http"
 	"path/filepath"
-	"strconv"
 
 	"github.com/Ghjattu/tiny-tiktok/models"
 	"github.com/Ghjattu/tiny-tiktok/services"
+	"github.com/Ghjattu/tiny-tiktok/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -58,35 +58,15 @@ func GetPublishListByAuthorID(c *gin.Context) {
 	userIDString := c.Query("user_id")
 
 	// Check user id is valid.
-	authorID, err := strconv.ParseInt(userIDString, 10, 64)
-	if err != nil {
-		if numErr, ok := err.(*strconv.NumError); ok {
-			if numErr.Err == strconv.ErrSyntax {
-				c.JSON(http.StatusBadRequest, VideoResponse{
-					Response: Response{
-						StatusCode: 1,
-						StatusMsg:  "invalid syntax",
-					},
-					VideoList: nil,
-				})
-			} else if numErr.Err == strconv.ErrRange {
-				c.JSON(http.StatusBadRequest, VideoResponse{
-					Response: Response{
-						StatusCode: 1,
-						StatusMsg:  "user id out of range",
-					},
-					VideoList: nil,
-				})
-			}
-		} else {
-			c.JSON(http.StatusOK, VideoResponse{
-				Response: Response{
-					StatusCode: 1,
-					StatusMsg:  "unknown error",
-				},
-				VideoList: nil,
-			})
-		}
+	statusCode, statusMsg, authorID := utils.ParseInt64(userIDString)
+	if statusCode == 1 {
+		c.JSON(http.StatusBadRequest, VideoResponse{
+			Response: Response{
+				StatusCode: statusCode,
+				StatusMsg:  statusMsg,
+			},
+			VideoList: nil,
+		})
 		return
 	}
 

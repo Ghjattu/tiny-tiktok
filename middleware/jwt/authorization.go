@@ -29,12 +29,9 @@ func AuthorizationGet() gin.HandlerFunc {
 
 		// If the token is invalid, return an error.
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, UserResponse{
-				Response: Response{
-					StatusCode: 1,
-					StatusMsg:  "invalid token",
-				},
-				User: nil,
+			c.JSON(http.StatusUnauthorized, Response{
+				StatusCode: 1,
+				StatusMsg:  "invalid token",
 			})
 			c.Abort()
 			return

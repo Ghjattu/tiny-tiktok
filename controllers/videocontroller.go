@@ -35,6 +35,7 @@ func PublishNewVideo(c *gin.Context) {
 		})
 	}
 
+	// Create new video.
 	vs := &services.VideoService{}
 	statusCode, statusMsg := vs.CreateNewVideo(savedPath, title, userID, username)
 

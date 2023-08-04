@@ -18,8 +18,8 @@ func beforeLoginTest(req *http.Request, isInitDatabase bool) (*httptest.Response
 	}
 
 	r := gin.Default()
-	r.POST("/api/douyin/user/register", Register)
-	r.POST("/api/douyin/user/login", Login)
+	r.POST("/api/douyin/user/register/", Register)
+	r.POST("/api/douyin/user/login/", Login)
 
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
@@ -32,7 +32,7 @@ func beforeLoginTest(req *http.Request, isInitDatabase bool) (*httptest.Response
 }
 
 func TestLoginWithNotExistName(t *testing.T) {
-	req := httptest.NewRequest("POST", "http://127.0.0.1/api/douyin/user/login?username=test&password=123456", nil)
+	req := httptest.NewRequest("POST", "http://127.0.0.1/api/douyin/user/login/?username=test&password=123456", nil)
 
 	w, lr := beforeLoginTest(req, true)
 
@@ -42,7 +42,7 @@ func TestLoginWithNotExistName(t *testing.T) {
 }
 
 func TestLoginWithWrongPassword(t *testing.T) {
-	req := httptest.NewRequest("POST", "http://127.0.0.1/api/douyin/user/register?username=test&password=123456", nil)
+	req := httptest.NewRequest("POST", "http://127.0.0.1/api/douyin/user/register/?username=test&password=123456", nil)
 
 	w, lr := beforeLoginTest(req, true)
 
@@ -50,7 +50,7 @@ func TestLoginWithWrongPassword(t *testing.T) {
 	assert.Equal(t, int32(0), lr.StatusCode)
 	assert.Equal(t, "register successfully", lr.StatusMsg)
 
-	req = httptest.NewRequest("POST", "http://127.0.0.1/api/douyin/user/login?username=test&password=12345", nil)
+	req = httptest.NewRequest("POST", "http://127.0.0.1/api/douyin/user/login/?username=test&password=12345", nil)
 
 	w, lr = beforeLoginTest(req, false)
 
@@ -60,7 +60,7 @@ func TestLoginWithWrongPassword(t *testing.T) {
 }
 
 func TestLoginWithCorrectPassword(t *testing.T) {
-	req := httptest.NewRequest("POST", "http://127.0.0.1/api/douyin/user/register?username=test&password=123456", nil)
+	req := httptest.NewRequest("POST", "http://127.0.0.1/api/douyin/user/register/?username=test&password=123456", nil)
 
 	w, lr := beforeLoginTest(req, true)
 
@@ -68,7 +68,7 @@ func TestLoginWithCorrectPassword(t *testing.T) {
 	assert.Equal(t, int32(0), lr.StatusCode)
 	assert.Equal(t, "register successfully", lr.StatusMsg)
 
-	req = httptest.NewRequest("POST", "http://127.0.0.1/api/douyin/user/login?username=test&password=123456", nil)
+	req = httptest.NewRequest("POST", "http://127.0.0.1/api/douyin/user/login/?username=test&password=123456", nil)
 
 	w, lr = beforeLoginTest(req, false)
 

@@ -20,8 +20,8 @@ func beforeUserTest(req *http.Request, isInitDatabase bool, needAuth bool) (*htt
 	}
 
 	r := gin.Default()
-	r.POST("/douyin/user/register", Register)
-	r.POST("/douyin/user/login", Login)
+	r.POST("/douyin/user/register/", Register)
+	r.POST("/douyin/user/login/", Login)
 	if needAuth {
 		r.GET("/douyin/user/", jwt.AuthorizationGet(), GetUserByUserIDAndToken)
 	} else {
@@ -61,7 +61,7 @@ func TestGetUserByUserIDAndTokenWithInvalidUserID(t *testing.T) {
 
 func TestGetUserByUserIDAndTokenWithNotExistUserID(t *testing.T) {
 	req := httptest.NewRequest("POST",
-		"http://127.0.0.1/douyin/user/register?username=test&password=123456", nil)
+		"http://127.0.0.1/douyin/user/register/?username=test&password=123456", nil)
 
 	w, rr, _ := beforeUserTest(req, true, false)
 
@@ -85,7 +85,7 @@ func TestGetUserByUserIDAndTokenWithNotExistUserID(t *testing.T) {
 
 func TestGetUserByUserIDAndTokenWithInvalidToken(t *testing.T) {
 	req := httptest.NewRequest("POST",
-		"http://127.0.0.1/douyin/user/register?username=test&password=123456", nil)
+		"http://127.0.0.1/douyin/user/register/?username=test&password=123456", nil)
 
 	w, rr, _ := beforeUserTest(req, true, false)
 
@@ -110,7 +110,7 @@ func TestGetUserByUserIDAndTokenWithInvalidToken(t *testing.T) {
 
 func TestGetUserByUserIDAndTokenWithCorrectToken(t *testing.T) {
 	req := httptest.NewRequest("POST",
-		"http://127.0.0.1/douyin/user/register?username=test&password=123456", nil)
+		"http://127.0.0.1/douyin/user/register/?username=test&password=123456", nil)
 
 	w, rr, _ := beforeUserTest(req, true, false)
 

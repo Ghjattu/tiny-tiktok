@@ -9,7 +9,7 @@ import (
 func RegisterRouter(r *gin.Engine) {
 	api := r.Group("/douyin")
 
-	api.POST("/user/register", controllers.Register)
-	api.POST("/user/login", controllers.Login)
+	api.POST("/user/register/", controllers.Register)
+	api.POST("/user/login/", controllers.Login)
 	api.GET("/user/", jwt.AuthorizationGet(), controllers.GetUserByUserIDAndToken)
 }

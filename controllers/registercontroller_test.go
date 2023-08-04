@@ -18,7 +18,7 @@ func beforeRegisterTest(req *http.Request, isInitDatabase bool) (*httptest.Respo
 	}
 
 	r := gin.Default()
-	r.POST("/api/douyin/user/register", Register)
+	r.POST("/api/douyin/user/register/", Register)
 
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
@@ -31,7 +31,7 @@ func beforeRegisterTest(req *http.Request, isInitDatabase bool) (*httptest.Respo
 }
 
 func TestRegisterWithEmptyUsername(t *testing.T) {
-	req := httptest.NewRequest("POST", "http://127.0.0.1/api/douyin/user/register?password=123456", nil)
+	req := httptest.NewRequest("POST", "http://127.0.0.1/api/douyin/user/register/?password=123456", nil)
 
 	w, rr := beforeRegisterTest(req, true)
 
@@ -41,7 +41,7 @@ func TestRegisterWithEmptyUsername(t *testing.T) {
 }
 
 func TestRegisterWithEmptyPassword(t *testing.T) {
-	req := httptest.NewRequest("POST", "http://127.0.0.1/api/douyin/user/register?username=test", nil)
+	req := httptest.NewRequest("POST", "http://127.0.0.1/api/douyin/user/register/?username=test", nil)
 
 	w, rr := beforeRegisterTest(req, true)
 
@@ -51,7 +51,7 @@ func TestRegisterWithEmptyPassword(t *testing.T) {
 }
 
 func TestRegisterWithShortPassword(t *testing.T) {
-	req := httptest.NewRequest("POST", "http://127.0.0.1/api/douyin/user/register?username=test&password=123", nil)
+	req := httptest.NewRequest("POST", "http://127.0.0.1/api/douyin/user/register/?username=test&password=123", nil)
 
 	w, rr := beforeRegisterTest(req, true)
 
@@ -62,17 +62,17 @@ func TestRegisterWithShortPassword(t *testing.T) {
 
 func TestRegisterWithLongPassword(t *testing.T) {
 	req := httptest.NewRequest("POST",
-		"http://127.0.0.1/api/douyin/user/register?username=test&password=12345678901234567890123456789012345678901234567890123456789012345678901234567890", nil)
+		"http://127.0.0.1/api/douyin/user/register/?username=test&password=12345678901234567890123456789012345678901234567890123456789012345678901234567890", nil)
 
 	w, rr := beforeRegisterTest(req, true)
 
 	assert.Equal(t, 200, w.Code)
 	assert.Equal(t, int32(1), rr.StatusCode)
-	assert.Equal(t, "password length exceeds 72 bytes", rr.StatusMsg)
+	assert.Equal(t, "username or password is too long", rr.StatusMsg)
 }
 
 func TestRegisterWithRegisteredUsername(t *testing.T) {
-	req := httptest.NewRequest("POST", "http://127.0.0.1/api/douyin/user/register?username=test&password=123456", nil)
+	req := httptest.NewRequest("POST", "http://127.0.0.1/api/douyin/user/register/?username=test&password=123456", nil)
 
 	w, rr := beforeRegisterTest(req, true)
 
@@ -80,7 +80,7 @@ func TestRegisterWithRegisteredUsername(t *testing.T) {
 	assert.Equal(t, int32(0), rr.StatusCode)
 	assert.Equal(t, "register successfully", rr.StatusMsg)
 
-	req = httptest.NewRequest("POST", "http://127.0.0.1/api/douyin/user/register?username=test&password=123456", nil)
+	req = httptest.NewRequest("POST", "http://127.0.0.1/api/douyin/user/register/?username=test&password=123456", nil)
 
 	w, rr = beforeRegisterTest(req, false)
 
@@ -90,7 +90,7 @@ func TestRegisterWithRegisteredUsername(t *testing.T) {
 }
 
 func TestRegisterWithValidUsernameAndPassword(t *testing.T) {
-	req := httptest.NewRequest("POST", "http://127.0.0.1/api/douyin/user/register?username=test&password=123456", nil)
+	req := httptest.NewRequest("POST", "http://127.0.0.1/api/douyin/user/register/?username=test&password=123456", nil)
 
 	w, rr := beforeRegisterTest(req, true)
 

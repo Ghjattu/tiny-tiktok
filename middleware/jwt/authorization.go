@@ -46,3 +46,30 @@ func AuthorizationGet() gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+// AuthorizationPost is a middleware that checks if the token is valid
+// before POST requests.
+// If the token is valid, it sets the user id and name to the context.
+func AuthorizationPost() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		tokenString := c.PostForm("token")
+
+		// Parse the token.
+		userID, name, err := ValidateToken(tokenString)
+
+		// If the token is invalid, return an error.
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, Response{
+				StatusCode: 1,
+				StatusMsg:  "invalid token",
+			})
+			c.Abort()
+			return
+		}
+
+		// If the token is valid, set the user_id and name to the context.
+		c.Set("user_id", userID)
+		c.Set("username", name)
+		c.Next()
+	}
+}

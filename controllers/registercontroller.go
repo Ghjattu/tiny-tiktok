@@ -13,6 +13,7 @@ type RegisterResponse struct {
 	Token  string `json:"token"`
 }
 
+// Endpoint: /douyin/user/register/
 func Register(c *gin.Context) {
 	username := c.Query("username")
 	password := c.Query("password")

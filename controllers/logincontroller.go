@@ -11,6 +11,7 @@ type LoginResponse struct {
 	Token  string `json:"token"`
 }
 
+// Endpoint: /douyin/user/login/
 func Login(c *gin.Context) {
 	username := c.Query("username")
 	password := c.Query("password")

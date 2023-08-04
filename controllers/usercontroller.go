@@ -14,6 +14,7 @@ type UserResponse struct {
 	User *models.User `json:"user"`
 }
 
+// Endpoint: /douyin/user/
 func GetUserByUserIDAndToken(c *gin.Context) {
 	userIDString := c.Query("user_id")
 

@@ -27,7 +27,7 @@ func PublishNewVideo(c *gin.Context) {
 	// Save video to local.
 	videoName := filepath.Base(data.Filename)
 	finalVideoName := fmt.Sprintf("%s_%s", username, videoName)
-	savedPath := filepath.Join("./public/", finalVideoName)
+	savedPath := filepath.Join("../public/", finalVideoName)
 	if err := c.SaveUploadedFile(data, savedPath); err != nil {
 		c.JSON(http.StatusOK, Response{
 			StatusCode: 1,

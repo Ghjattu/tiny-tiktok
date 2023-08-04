@@ -42,7 +42,7 @@ func AuthorizationGet() gin.HandlerFunc {
 
 		// If the token is valid, set the user_id and name to the context.
 		c.Set("user_id", userID)
-		c.Set("name", name)
+		c.Set("username", name)
 		c.Next()
 	}
 }

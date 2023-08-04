@@ -30,13 +30,14 @@ func Register(c *gin.Context) {
 			Token:  token,
 		})
 		return
-	} else {
-		c.JSON(http.StatusOK, RegisterResponse{
-			Response: Response{
-				StatusCode: statusCode,
-				StatusMsg:  statusMsg,
-			},
-		})
-		return
 	}
+
+	c.JSON(http.StatusOK, RegisterResponse{
+		Response: Response{
+			StatusCode: statusCode,
+			StatusMsg:  statusMsg,
+		},
+		UserID: -1,
+		Token:  "",
+	})
 }

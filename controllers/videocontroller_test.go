@@ -98,18 +98,27 @@ func constructForm(formFields map[string]string) (*bytes.Buffer, *multipart.Writ
 	return form, writer, nil
 }
 
-func TestPublishNewVideoWithInvalidToken(t *testing.T) {
+// getValidToken registers a new user and returns the token.
+//
+//	@return int32 "status_code"
+//	@return string "token"
+func getValidToken() (int32, string) {
 	// Register a new user.
 	req := httptest.NewRequest("POST",
 		"http://127.0.0.1/douyin/user/register/?username=test&password=123456", nil)
 
-	w, rr := beforeVideoTest(req, true, false)
+	_, rr := beforeVideoTest(req, true, false)
 
-	assert.Equal(t, 200, w.Code)
-	assert.Equal(t, int32(0), rr.StatusCode)
-	assert.Equal(t, "register successfully", rr.StatusMsg)
+	return rr.StatusCode, rr.Token
+}
 
-	invalidToken := rr.Token + "1"
+func TestPublishNewVideoWithInvalidToken(t *testing.T) {
+	// Register a new user and get the token.
+	statusCode, token := getValidToken()
+
+	assert.Equal(t, int32(0), statusCode)
+
+	invalidToken := token + "1"
 
 	// Construct a test form.
 	formFields := map[string]string{
@@ -121,7 +130,7 @@ func TestPublishNewVideoWithInvalidToken(t *testing.T) {
 		t.Fatalf("failed to construct form data: %v", err)
 	}
 
-	req = httptest.NewRequest("POST",
+	req := httptest.NewRequest("POST",
 		"http://127.0.0.1/douyin/publish/action/", form)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 
@@ -133,17 +142,10 @@ func TestPublishNewVideoWithInvalidToken(t *testing.T) {
 }
 
 func TestPublishNewVideoWithCorrectVideoAndToken(t *testing.T) {
-	// Register a new user.
-	req := httptest.NewRequest("POST",
-		"http://127.0.0.1/douyin/user/register/?username=test&password=123456", nil)
+	// Register a new user and get the token.
+	status_code, token := getValidToken()
 
-	w, rr := beforeVideoTest(req, true, false)
-
-	assert.Equal(t, 200, w.Code)
-	assert.Equal(t, int32(0), rr.StatusCode)
-	assert.Equal(t, "register successfully", rr.StatusMsg)
-
-	token := rr.Token
+	assert.Equal(t, int32(0), status_code)
 
 	// Construct a test form.
 	formFields := map[string]string{
@@ -155,7 +157,7 @@ func TestPublishNewVideoWithCorrectVideoAndToken(t *testing.T) {
 		t.Fatalf("failed to construct form data: %v", err)
 	}
 
-	req = httptest.NewRequest("POST",
+	req := httptest.NewRequest("POST",
 		"http://127.0.0.1/douyin/publish/action/", form)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 

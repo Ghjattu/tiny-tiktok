@@ -199,7 +199,7 @@ func TestPublishNewVideoWithValidToken(t *testing.T) {
 		"http://127.0.0.1/douyin/publish/action/", form)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 
-	w, response, _ := beforeVideoTest(req, true, false)
+	w, response, _ := beforeVideoTest(req, false, true)
 
 	assert.Equal(t, 200, w.Code)
 	assert.Equal(t, int32(0), response.StatusCode)

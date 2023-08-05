@@ -2,6 +2,7 @@ package models
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -10,10 +11,10 @@ func TestCreateNewVideo(t *testing.T) {
 	InitDatabase(true)
 
 	testVideo := &Video{
-		AuthorID:   1,
-		AuthorName: "test",
-		PlayUrl:    "test",
-		Title:      "test",
+		AuthorID:    1,
+		PublishTime: time.Now(),
+		PlayUrl:     "test",
+		Title:       "test",
 	}
 
 	returnedVideo, err := CreateNewVideo(testVideo)
@@ -22,7 +23,6 @@ func TestCreateNewVideo(t *testing.T) {
 	}
 
 	assert.Equal(t, testVideo.AuthorID, returnedVideo.AuthorID)
-	assert.Equal(t, testVideo.AuthorName, returnedVideo.AuthorName)
 	assert.Equal(t, testVideo.PlayUrl, returnedVideo.PlayUrl)
 	assert.Equal(t, testVideo.Title, returnedVideo.Title)
 }
@@ -45,10 +45,10 @@ func TestGetVideoListByUserID(t *testing.T) {
 
 	// Create a new test video.
 	testVideo := &Video{
-		AuthorID:   returnedTestUser.ID,
-		AuthorName: returnedTestUser.Name,
-		PlayUrl:    "test",
-		Title:      "test",
+		AuthorID:    returnedTestUser.ID,
+		PublishTime: time.Now(),
+		PlayUrl:     "test",
+		Title:       "test",
 	}
 
 	returnedTestVideo, err := CreateNewVideo(testVideo)
@@ -57,7 +57,6 @@ func TestGetVideoListByUserID(t *testing.T) {
 	}
 
 	assert.Equal(t, testVideo.AuthorID, returnedTestVideo.AuthorID)
-	assert.Equal(t, testVideo.AuthorName, returnedTestVideo.AuthorName)
 
 	// Get video list by test user id.
 	videoList, err := GetVideoListByUserID(returnedTestUser.ID)
@@ -67,7 +66,6 @@ func TestGetVideoListByUserID(t *testing.T) {
 
 	assert.Equal(t, 1, len(videoList))
 	assert.Equal(t, testVideo.AuthorID, videoList[0].Author.ID)
-	assert.Equal(t, testVideo.AuthorName, videoList[0].Author.Name)
 	assert.Equal(t, testVideo.PlayUrl, videoList[0].PlayUrl)
 	assert.Equal(t, testVideo.Title, videoList[0].Title)
 }

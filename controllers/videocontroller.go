@@ -2,11 +2,11 @@ package controllers
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
+	"time"
 
 	"github.com/Ghjattu/tiny-tiktok/models"
 	"github.com/Ghjattu/tiny-tiktok/services"
@@ -22,6 +22,10 @@ type VideoResponse struct {
 
 // Endpoint: /douyin/publish/action/
 func PublishNewVideo(c *gin.Context) {
+	publishTime := time.Now()
+	// publishTimeUnix := publishTime.UnixNano()
+	// publishTimeStr := strconv.FormatInt(publishTimeUnix, 10)
+
 	data, err := c.FormFile("data")
 	title := c.PostForm("title")
 
@@ -34,7 +38,6 @@ func PublishNewVideo(c *gin.Context) {
 	}
 
 	userID := c.GetInt64("user_id")
-	username := c.GetString("username")
 
 	// Save video to local.
 	videoName := filepath.Base(data.Filename)
@@ -53,11 +56,9 @@ func PublishNewVideo(c *gin.Context) {
 	serverPort := os.Getenv("SERVER_PORT")
 	playUrl := fmt.Sprintf("http://%s:%s/static/videos/%s", serverIP, serverPort, finalVideoName)
 
-	log.Println(playUrl)
-
 	// Create new video.
 	vs := &services.VideoService{}
-	statusCode, statusMsg := vs.CreateNewVideo(playUrl, title, userID, username)
+	statusCode, statusMsg := vs.CreateNewVideo(playUrl, title, userID, publishTime)
 
 	c.JSON(http.StatusOK, Response{
 		StatusCode: statusCode,

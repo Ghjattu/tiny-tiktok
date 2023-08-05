@@ -2,6 +2,7 @@ package services
 
 import (
 	"testing"
+	"time"
 
 	"github.com/Ghjattu/tiny-tiktok/models"
 	"github.com/stretchr/testify/assert"
@@ -12,7 +13,7 @@ func TestCreateNewVideoWithEmptyTitle(t *testing.T) {
 
 	vs := &VideoService{}
 
-	status_code, statue_msg := vs.CreateNewVideo("test", "", 1, "test")
+	status_code, statue_msg := vs.CreateNewVideo("test", "", 1, time.Now())
 
 	assert.Equal(t, int32(1), status_code)
 	assert.Equal(t, "video title is empty", statue_msg)
@@ -23,7 +24,7 @@ func TestCreateNewVideoWithCorrectVideo(t *testing.T) {
 
 	vs := &VideoService{}
 
-	status_code, statue_msg := vs.CreateNewVideo("test", "test", 1, "test")
+	status_code, statue_msg := vs.CreateNewVideo("test", "test", 1, time.Now())
 
 	assert.Equal(t, int32(0), status_code)
 	assert.Equal(t, "create new video successfully", statue_msg)
@@ -59,10 +60,10 @@ func TestGetPublishListByAuthorIDWithCorrectID(t *testing.T) {
 
 	// Create a new test video.
 	testVideo := &models.Video{
-		AuthorID:   returnedTestUser.ID,
-		AuthorName: returnedTestUser.Name,
-		PlayUrl:    "test",
-		Title:      "test",
+		AuthorID:    returnedTestUser.ID,
+		PublishTime: time.Now(),
+		PlayUrl:     "test",
+		Title:       "test",
 	}
 
 	returnedTestVideo, err := models.CreateNewVideo(testVideo)
@@ -71,7 +72,6 @@ func TestGetPublishListByAuthorIDWithCorrectID(t *testing.T) {
 	}
 
 	assert.Equal(t, testVideo.AuthorID, returnedTestVideo.AuthorID)
-	assert.Equal(t, testVideo.AuthorName, returnedTestVideo.AuthorName)
 
 	vs := &VideoService{}
 
@@ -81,7 +81,6 @@ func TestGetPublishListByAuthorIDWithCorrectID(t *testing.T) {
 	assert.Equal(t, "get publish list successfully", statue_msg)
 	assert.Equal(t, 1, len(videoList))
 	assert.Equal(t, testVideo.AuthorID, videoList[0].Author.ID)
-	assert.Equal(t, testVideo.AuthorName, videoList[0].Author.Name)
 	assert.Equal(t, testVideo.PlayUrl, videoList[0].PlayUrl)
 	assert.Equal(t, testVideo.Title, videoList[0].Title)
 }

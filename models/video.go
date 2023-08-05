@@ -1,15 +1,17 @@
 package models
 
+import "time"
+
 type Video struct {
-	ID            int64  `gorm:"primary_key;auto_increment" json:"id"`
-	AuthorID      int64  `json:"author_id"`
-	AuthorName    string `json:"author_name"`
-	PlayUrl       string `json:"play_url"`
-	CoverUrl      string `json:"cover_url"`
-	FavoriteCount int64  `json:"favorite_count"`
-	CommentCount  int64  `json:"comment_count"`
-	IsFavorite    bool   `json:"is_favorite"`
-	Title         string `json:"title"`
+	ID            int64     `gorm:"primary_key;auto_increment" json:"id"`
+	AuthorID      int64     `json:"author_id"`
+	PublishTime   time.Time `json:"publish_time"`
+	PlayUrl       string    `json:"play_url"`
+	CoverUrl      string    `json:"cover_url"`
+	FavoriteCount int64     `json:"favorite_count"`
+	CommentCount  int64     `json:"comment_count"`
+	IsFavorite    bool      `json:"is_favorite"`
+	Title         string    `json:"title"`
 }
 
 type VideoDetail struct {

@@ -1,21 +1,25 @@
 package services
 
-import "github.com/Ghjattu/tiny-tiktok/models"
+import (
+	"time"
+
+	"github.com/Ghjattu/tiny-tiktok/models"
+)
 
 // VideoService implements VideoInterface.
 type VideoService struct{}
 
-func (vs *VideoService) CreateNewVideo(playUrl string, title string, authorID int64, authorName string) (int32, string) {
+func (vs *VideoService) CreateNewVideo(playUrl string, title string, authorID int64, publishTime time.Time) (int32, string) {
 	// Check title is empty or not.
 	if title == "" {
 		return 1, "video title is empty"
 	}
 
 	video := &models.Video{
-		AuthorID:   authorID,
-		AuthorName: authorName,
-		PlayUrl:    playUrl,
-		Title:      title,
+		AuthorID:    authorID,
+		PublishTime: publishTime,
+		PlayUrl:     playUrl,
+		Title:       title,
 	}
 
 	// Insert new video to database.
@@ -40,4 +44,13 @@ func (vs *VideoService) GetPublishListByAuthorID(authorID int64) (int32, string,
 	// }
 
 	return 0, "get publish list successfully", videoList
+}
+
+func (vs *VideoService) GetMost30Videos(latestTime time.Time) (int32, string, int64, []models.VideoDetail) {
+	videoList, earliestTime, err := models.GetMost30Videos(latestTime)
+	if err != nil {
+		return 1, "failed to get most 30 videos", -1, nil
+	}
+
+	return 0, "get most 30 videos successfully", earliestTime.Unix(), videoList
 }

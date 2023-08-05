@@ -29,6 +29,11 @@ func Login(c *gin.Context) {
 			UserID: userID,
 			Token:  token,
 		})
+
+		// If login successfully, set the user_id and name to the context.
+		c.Set("user_id", userID)
+		c.Set("username", username)
+
 		return
 	}
 

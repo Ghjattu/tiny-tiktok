@@ -7,8 +7,12 @@ import (
 )
 
 func RegisterRouter(r *gin.Engine) {
+	// Set static file path.
+	r.Static("/static/videos", "../public/")
+
 	api := r.Group("/douyin")
 
+	api.GET("/feed", jwt.AuthorizationFeed(), controllers.Feed)
 	api.POST("/user/register/", controllers.Register)
 	api.POST("/user/login/", controllers.Login)
 	api.GET("/user/", jwt.AuthorizationGet(), controllers.GetUserByUserIDAndToken)

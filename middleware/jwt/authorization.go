@@ -70,3 +70,39 @@ func AuthorizationPost() gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+// AuthorizationFeed is a middleware that checks if the token is valid
+// before a feed request.
+// If the token is empty, it sets the user id equal to -1 and name to empty string.
+// else, check if the token is valid.
+func AuthorizationFeed() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		tokenString := c.Query("token")
+
+		// If the token is empty.
+		if tokenString == "" {
+			c.Set("user_id", int64(-1))
+			c.Set("username", "")
+			c.Next()
+			return
+		}
+
+		// Parse the token.
+		userID, name, err := ValidateToken(tokenString)
+
+		// If the token is invalid, return an error.
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, Response{
+				StatusCode: 1,
+				StatusMsg:  "invalid token",
+			})
+			c.Abort()
+			return
+		}
+
+		// If the token is valid, set the user_id and name to the context.
+		c.Set("user_id", userID)
+		c.Set("username", name)
+		c.Next()
+	}
+}

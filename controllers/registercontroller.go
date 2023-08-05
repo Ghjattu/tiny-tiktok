@@ -30,6 +30,11 @@ func Register(c *gin.Context) {
 			UserID: userID,
 			Token:  token,
 		})
+
+		// If register successfully, set the user_id and name to the context.
+		c.Set("user_id", userID)
+		c.Set("username", username)
+
 		return
 	}
 

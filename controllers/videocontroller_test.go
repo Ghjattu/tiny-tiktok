@@ -24,7 +24,7 @@ var (
 	serverPort = ""
 )
 
-func beforeVideoTest(req *http.Request, needInitDatabase bool, needAuth bool) (*httptest.ResponseRecorder, *RegisterResponse, *VideoResponse) {
+func beforeVideoTest(req *http.Request, needInitDatabase bool, needAuth bool) (*httptest.ResponseRecorder, *RegisterResponse, *PublishListResponse) {
 	// Load environment variables.
 	godotenv.Load("../.env")
 	serverIP = os.Getenv("SERVER_IP")
@@ -56,8 +56,8 @@ func beforeVideoTest(req *http.Request, needInitDatabase bool, needAuth bool) (*
 		return w, rr, nil
 	}
 
-	// Otherwise the request method is GET, then the response is VideoResponse.
-	vr := &VideoResponse{}
+	// Otherwise the request method is GET, then the response is PublishListResponse.
+	vr := &PublishListResponse{}
 	bytes, _ := io.ReadAll(w.Result().Body)
 	json.Unmarshal(bytes, vr)
 

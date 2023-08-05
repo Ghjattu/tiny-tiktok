@@ -15,7 +15,7 @@ func ParseInt64(s string) (int32, string, int64) {
 			if numErr.Err == strconv.ErrSyntax {
 				return 1, "invalid syntax", 0
 			} else if numErr.Err == strconv.ErrRange {
-				return 1, "user id out of range", 0
+				return 1, "the target value out of range", 0
 			}
 		} else {
 			return 1, "unknown error", 0

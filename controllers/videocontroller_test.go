@@ -238,7 +238,7 @@ func TestGetPublishListByAuthorIDWithOutOfRangeID(t *testing.T) {
 
 	assert.Equal(t, 400, w.Code)
 	assert.Equal(t, int32(1), res.StatusCode)
-	assert.Equal(t, "user id out of range", res.StatusMsg)
+	assert.Equal(t, "the target value out of range", res.StatusMsg)
 	assert.Equal(t, 0, len(res.VideoList))
 }
 

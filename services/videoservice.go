@@ -45,3 +45,12 @@ func (vs *VideoService) GetPublishListByAuthorID(authorID int64) (int32, string,
 
 	return 0, "get publish list successfully", videoList
 }
+
+func (vs *VideoService) GetMost30Videos(latestTime time.Time) (int32, string, int64, []models.VideoDetail) {
+	videoList, earliestTime, err := models.GetMost30Videos(latestTime)
+	if err != nil {
+		return 1, "failed to get most 30 videos", -1, nil
+	}
+
+	return 0, "get most 30 videos successfully", earliestTime.Unix(), videoList
+}

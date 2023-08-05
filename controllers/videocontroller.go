@@ -15,8 +15,14 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
-type VideoResponse struct {
+type PublishListResponse struct {
 	Response
+	VideoList []models.VideoDetail `json:"video_list"`
+}
+
+type FeedResponse struct {
+	Response
+	NextTime  int64                `json:"next_time"`
 	VideoList []models.VideoDetail `json:"video_list"`
 }
 
@@ -73,7 +79,7 @@ func GetPublishListByAuthorID(c *gin.Context) {
 	// Check user id is valid.
 	statusCode, statusMsg, authorID := utils.ParseInt64(userIDString)
 	if statusCode == 1 {
-		c.JSON(http.StatusBadRequest, VideoResponse{
+		c.JSON(http.StatusBadRequest, PublishListResponse{
 			Response: Response{
 				StatusCode: statusCode,
 				StatusMsg:  statusMsg,
@@ -91,11 +97,51 @@ func GetPublishListByAuthorID(c *gin.Context) {
 	vs := &services.VideoService{}
 	statusCode, statusMsg, videoList := vs.GetPublishListByAuthorID(authorID)
 
-	c.JSON(http.StatusOK, VideoResponse{
+	c.JSON(http.StatusOK, PublishListResponse{
 		Response: Response{
 			StatusCode: statusCode,
 			StatusMsg:  statusMsg,
 		},
+		VideoList: videoList,
+	})
+}
+
+// Endpoint: /douyin/feed/
+func Feed(c *gin.Context) {
+	latestTimeStr := c.Query("latest_time")
+
+	// If the latest time is empty, set it to current time.
+	if latestTimeStr == "" {
+		latestTimeStr = strconv.FormatInt(time.Now().Unix(), 10)
+	}
+
+	statusCode, statusMsg, latestTimeInt := utils.ParseInt64(latestTimeStr)
+	// Failed to parse latest time string to int64.
+	if statusCode == 1 {
+		c.JSON(http.StatusBadRequest, FeedResponse{
+			Response: Response{
+				StatusCode: statusCode,
+				StatusMsg:  statusMsg,
+			},
+			NextTime:  -1,
+			VideoList: nil,
+		})
+		return
+	}
+
+	// Convert int64 to time.Time.
+	latestTime := time.Unix(latestTimeInt, 0)
+
+	// Get most 30 videos.
+	vs := &services.VideoService{}
+	statusCode, statusMsg, nextTime, videoList := vs.GetMost30Videos(latestTime)
+
+	c.JSON(http.StatusOK, FeedResponse{
+		Response: Response{
+			StatusCode: statusCode,
+			StatusMsg:  statusMsg,
+		},
+		NextTime:  nextTime,
 		VideoList: videoList,
 	})
 }

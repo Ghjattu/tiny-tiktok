@@ -2,13 +2,16 @@ package controllers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 
 	"github.com/Ghjattu/tiny-tiktok/models"
 	"github.com/Ghjattu/tiny-tiktok/services"
 	"github.com/Ghjattu/tiny-tiktok/utils"
 	"github.com/gin-gonic/gin"
+	_ "github.com/joho/godotenv/autoload"
 )
 
 type VideoResponse struct {
@@ -36,6 +39,7 @@ func PublishNewVideo(c *gin.Context) {
 	videoName := filepath.Base(data.Filename)
 	finalVideoName := fmt.Sprintf("%s_%s", username, videoName)
 	savedPath := filepath.Join("../public/", finalVideoName)
+
 	if err := c.SaveUploadedFile(data, savedPath); err != nil {
 		c.JSON(http.StatusOK, Response{
 			StatusCode: 1,
@@ -43,9 +47,16 @@ func PublishNewVideo(c *gin.Context) {
 		})
 	}
 
+	// Construct play url.
+	serverIP := os.Getenv("SERVER_IP")
+	serverPort := os.Getenv("SERVER_PORT")
+	playUrl := fmt.Sprintf("http://%s:%s/static/videos/%s", serverIP, serverPort, finalVideoName)
+
+	log.Println(playUrl)
+
 	// Create new video.
 	vs := &services.VideoService{}
-	statusCode, statusMsg := vs.CreateNewVideo(savedPath, title, userID, username)
+	statusCode, statusMsg := vs.CreateNewVideo(playUrl, title, userID, username)
 
 	c.JSON(http.StatusOK, Response{
 		StatusCode: statusCode,

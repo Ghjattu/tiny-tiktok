@@ -3,6 +3,7 @@ package controllers
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -14,10 +15,21 @@ import (
 	"github.com/Ghjattu/tiny-tiktok/middleware/jwt"
 	"github.com/Ghjattu/tiny-tiktok/models"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/assert"
 )
 
+var (
+	serverIP   = ""
+	serverPort = ""
+)
+
 func beforeVideoTest(req *http.Request, needInitDatabase bool, needAuth bool) (*httptest.ResponseRecorder, *RegisterResponse, *VideoResponse) {
+	// Load environment variables.
+	godotenv.Load("../.env")
+	serverIP = os.Getenv("SERVER_IP")
+	serverPort = os.Getenv("SERVER_PORT")
+
 	if needInitDatabase {
 		models.InitDatabase(true)
 	}
@@ -52,25 +64,36 @@ func beforeVideoTest(req *http.Request, needInitDatabase bool, needAuth bool) (*
 	return w, nil, vr
 }
 
+// testVideoAccess tests the video access.
+func testVideoAccess(req *http.Request) *httptest.ResponseRecorder {
+	r := gin.Default()
+	r.Static("/static/videos", "../public/")
+
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	return w
+}
+
 // createTestFile creates a temporary testing file with the given filename and content.
 //
 //	@param filename string
 //	@param content string
 //	@return *os.File
 //	@return error
-func createTestFile(filename, content string) (*os.File, error) {
-	file, err := os.CreateTemp("", filename)
-	if err != nil {
-		return nil, err
-	}
+// func createTestFile(filename, content string) (*os.File, error) {
+// 	file, err := os.CreateTemp("", filename)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	if _, err := file.WriteString(content); err != nil {
-		file.Close()
-		return nil, err
-	}
+// 	if _, err := file.WriteString(content); err != nil {
+// 		file.Close()
+// 		return nil, err
+// 	}
 
-	return file, nil
-}
+// 	return file, nil
+// }
 
 // constructForm constructs a form data with a test file and form fields.
 //
@@ -79,8 +102,8 @@ func createTestFile(filename, content string) (*os.File, error) {
 //	@return *multipart.Writer
 //	@return error
 func constructForm(formFields map[string]string) (*bytes.Buffer, *multipart.Writer, error) {
-	// Create a test file.
-	file, err := createTestFile("test.txt", "test")
+	// Read the test video.
+	file, err := os.Open("../data/bear.mp4")
 	if err != nil {
 		return nil, nil, err
 	}
@@ -97,7 +120,7 @@ func constructForm(formFields map[string]string) (*bytes.Buffer, *multipart.Writ
 	}
 
 	// Add form file.
-	part, err := writer.CreateFormFile("data", "test.txt")
+	part, err := writer.CreateFormFile("data", "bear.mp4")
 	if err != nil {
 		return nil, nil, err
 	}
@@ -170,6 +193,7 @@ func TestPublishNewVideoWithCorrectVideoAndToken(t *testing.T) {
 		t.Fatalf("failed to construct form data: %v", err)
 	}
 
+	// Publish a new video.
 	req := httptest.NewRequest("POST",
 		"http://127.0.0.1/douyin/publish/action/", form)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
@@ -179,6 +203,15 @@ func TestPublishNewVideoWithCorrectVideoAndToken(t *testing.T) {
 	assert.Equal(t, 200, w.Code)
 	assert.Equal(t, int32(0), response.StatusCode)
 	assert.Equal(t, "create new video successfully", response.StatusMsg)
+
+	// Test the video access.
+	videoURL := fmt.Sprintf("http://%s:%s/static/videos/%s", serverIP, serverPort, "_bear.mp4")
+	req = httptest.NewRequest("GET", videoURL, nil)
+
+	w = testVideoAccess(req)
+
+	assert.Equal(t, 200, w.Code)
+	assert.Equal(t, "video/mp4", w.Header().Get("Content-Type"))
 }
 
 func TestGetPublishListByAuthorIDWithEmptyID(t *testing.T) {

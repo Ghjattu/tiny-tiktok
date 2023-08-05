@@ -84,3 +84,15 @@ func TestGetPublishListByAuthorIDWithCorrectID(t *testing.T) {
 	assert.Equal(t, testVideo.PlayUrl, videoList[0].PlayUrl)
 	assert.Equal(t, testVideo.Title, videoList[0].Title)
 }
+
+func TestGetMost30Videos(t *testing.T) {
+	models.InitDatabase(true)
+
+	vs := &VideoService{}
+
+	status_code, statue_msg, _, videoList := vs.GetMost30Videos(time.Now())
+
+	assert.Equal(t, int32(0), status_code)
+	assert.Equal(t, "get most 30 videos successfully", statue_msg)
+	assert.Equal(t, 0, len(videoList))
+}

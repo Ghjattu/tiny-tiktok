@@ -134,23 +134,24 @@ func constructForm(formFields map[string]string) (*bytes.Buffer, *multipart.Writ
 	return form, writer, nil
 }
 
-// getValidToken registers a new user and returns the token.
+// registerNewUser registers a new user and returns the status_code, user_id and token.
 //
 //	@return int32 "status_code"
+//	@return int64 "user_id"
 //	@return string "token"
-func getValidToken() (int32, string) {
+func registerNewUser() (int32, int64, string) {
 	// Register a new user.
 	req := httptest.NewRequest("POST",
 		"http://127.0.0.1/douyin/user/register/?username=test&password=123456", nil)
 
 	_, rr, _ := beforeVideoTest(req, true, false)
 
-	return rr.StatusCode, rr.Token
+	return rr.StatusCode, rr.UserID, rr.Token
 }
 
 func TestPublishNewVideoWithInvalidToken(t *testing.T) {
 	// Register a new user and get the token.
-	statusCode, token := getValidToken()
+	statusCode, _, token := registerNewUser()
 
 	assert.Equal(t, int32(0), statusCode)
 
@@ -177,9 +178,9 @@ func TestPublishNewVideoWithInvalidToken(t *testing.T) {
 	assert.Equal(t, "invalid token", response.StatusMsg)
 }
 
-func TestPublishNewVideoWithCorrectVideoAndToken(t *testing.T) {
-	// Register a new user and get the token.
-	status_code, token := getValidToken()
+func TestPublishNewVideoWithValidToken(t *testing.T) {
+	// Register a new user.
+	status_code, userID, token := registerNewUser()
 
 	assert.Equal(t, int32(0), status_code)
 
@@ -205,7 +206,7 @@ func TestPublishNewVideoWithCorrectVideoAndToken(t *testing.T) {
 	assert.Equal(t, "create new video successfully", response.StatusMsg)
 
 	// Test the video access.
-	videoURL := fmt.Sprintf("http://%s:%s/static/videos/%s", serverIP, serverPort, "_bear.mp4")
+	videoURL := fmt.Sprintf("http://%s:%s/static/videos/%s_bear.mp4", serverIP, serverPort, strconv.Itoa(int(userID)))
 	req = httptest.NewRequest("GET", videoURL, nil)
 
 	w = testVideoAccess(req)
@@ -252,16 +253,9 @@ func TestGetPublishListByAuthorIDWithOutOfRangeID(t *testing.T) {
 
 func TestGetPublishListByAuthorIDWithValidID(t *testing.T) {
 	// Register a new user.
-	req := httptest.NewRequest("POST",
-		"http://127.0.0.1/douyin/user/register/?username=test&password=123456", nil)
+	status_code, userID, token := registerNewUser()
 
-	_, rr, _ := beforeVideoTest(req, true, false)
-
-	assert.Equal(t, int32(0), rr.StatusCode)
-	assert.Equal(t, "register successfully", rr.StatusMsg)
-
-	userID := rr.UserID
-	token := rr.Token
+	assert.Equal(t, int32(0), status_code)
 
 	// Publish a new video.
 	formFields := map[string]string{
@@ -273,7 +267,7 @@ func TestGetPublishListByAuthorIDWithValidID(t *testing.T) {
 		t.Fatalf("failed to construct form data: %v", err)
 	}
 
-	req = httptest.NewRequest("POST",
+	req := httptest.NewRequest("POST",
 		"http://127.0.0.1/douyin/publish/action/", form)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 

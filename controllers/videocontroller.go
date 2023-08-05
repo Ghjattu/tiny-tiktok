@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"github.com/Ghjattu/tiny-tiktok/models"
 	"github.com/Ghjattu/tiny-tiktok/services"
@@ -37,7 +38,7 @@ func PublishNewVideo(c *gin.Context) {
 
 	// Save video to local.
 	videoName := filepath.Base(data.Filename)
-	finalVideoName := fmt.Sprintf("%s_%s", username, videoName)
+	finalVideoName := fmt.Sprintf("%s_%s", strconv.Itoa(int(userID)), videoName)
 	savedPath := filepath.Join("../public/", finalVideoName)
 
 	if err := c.SaveUploadedFile(data, savedPath); err != nil {

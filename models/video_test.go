@@ -84,3 +84,18 @@ func TestGetMost30VideosWithEmptyVideoList(t *testing.T) {
 
 	assert.Equal(t, 0, len(videoList))
 }
+
+func TestGetVideoByID(t *testing.T) {
+	InitDatabase(true)
+
+	// Create a new test video.
+	testVideo, _ := createTestVideo(1, time.Now(), "test")
+
+	returnedVideo, err := GetVideoByID(testVideo.ID)
+	if err != nil {
+		t.Fatalf("Error when getting video by id: %v", err)
+	}
+
+	assert.Equal(t, testVideo.AuthorID, returnedVideo.AuthorID)
+	assert.Equal(t, testVideo.Title, returnedVideo.Title)
+}

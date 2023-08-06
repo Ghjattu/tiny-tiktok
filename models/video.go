@@ -136,3 +136,16 @@ func GetMost30Videos(latestTime time.Time) ([]VideoDetail, time.Time, error) {
 
 	return videoList, earliestTime, err
 }
+
+// GetVideoByID get video by video id.
+//
+//	@param videoID int64
+//	@return *Video
+//	@return error
+func GetVideoByID(videoID int64) (*Video, error) {
+	video := &Video{}
+
+	err := db.Model(&Video{}).Where("id = ?", videoID).First(video).Error
+
+	return video, err
+}

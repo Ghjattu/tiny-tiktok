@@ -6,6 +6,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// RegisterService implements RegisterInterface.
 type RegisterService struct{}
 
 // Register registers a new user.

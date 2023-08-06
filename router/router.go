@@ -12,10 +12,10 @@ func RegisterRouter(r *gin.Engine) {
 
 	api := r.Group("/douyin")
 
-	api.GET("/feed", jwt.AuthorizationFeed(), controllers.Feed)
+	api.GET("/feed", jwt.AuthorizeFeed(), controllers.Feed)
 	api.POST("/user/register/", controllers.Register)
 	api.POST("/user/login/", controllers.Login)
-	api.GET("/user/", jwt.AuthorizationGet(), controllers.GetUserByUserIDAndToken)
-	api.POST("/publish/action/", jwt.AuthorizationPost(), controllers.PublishNewVideo)
-	api.GET("/publish/list/", jwt.AuthorizationGet(), controllers.GetPublishListByAuthorID)
+	api.GET("/user/", jwt.AuthorizeGet(), controllers.GetUserByUserIDAndToken)
+	api.POST("/publish/action/", jwt.AuthorizePost(), controllers.PublishNewVideo)
+	api.GET("/publish/list/", jwt.AuthorizeGet(), controllers.GetPublishListByAuthorID)
 }

@@ -54,10 +54,10 @@ func beforeVideoTest(req *http.Request, needInitDatabase bool, needAuth bool) (*
 
 	r := gin.Default()
 	r.POST("/douyin/user/register/", Register)
-	r.GET("/douyin/feed/", jwt.AuthorizationFeed(), Feed)
+	r.GET("/douyin/feed/", jwt.AuthorizeFeed(), Feed)
 	if needAuth {
-		r.GET("/douyin/publish/list/", jwt.AuthorizationGet(), GetPublishListByAuthorID)
-		r.POST("/douyin/publish/action/", jwt.AuthorizationPost(), PublishNewVideo)
+		r.GET("/douyin/publish/list/", jwt.AuthorizeGet(), GetPublishListByAuthorID)
+		r.POST("/douyin/publish/action/", jwt.AuthorizePost(), PublishNewVideo)
 	} else {
 		r.GET("/douyin/publish/list/", GetPublishListByAuthorID)
 		r.POST("/douyin/publish/action/", PublishNewVideo)

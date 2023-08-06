@@ -23,7 +23,7 @@ func beforeUserTest(req *http.Request, isInitDatabase bool, needAuth bool) (*htt
 	r.POST("/douyin/user/register/", Register)
 	r.POST("/douyin/user/login/", Login)
 	if needAuth {
-		r.GET("/douyin/user/", jwt.AuthorizationGet(), GetUserByUserIDAndToken)
+		r.GET("/douyin/user/", jwt.AuthorizeGet(), GetUserByUserIDAndToken)
 	} else {
 		r.GET("/douyin/user/", GetUserByUserIDAndToken)
 	}

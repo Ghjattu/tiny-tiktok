@@ -5,6 +5,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// UserService implements UserInterface.
 type UserService struct{}
 
 // GetUserByUserID gets a user by its user id.

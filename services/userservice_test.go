@@ -7,18 +7,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetUserByUserIDWithWrongID(t *testing.T) {
+func TestGetUserByUserIDWithNonExistID(t *testing.T) {
 	models.InitDatabase(true)
-
-	rs := &RegisterService{}
-	userID, statusCode, statusMsg, _ := rs.Register("test", "123456")
-
-	assert.Equal(t, int32(0), statusCode)
-	assert.Equal(t, "register successfully", statusMsg)
 
 	us := &UserService{}
 
-	statusCode, statusMsg, user := us.GetUserByUserID(userID + 1)
+	statusCode, statusMsg, user := us.GetUserByUserID(1)
 
 	assert.Equal(t, int32(1), statusCode)
 	assert.Equal(t, "user not found", statusMsg)
@@ -28,18 +22,15 @@ func TestGetUserByUserIDWithWrongID(t *testing.T) {
 func TestGetUserByUserIDWithCorrectID(t *testing.T) {
 	models.InitDatabase(true)
 
-	rs := &RegisterService{}
-	userID, statusCode, statusMsg, _ := rs.Register("test", "123456")
-
-	assert.Equal(t, int32(0), statusCode)
-	assert.Equal(t, "register successfully", statusMsg)
+	// Create a new test user.
+	testUser, _ := createTestUser("test", "123456")
 
 	us := &UserService{}
 
-	statusCode, statusMsg, user := us.GetUserByUserID(userID)
+	statusCode, statusMsg, user := us.GetUserByUserID(testUser.ID)
 
 	assert.Equal(t, int32(0), statusCode)
 	assert.Equal(t, "get user successfully", statusMsg)
-	assert.Equal(t, "test", user.Name)
+	assert.Equal(t, testUser.Name, user.Name)
 	assert.Equal(t, "", user.Password)
 }

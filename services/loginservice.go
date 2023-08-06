@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// LOginService implements LoginInterface.
 type LoginService struct{}
 
 // Login logs in a user.

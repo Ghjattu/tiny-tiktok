@@ -39,6 +39,19 @@ func TestRegisterWithShortPassword(t *testing.T) {
 	assert.Equal(t, "password is too short", status_msg)
 }
 
+func TestRegisterWithLongUsername(t *testing.T) {
+	models.InitDatabase(true)
+
+	rs := &RegisterService{}
+
+	user_id, status_code, status_msg, _ := rs.Register(
+		"1234567890123456789012345678901234567890123456789012345678901234567890", "123456")
+
+	assert.Equal(t, int64(-1), user_id)
+	assert.Equal(t, int32(1), status_code)
+	assert.Equal(t, "username or password is too long", status_msg)
+}
+
 func TestRegisterWithLongPassword(t *testing.T) {
 	models.InitDatabase(true)
 
@@ -52,12 +65,27 @@ func TestRegisterWithLongPassword(t *testing.T) {
 	assert.Equal(t, "username or password is too long", status_msg)
 }
 
+func TestRegisterWithExceed72BytesPassword(t *testing.T) {
+	models.InitDatabase(true)
+
+	rs := &RegisterService{}
+
+	user_id, status_code, status_msg, _ := rs.Register("test",
+		"密码密码密码密码密码密码密码密码密码密码密码密码密码密码密码")
+
+	assert.Equal(t, int64(-1), user_id)
+	assert.Equal(t, int32(1), status_code)
+	assert.Equal(t, "password length exceeds 72 bytes", status_msg)
+}
+
 func TestRegisterWithRegisteredUsername(t *testing.T) {
 	models.InitDatabase(true)
 
 	rs := &RegisterService{}
 
-	rs.Register("test", "123456")
+	// Create a new test user.
+	createTestUser("test", "123456")
+
 	user_id, status_code, status_msg, _ := rs.Register("test", "123456")
 
 	assert.Equal(t, int64(-1), user_id)

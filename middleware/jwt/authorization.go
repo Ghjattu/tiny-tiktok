@@ -17,10 +17,10 @@ type UserResponse struct {
 	User *models.User `json:"user"`
 }
 
-// AuthorizationGet is a middleware that checks if the token is valid
+// AuthorizeGet is a middleware that checks if the token is valid
 // before GET requests.
 // If the token is valid, it sets the user id and name to the context.
-func AuthorizationGet() gin.HandlerFunc {
+func AuthorizeGet() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenString := c.Query("token")
 
@@ -44,10 +44,10 @@ func AuthorizationGet() gin.HandlerFunc {
 	}
 }
 
-// AuthorizationPost is a middleware that checks if the token is valid
+// AuthorizePost is a middleware that checks if the token is valid
 // before POST requests.
 // If the token is valid, it sets the user id and name to the context.
-func AuthorizationPost() gin.HandlerFunc {
+func AuthorizePost() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenString := c.PostForm("token")
 
@@ -71,11 +71,11 @@ func AuthorizationPost() gin.HandlerFunc {
 	}
 }
 
-// AuthorizationFeed is a middleware that checks if the token is valid
+// AuthorizeFeed is a middleware that checks if the token is valid
 // before a feed request.
 // If the token is empty, it sets the user id equal to -1 and name to empty string.
 // else, check if the token is valid.
-func AuthorizationFeed() gin.HandlerFunc {
+func AuthorizeFeed() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenString := c.Query("token")
 

@@ -42,5 +42,7 @@ func Login(c *gin.Context) {
 			StatusCode: statusCode,
 			StatusMsg:  statusMsg,
 		},
+		UserID: -1,
+		Token:  "",
 	})
 }

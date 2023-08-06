@@ -46,36 +46,14 @@ func TestGetPublishListByAuthorIDWithCorrectID(t *testing.T) {
 	models.InitDatabase(true)
 
 	// Create a new test user.
-	testUser := &models.User{
-		Name:     "test",
-		Password: "test",
-	}
-
-	returnedTestUser, err := models.CreateNewUser(testUser)
-	if err != nil {
-		t.Fatalf("Error when creating a new user: %v", err)
-	}
-
-	assert.Equal(t, testUser.Name, returnedTestUser.Name)
+	testUser, _ := createTestUser("test", "123456")
 
 	// Create a new test video.
-	testVideo := &models.Video{
-		AuthorID:    returnedTestUser.ID,
-		PublishTime: time.Now(),
-		PlayUrl:     "test",
-		Title:       "test",
-	}
-
-	returnedTestVideo, err := models.CreateNewVideo(testVideo)
-	if err != nil {
-		t.Fatalf("Error when creating a new video: %v", err)
-	}
-
-	assert.Equal(t, testVideo.AuthorID, returnedTestVideo.AuthorID)
+	testVideo, _ := createTestVideo(testUser.ID, time.Now(), "test")
 
 	vs := &VideoService{}
 
-	status_code, statue_msg, videoList := vs.GetPublishListByAuthorID(returnedTestUser.ID)
+	status_code, statue_msg, videoList := vs.GetPublishListByAuthorID(testUser.ID)
 
 	assert.Equal(t, int32(0), status_code)
 	assert.Equal(t, "get publish list successfully", statue_msg)

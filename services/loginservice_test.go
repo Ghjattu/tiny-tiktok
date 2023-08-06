@@ -7,6 +7,19 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestLoginWithLongUsername(t *testing.T) {
+	models.InitDatabase(true)
+
+	ls := &LoginService{}
+
+	user_id, status_code, status_msg, _ := ls.Login(
+		"1234567890123456789012345678901234567890123456789012345678901234567890", "123456")
+
+	assert.Equal(t, int64(-1), user_id)
+	assert.Equal(t, int32(1), status_code)
+	assert.Equal(t, "username or password is too long", status_msg)
+}
+
 func TestLoginWithLongPassword(t *testing.T) {
 	models.InitDatabase(true)
 
@@ -35,8 +48,8 @@ func TestLoginWithNotExistName(t *testing.T) {
 func TestLoginWithWrongPassword(t *testing.T) {
 	models.InitDatabase(true)
 
-	rs := &RegisterService{}
-	rs.Register("test", "123456")
+	// Create a new test user.
+	createTestUser("test", "123456")
 
 	ls := &LoginService{}
 
@@ -50,8 +63,8 @@ func TestLoginWithWrongPassword(t *testing.T) {
 func TestLoginWithCorrectPassword(t *testing.T) {
 	models.InitDatabase(true)
 
-	rs := &RegisterService{}
-	rs.Register("test", "123456")
+	// Create a new test user.
+	testUser, _ := createTestUser("test", "123456")
 
 	ls := &LoginService{}
 
@@ -60,4 +73,5 @@ func TestLoginWithCorrectPassword(t *testing.T) {
 	assert.Equal(t, int64(1), user_id)
 	assert.Equal(t, int32(0), status_code)
 	assert.Equal(t, "login successfully", status_msg)
+	assert.Equal(t, testUser.ID, user_id)
 }

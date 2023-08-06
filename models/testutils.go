@@ -1,5 +1,6 @@
-// testutils.go contains some functions that are used in test files
+// Description: This testutils.go file contains some functions that are used in test files
 // in the models package.
+
 package models
 
 import "time"
@@ -9,6 +10,7 @@ import "time"
 //	@param name string
 //	@param password string
 //	@return *User
+//	@return error
 func createTestUser(name string, password string) (*User, error) {
 	testUser := &User{
 		Name:     name,

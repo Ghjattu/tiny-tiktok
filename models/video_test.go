@@ -7,39 +7,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// createNewUser create a new test user.
-//
-//	@return *User
-func createNewUser() *User {
-	testUser := &User{
-		Name:     "test",
-		Password: "test",
-	}
-
-	returnedTestUser, _ := CreateNewUser(testUser)
-
-	return returnedTestUser
-}
-
-// createNewVideo create a new test video.
-//
-//	@param authorID int64
-//	@param publishTime time.Time
-//	@param title string
-//	@return *Video
-func createNewVideo(authorID int64, publishTime time.Time, title string) *Video {
-	testVideo := &Video{
-		AuthorID:    authorID,
-		PublishTime: publishTime,
-		PlayUrl:     "test",
-		Title:       title,
-	}
-
-	returnedTestVideo, _ := CreateNewVideo(testVideo)
-
-	return returnedTestVideo
-}
-
 func TestCreateNewVideo(t *testing.T) {
 	InitDatabase(true)
 
@@ -64,10 +31,10 @@ func TestGetVideoListByUserID(t *testing.T) {
 	InitDatabase(true)
 
 	// Create a new test user.
-	testUser := createNewUser()
+	testUser, _ := createTestUser("test", "test")
 
 	// Create a new test video.
-	testVideo := createNewVideo(testUser.ID, time.Now(), "test")
+	testVideo, _ := createTestVideo(testUser.ID, time.Now(), "test")
 
 	// Get video list by test user id.
 	videoList, err := GetVideoListByUserID(testUser.ID)
@@ -85,7 +52,7 @@ func TestGetMost30Videos(t *testing.T) {
 	InitDatabase(true)
 
 	// Create a new test user.
-	testUser := createNewUser()
+	testUser, _ := createTestUser("test", "test")
 
 	// Construct three timestamps.
 	videoOneTimestamp := time.Now()
@@ -93,8 +60,8 @@ func TestGetMost30Videos(t *testing.T) {
 	videoTwoTimestamp := time.Now().Add(time.Second * 10)
 
 	// Create two new test videos.
-	testVideoOne := createNewVideo(testUser.ID, videoOneTimestamp, "testOne")
-	createNewVideo(testUser.ID, videoTwoTimestamp, "testTwo")
+	testVideoOne, _ := createTestVideo(testUser.ID, videoOneTimestamp, "testOne")
+	createTestVideo(testUser.ID, videoTwoTimestamp, "testTwo")
 
 	// Check the results.
 	videoList, earliestTime, err := GetMost30Videos(middleTimestamp)

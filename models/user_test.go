@@ -25,15 +25,8 @@ func TestCreateNewUser(t *testing.T) {
 func TestGetUserByName(t *testing.T) {
 	InitDatabase(true)
 
-	testUser := &User{
-		Name:     "test1",
-		Password: "test1",
-	}
-
-	_, err := CreateNewUser(testUser)
-	if err != nil {
-		t.Fatalf("Error when creating a new user: %v", err)
-	}
+	// Create a new test user.
+	testUser, _ := createTestUser("test", "test")
 
 	returnedUser, err := GetUserByName(testUser.Name)
 	if err != nil {
@@ -46,15 +39,8 @@ func TestGetUserByName(t *testing.T) {
 func TestGetUserByUserID(t *testing.T) {
 	InitDatabase(true)
 
-	testUser := &User{
-		Name:     "test",
-		Password: "test",
-	}
-
-	_, err := CreateNewUser(testUser)
-	if err != nil {
-		t.Fatalf("Error when creating a new user: %v", err)
-	}
+	// Create a new test user.
+	testUser, _ := createTestUser("test", "test")
 
 	returnedUser, err := GetUserByUserID(testUser.ID)
 	if err != nil {

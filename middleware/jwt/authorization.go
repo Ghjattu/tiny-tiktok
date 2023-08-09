@@ -51,6 +51,10 @@ func AuthorizePost() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenString := c.PostForm("token")
 
+		if tokenString == "" {
+			tokenString = c.Query("token")
+		}
+
 		// Parse the token.
 		userID, name, err := ValidateToken(tokenString)
 

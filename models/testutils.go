@@ -36,7 +36,7 @@ func createTestVideo(authorID int64, publishTime time.Time, title string) (*Vide
 		Title:       title,
 	}
 
-	_, err := CreateNewVideo(testVideo)
+	returnedTestVideo, err := CreateNewVideo(testVideo)
 
-	return testVideo, err
+	return returnedTestVideo, err
 }

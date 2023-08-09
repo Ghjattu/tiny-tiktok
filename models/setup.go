@@ -52,8 +52,8 @@ func InitDatabase(isTest bool) {
 	// Drop table if isTest is true to avoid error
 	// when running tests multiple times in a row.
 	if isTest {
-		db.Migrator().DropTable(&User{}, &Video{})
+		db.Migrator().DropTable(&User{}, &Video{}, &FavoriteRel{})
 	}
 
-	db.AutoMigrate(&User{}, &Video{})
+	db.AutoMigrate(&User{}, &Video{}, &FavoriteRel{})
 }

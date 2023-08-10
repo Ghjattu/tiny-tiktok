@@ -70,3 +70,26 @@ func TestCheckFavoriteRelExist(t *testing.T) {
 
 	assert.True(t, exist)
 }
+
+func TestGetFavoriteCountByVideoID(t *testing.T) {
+	InitDatabase(true)
+
+	// Create a new favorite rel.
+	fr := &FavoriteRel{
+		UserID:  1,
+		VideoID: 1,
+	}
+
+	_, err := CreateNewFavoriteRel(fr)
+	if err != nil {
+		t.Fatalf("Error when creating a new favorite rel: %v", err)
+	}
+
+	// Get favorite count by video id.
+	count, err := GetFavoriteCountByVideoID(fr.VideoID)
+	if err != nil {
+		t.Fatalf("Error when getting favorite count by video id: %v", err)
+	}
+
+	assert.Equal(t, int64(1), count)
+}

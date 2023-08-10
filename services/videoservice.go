@@ -10,11 +10,6 @@ import (
 type VideoService struct{}
 
 func (vs *VideoService) CreateNewVideo(playUrl string, title string, authorID int64, publishTime time.Time) (int32, string) {
-	// Check title is empty or not.
-	if title == "" {
-		return 1, "video title is empty"
-	}
-
 	video := &models.Video{
 		AuthorID:    authorID,
 		PublishTime: publishTime,

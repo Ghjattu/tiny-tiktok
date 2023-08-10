@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -41,6 +42,17 @@ func PublishNewVideo(c *gin.Context) {
 			StatusCode: 1,
 			StatusMsg:  err.Error(),
 		})
+		return
+	}
+
+	log.Println("title: ", title)
+	// Check title is empty or not.
+	if title == "" {
+		c.JSON(http.StatusOK, Response{
+			StatusCode: 1,
+			StatusMsg:  "video title is empty",
+		})
+		return
 	}
 
 	userID := c.GetInt64("user_id")
@@ -55,6 +67,7 @@ func PublishNewVideo(c *gin.Context) {
 			StatusCode: 1,
 			StatusMsg:  err.Error(),
 		})
+		return
 	}
 
 	// Construct play url.

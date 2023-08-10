@@ -87,10 +87,10 @@ func PublishNewVideo(c *gin.Context) {
 
 // Endpoint: /douyin/publish/list/
 func GetPublishListByAuthorID(c *gin.Context) {
-	userIDString := c.Query("user_id")
+	authorIDStr := c.Query("user_id")
 
 	// Check user id is valid.
-	statusCode, statusMsg, authorID := utils.ParseInt64(userIDString)
+	statusCode, statusMsg, authorID := utils.ParseInt64(authorIDStr)
 	if statusCode == 1 {
 		c.JSON(http.StatusBadRequest, PublishListResponse{
 			Response: Response{
@@ -102,13 +102,12 @@ func GetPublishListByAuthorID(c *gin.Context) {
 		return
 	}
 
-	// TODO:
 	// Get current login user id.
-	// currentUserID := c.GetInt64("user_id")
+	currentUserID := c.GetInt64("user_id")
 
-	// Get published video list by user id.
+	// Get published video list by author id.
 	vs := &services.VideoService{}
-	statusCode, statusMsg, videoList := vs.GetPublishListByAuthorID(authorID)
+	statusCode, statusMsg, videoList := vs.GetPublishListByAuthorID(authorID, currentUserID)
 
 	c.JSON(http.StatusOK, PublishListResponse{
 		Response: Response{

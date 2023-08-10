@@ -26,17 +26,18 @@ func (vs *VideoService) CreateNewVideo(playUrl string, title string, authorID in
 	return 0, "create new video successfully"
 }
 
-func (vs *VideoService) GetPublishListByAuthorID(authorID int64) (int32, string, []models.VideoDetail) {
+func (vs *VideoService) GetPublishListByAuthorID(authorID int64, currentUserID int64) (int32, string, []models.VideoDetail) {
 	videoList, err := models.GetVideoListByUserID(authorID)
 	if err != nil {
 		return 1, "failed to get publish list", nil
 	}
 
-	// TODO: Update IsFavorite field.
-	// for i := 0; i < len(videoList); i++ {
-	// 	video := &videoList[i]
-	// 	video.IsFavorite =
-	// }
+	// Update IsFavorite field and FavoriteCount field for each video.
+	for i := 0; i < len(videoList); i++ {
+		video := &videoList[i]
+		video.IsFavorite, _ = models.CheckFavoriteRelExist(currentUserID, video.ID)
+		video.FavoriteCount, _ = models.GetFavoriteCountByVideoID(video.ID)
+	}
 
 	return 0, "get publish list successfully", videoList
 }

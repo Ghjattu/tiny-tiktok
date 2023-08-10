@@ -77,7 +77,7 @@ func selectResponseType(req *http.Request) interface{} {
 	}
 }
 
-// registerTestUser clears the database, and then registers a new test user
+// registerTestUser registers a new test user.
 //
 //	@param name string
 //	@param password string
@@ -85,8 +85,6 @@ func selectResponseType(req *http.Request) interface{} {
 //	@return *models.User
 //	@return string "token"
 func registerTestUser(name string, password string) (int64, *models.User, string) {
-	models.InitDatabase(true)
-
 	testUser := &models.User{
 		Name:     name,
 		Password: password,

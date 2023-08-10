@@ -10,23 +10,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var (
-	validUserID int64
-	validUser   *models.User
-	validToken  string
-
-	validVideoIDStr string
-)
-
-func init() {
-	validUserID, validUser, validToken = registerTestUser("test", "123456")
-
-	testVideo, _ := createTestVideo(validUserID, time.Now(), "test")
-	validVideoIDStr = fmt.Sprintf("%d", testVideo.ID)
-}
-
 func TestFavoriteActionWithInvalidVideoID(t *testing.T) {
-	url := "http://127.0.0.1/douyin/favorite/action/?video_id=abc&action_type=1&token=" + validToken
+	models.InitDatabase(true)
+
+	// Register a new test user.
+	_, _, token := registerTestUser("test", "123456")
+
+	url := "http://127.0.0.1/douyin/favorite/action/?video_id=abc&action_type=1&token=" + token
 	req := httptest.NewRequest("POST", url, nil)
 
 	w, r := sendRequest(req)
@@ -38,7 +28,12 @@ func TestFavoriteActionWithInvalidVideoID(t *testing.T) {
 }
 
 func TestFavoriteActionWithInvalidActionType(t *testing.T) {
-	url := "http://127.0.0.1/douyin/favorite/action/?video_id=1&action_type=abc&token=" + validToken
+	models.InitDatabase(true)
+
+	// Register a new test user.
+	_, _, token := registerTestUser("test", "123456")
+
+	url := "http://127.0.0.1/douyin/favorite/action/?video_id=1&action_type=abc&token=" + token
 	req := httptest.NewRequest("POST", url, nil)
 
 	w, r := sendRequest(req)
@@ -50,8 +45,17 @@ func TestFavoriteActionWithInvalidActionType(t *testing.T) {
 }
 
 func TestFavoriteActionWithValidVideoIDAndType(t *testing.T) {
-	url := "http://127.0.0.1/douyin/favorite/action/?video_id=" + validVideoIDStr +
-		"&action_type=1&token=" + validToken
+	models.InitDatabase(true)
+
+	// Register a new test user.
+	userID, _, token := registerTestUser("test", "123456")
+
+	// Create a new test video.
+	testVideo, _ := createTestVideo(userID, time.Now(), "test")
+	videoIDStr := fmt.Sprintf("%d", testVideo.ID)
+
+	url := "http://127.0.0.1/douyin/favorite/action/?video_id=" + videoIDStr +
+		"&action_type=1&token=" + token
 	req := httptest.NewRequest("POST", url, nil)
 
 	w, r := sendRequest(req)

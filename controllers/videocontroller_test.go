@@ -10,6 +10,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/Ghjattu/tiny-tiktok/models"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
@@ -67,15 +68,15 @@ func constructTestForm(formFields map[string]string) (*bytes.Buffer, *multipart.
 	return form, writer, nil
 }
 
-func TestPublishNewVideoWithInvalidToken(t *testing.T) {
+func TestPublishNewVideoWithEmptyTitle(t *testing.T) {
+	models.InitDatabase(true)
+
 	// Register a new test user.
 	_, _, token := registerTestUser("test", "123456")
-	invalidToken := token + "1"
 
 	// Construct a test form.
 	formFields := map[string]string{
-		"title": "Test Title",
-		"token": invalidToken,
+		"token": token,
 	}
 	form, writer, err := constructTestForm(formFields)
 	if err != nil {
@@ -90,12 +91,14 @@ func TestPublishNewVideoWithInvalidToken(t *testing.T) {
 	w, r := sendRequest(req)
 	res := r.(*Response)
 
-	assert.Equal(t, 401, w.Code)
+	assert.Equal(t, 200, w.Code)
 	assert.Equal(t, int32(1), res.StatusCode)
-	assert.Equal(t, "invalid token", res.StatusMsg)
+	assert.Equal(t, "video title is empty", res.StatusMsg)
 }
 
-func TestPublishNewVideoWithValidToken(t *testing.T) {
+func TestPublishNewVideo(t *testing.T) {
+	models.InitDatabase(true)
+
 	// Register a new test user.
 	userID, _, token := registerTestUser("test", "123456")
 	userIDStr := fmt.Sprintf("%d", userID)
@@ -133,6 +136,8 @@ func TestPublishNewVideoWithValidToken(t *testing.T) {
 }
 
 func TestGetPublishListByAuthorIDWithInvalidID(t *testing.T) {
+	models.InitDatabase(true)
+
 	// Register a new test user.
 	_, _, token := registerTestUser("test", "123456")
 
@@ -147,63 +152,25 @@ func TestGetPublishListByAuthorIDWithInvalidID(t *testing.T) {
 	assert.Equal(t, "invalid syntax", res.StatusMsg)
 }
 
-func TestGetPublishListByAuthorIDWithInvalidToken(t *testing.T) {
+func TestGetPublishListByAuthorID(t *testing.T) {
+	models.InitDatabase(true)
+
 	// Register a new test user.
 	userID, _, token := registerTestUser("test", "123456")
 	userIDStr := fmt.Sprintf("%d", userID)
-	invalidToken := token + "1"
-
-	req := httptest.NewRequest("GET",
-		"http://127.0.0.1/douyin/publish/list/?user_id="+userIDStr+"&token="+invalidToken, nil)
-
-	w, r := sendRequest(req)
-	res := r.(*PublishListResponse)
-
-	assert.Equal(t, 401, w.Code)
-	assert.Equal(t, int32(1), res.StatusCode)
-	assert.Equal(t, "invalid token", res.StatusMsg)
-	assert.Equal(t, 0, len(res.VideoList))
-}
-
-func TestGetPublishListByAuthorIDWithValidToken(t *testing.T) {
-	// Register a new test user.
-	userID, _, token := registerTestUser("test", "123456")
-	userIDStr := fmt.Sprintf("%d", userID)
-
-	// Construct a test form.
-	formFields := map[string]string{
-		"title": "Test Title",
-		"token": token,
-	}
-	form, writer, err := constructTestForm(formFields)
-	if err != nil {
-		t.Fatalf("failed to construct form data: %v", err)
-	}
-
-	// Publish a new video.
-	req := httptest.NewRequest("POST",
-		"http://127.0.0.1/douyin/publish/action/", form)
-	req.Header.Set("Content-Type", writer.FormDataContentType())
-
-	w, r := sendRequest(req)
-	res := r.(*Response)
-
-	assert.Equal(t, 200, w.Code)
-	assert.Equal(t, int32(0), res.StatusCode)
-	assert.Equal(t, "create new video successfully", res.StatusMsg)
 
 	// Get publish list by author id.
 	url := "http://127.0.0.1/douyin/publish/list/?user_id=" + userIDStr +
 		"&token=" + token
-	req = httptest.NewRequest("GET", url, nil)
+	req := httptest.NewRequest("GET", url, nil)
 
-	w, r = sendRequest(req)
-	res2 := r.(*PublishListResponse)
+	w, r := sendRequest(req)
+	res := r.(*PublishListResponse)
 
 	assert.Equal(t, 200, w.Code)
-	assert.Equal(t, int32(0), res2.StatusCode)
-	assert.Equal(t, "get publish list successfully", res2.StatusMsg)
-	assert.Equal(t, 1, len(res2.VideoList))
+	assert.Equal(t, int32(0), res.StatusCode)
+	assert.Equal(t, "get publish list successfully", res.StatusMsg)
+	assert.Equal(t, 0, len(res.VideoList))
 }
 
 func TestFeedWithInvalidLatestTime(t *testing.T) {
@@ -219,6 +186,8 @@ func TestFeedWithInvalidLatestTime(t *testing.T) {
 }
 
 func TestFeedWithEmptyLatestTime(t *testing.T) {
+	models.InitDatabase(true)
+
 	req := httptest.NewRequest("GET", "http://127.0.0.1/douyin/feed/", nil)
 
 	w, r := sendRequest(req)

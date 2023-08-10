@@ -8,17 +8,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCreateNewVideoWithEmptyTitle(t *testing.T) {
-	models.InitDatabase(true)
-
-	vs := &VideoService{}
-
-	status_code, statue_msg := vs.CreateNewVideo("test", "", 1, time.Now())
-
-	assert.Equal(t, int32(1), status_code)
-	assert.Equal(t, "video title is empty", statue_msg)
-}
-
 func TestCreateNewVideoWithCorrectVideo(t *testing.T) {
 	models.InitDatabase(true)
 

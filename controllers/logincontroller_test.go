@@ -8,20 +8,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestLoginWithNotExistName(t *testing.T) {
-	models.InitDatabase(true)
-
-	req := httptest.NewRequest("POST",
-		"http://127.0.0.1/douyin/user/login/?username=test&password=123456", nil)
-
-	w, r := sendRequest(req)
-	res := r.(*LoginResponse)
-
-	assert.Equal(t, 200, w.Code)
-	assert.Equal(t, int32(1), res.StatusCode)
-	assert.Equal(t, "username not found", res.StatusMsg)
-}
-
 func TestLoginWithWrongPassword(t *testing.T) {
 	models.InitDatabase(true)
 

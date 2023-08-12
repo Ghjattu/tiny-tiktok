@@ -57,3 +57,20 @@ func (fs *FavoriteService) FavoriteAction(userID int64, videoID int64, actionTyp
 
 	return 0, "unfavorite action success"
 }
+
+func (fs *FavoriteService) GetFavoriteVideoListByUserID(currentUserID int64, queryUserID int64) (int32, string, []models.VideoDetail) {
+	// Get favorite video id list by user id.
+	favoriteVideoIDList, err := models.GetFavoriteVideoIDListByUserID(queryUserID)
+	if err != nil {
+		return 1, "failed to get favorite video id list", nil
+	}
+
+	// Get favorite video list by video id list.
+	vs := &VideoService{}
+	statusCode, _, favoriteVideoList := vs.GetVideoListByVideoIDList(favoriteVideoIDList, currentUserID)
+	if statusCode == 1 {
+		return 1, "failed to get favorite video list", nil
+	}
+
+	return 0, "get favorite video list successfully", favoriteVideoList
+}

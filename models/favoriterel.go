@@ -72,3 +72,17 @@ func GetFavoriteCountByUserID(userID int64) (int64, error) {
 
 	return count, err
 }
+
+// GetFavoriteVideoIDListByUserID get the user's favorite video id list by user id.
+//
+//	@param userID int64
+//	@return []int64 "video id list"
+//	@return error
+func GetFavoriteVideoIDListByUserID(userID int64) ([]int64, error) {
+	videoIDList := make([]int64, 0)
+	err := db.Model(&FavoriteRel{}).
+		Where("user_id = ?", userID).
+		Pluck("video_id", &videoIDList).Error
+
+	return videoIDList, err
+}

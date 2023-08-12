@@ -11,6 +11,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/Ghjattu/tiny-tiktok/middleware/jwt"
 	"github.com/Ghjattu/tiny-tiktok/models"
@@ -26,8 +27,7 @@ var (
 	r *gin.Engine
 )
 
-// init() retrieves the environment variables, initializes the gin engine
-// and registers a test user.
+// init() retrieves the environment variables, initializes the gin engine.
 func init() {
 	godotenv.Load("../.env")
 	serverIP = os.Getenv("SERVER_IP")
@@ -40,6 +40,8 @@ func init() {
 	r.GET("/douyin/user/", jwt.AuthorizeGet(), GetUserByUserIDAndToken)
 	r.POST("/douyin/publish/action/", jwt.AuthorizePost(), PublishNewVideo)
 	r.GET("/douyin/publish/list/", jwt.AuthorizeGet(), GetPublishListByAuthorID)
+
+	r.POST("/douyin/favorite/action/", jwt.AuthorizePost(), FavoriteAction)
 }
 
 // selectResponseType selects the response type according to the request path.
@@ -65,6 +67,7 @@ func selectResponseType(req *http.Request) interface{} {
 		return &UserResponse{}
 	case "action":
 		//  /douyin/publish/action/
+		//  /douyin/favorite/action/
 		return &Response{}
 	case "list":
 		//  /douyin/publish/list/
@@ -74,7 +77,7 @@ func selectResponseType(req *http.Request) interface{} {
 	}
 }
 
-// registerTestUser clears the database, and then registers a new test user
+// registerTestUser registers a new test user.
 //
 //	@param name string
 //	@param password string
@@ -82,8 +85,6 @@ func selectResponseType(req *http.Request) interface{} {
 //	@return *models.User
 //	@return string "token"
 func registerTestUser(name string, password string) (int64, *models.User, string) {
-	models.InitDatabase(true)
-
 	testUser := &models.User{
 		Name:     name,
 		Password: password,
@@ -94,6 +95,25 @@ func registerTestUser(name string, password string) (int64, *models.User, string
 	userID, _, _, token := rs.Register(testUser.Name, testUser.Password)
 
 	return userID, testUser, token
+}
+
+// createTestVideo create a new test video.
+//
+//	@param authorID int64
+//	@param publishTime time.Time
+//	@param title string
+//	@return *Video
+func createTestVideo(authorID int64, publishTime time.Time, title string) (*models.Video, error) {
+	testVideo := &models.Video{
+		AuthorID:    authorID,
+		PublishTime: publishTime,
+		PlayUrl:     "test",
+		Title:       title,
+	}
+
+	_, err := models.CreateNewVideo(testVideo)
+
+	return testVideo, err
 }
 
 // sendRequest sends a request to the server and

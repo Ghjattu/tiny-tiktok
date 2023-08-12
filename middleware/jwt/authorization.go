@@ -3,18 +3,12 @@ package jwt
 import (
 	"net/http"
 
-	"github.com/Ghjattu/tiny-tiktok/models"
 	"github.com/gin-gonic/gin"
 )
 
 type Response struct {
 	StatusCode int32  `json:"status_code"`
 	StatusMsg  string `json:"status_msg"`
-}
-
-type UserResponse struct {
-	Response
-	User *models.User `json:"user"`
 }
 
 // AuthorizeGet is a middleware that checks if the token is valid
@@ -50,6 +44,10 @@ func AuthorizeGet() gin.HandlerFunc {
 func AuthorizePost() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenString := c.PostForm("token")
+
+		if tokenString == "" {
+			tokenString = c.Query("token")
+		}
 
 		// Parse the token.
 		userID, name, err := ValidateToken(tokenString)

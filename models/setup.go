@@ -1,11 +1,14 @@
 package models
 
 import (
+	"log"
 	"os"
+	"time"
 
 	"github.com/joho/godotenv"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var db *gorm.DB
@@ -42,7 +45,20 @@ func InitDatabase(isTest bool) {
 	dsn := mysql_username + ":" + mysql_password +
 		"@tcp(" + mysql_ip + ":" + mysql_port + ")" + "/" + mysql_db_name +
 		"?charset=utf8mb4&parseTime=True&loc=Local"
-	d, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+
+	newLogger := logger.New(
+		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
+		logger.Config{
+			SlowThreshold:             time.Second,  // Slow SQL threshold
+			LogLevel:                  logger.Error, // Log level
+			IgnoreRecordNotFoundError: true,         // Ignore ErrRecordNotFound error for logger
+			Colorful:                  true,
+		},
+	)
+
+	d, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+		Logger: newLogger,
+	})
 	if err != nil {
 		panic("failed to connect database")
 	}
@@ -52,8 +68,8 @@ func InitDatabase(isTest bool) {
 	// Drop table if isTest is true to avoid error
 	// when running tests multiple times in a row.
 	if isTest {
-		db.Migrator().DropTable(&User{}, &Video{})
+		db.Migrator().DropTable(&User{}, &Video{}, &FavoriteRel{})
 	}
 
-	db.AutoMigrate(&User{}, &Video{})
+	db.AutoMigrate(&User{}, &Video{}, &FavoriteRel{})
 }

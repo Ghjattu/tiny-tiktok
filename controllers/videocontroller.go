@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -41,6 +42,17 @@ func PublishNewVideo(c *gin.Context) {
 			StatusCode: 1,
 			StatusMsg:  err.Error(),
 		})
+		return
+	}
+
+	log.Println("title: ", title)
+	// Check title is empty or not.
+	if title == "" {
+		c.JSON(http.StatusOK, Response{
+			StatusCode: 1,
+			StatusMsg:  "video title is empty",
+		})
+		return
 	}
 
 	userID := c.GetInt64("user_id")
@@ -55,6 +67,7 @@ func PublishNewVideo(c *gin.Context) {
 			StatusCode: 1,
 			StatusMsg:  err.Error(),
 		})
+		return
 	}
 
 	// Construct play url.
@@ -74,10 +87,10 @@ func PublishNewVideo(c *gin.Context) {
 
 // Endpoint: /douyin/publish/list/
 func GetPublishListByAuthorID(c *gin.Context) {
-	userIDString := c.Query("user_id")
+	authorIDStr := c.Query("user_id")
 
 	// Check user id is valid.
-	statusCode, statusMsg, authorID := utils.ParseInt64(userIDString)
+	statusCode, statusMsg, authorID := utils.ParseInt64(authorIDStr)
 	if statusCode == 1 {
 		c.JSON(http.StatusBadRequest, PublishListResponse{
 			Response: Response{
@@ -89,13 +102,12 @@ func GetPublishListByAuthorID(c *gin.Context) {
 		return
 	}
 
-	// TODO:
 	// Get current login user id.
-	// currentUserID := c.GetInt64("user_id")
+	currentUserID := c.GetInt64("user_id")
 
-	// Get published video list by user id.
+	// Get published video list by author id.
 	vs := &services.VideoService{}
-	statusCode, statusMsg, videoList := vs.GetPublishListByAuthorID(authorID)
+	statusCode, statusMsg, videoList := vs.GetVideoListByAuthorID(authorID, currentUserID)
 
 	c.JSON(http.StatusOK, PublishListResponse{
 		Response: Response{

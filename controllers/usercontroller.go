@@ -11,7 +11,7 @@ import (
 
 type UserResponse struct {
 	Response
-	User *models.User `json:"user"`
+	User *models.UserDetail `json:"user"`
 }
 
 // Endpoint: /douyin/user/
@@ -32,7 +32,7 @@ func GetUserByUserIDAndToken(c *gin.Context) {
 	}
 
 	us := &services.UserService{}
-	statusCode, statusMsg, user := us.GetUserByUserID(userID)
+	statusCode, statusMsg, user := us.GetUserDetailByUserID(userID)
 
 	c.JSON(http.StatusOK, UserResponse{
 		Response: Response{

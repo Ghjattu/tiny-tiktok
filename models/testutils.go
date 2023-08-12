@@ -47,7 +47,7 @@ func createTestVideo(authorID int64, publishTime time.Time, title string) (*Vide
 //	@param videoID int64
 //	@return *FavoriteRel
 //	@return error
-func createTestFavoriteRel(userID int64, videoID int64) (*FavoriteRel, error) {
+func CreateTestFavoriteRel(userID int64, videoID int64) (*FavoriteRel, error) {
 	testFavoriteRel := &FavoriteRel{
 		UserID:  userID,
 		VideoID: videoID,

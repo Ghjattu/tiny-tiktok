@@ -42,6 +42,7 @@ func init() {
 	r.GET("/douyin/publish/list/", jwt.AuthorizeGet(), GetPublishListByAuthorID)
 
 	r.POST("/douyin/favorite/action/", jwt.AuthorizePost(), FavoriteAction)
+	r.GET("/douyin/favorite/list/", jwt.AuthorizeGet(), GetFavoriteListByUserID)
 }
 
 // selectResponseType selects the response type according to the request path.
@@ -49,31 +50,23 @@ func init() {
 //	@param req *http.Request
 //	@return interface{}
 func selectResponseType(req *http.Request) interface{} {
-	pathSlice := strings.Split(req.URL.Path, "/")
-	lastPath := pathSlice[len(pathSlice)-2]
+	path, _ := strings.CutPrefix(req.URL.Path, "/douyin")
 
-	switch lastPath {
-	case "feed":
-		//  /douyin/feed/
+	switch path {
+	case "/feed/":
 		return &FeedResponse{}
-	case "register":
-		//  /douyin/user/register/
+	case "/user/register/":
 		return &RegisterResponse{}
-	case "login":
-		//  /douyin/user/login/
+	case "/user/login/":
 		return &LoginResponse{}
-	case "user":
-		//  /douyin/user/
+	case "/user/":
 		return &UserResponse{}
-	case "action":
-		//  /douyin/publish/action/
-		//  /douyin/favorite/action/
-		return &Response{}
-	case "list":
-		//  /douyin/publish/list/
+	case "/publish/list/":
 		return &PublishListResponse{}
+	case "/favorite/list/":
+		return &FavoriteListResponse{}
 	default:
-		return nil
+		return &Response{}
 	}
 }
 

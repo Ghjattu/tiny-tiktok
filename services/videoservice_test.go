@@ -60,3 +60,21 @@ func TestGetMost30Videos(t *testing.T) {
 	assert.Equal(t, "get most 30 videos successfully", statue_msg)
 	assert.Equal(t, 0, len(videoList))
 }
+
+func TestGetVideoListByVideoIDList(t *testing.T) {
+	models.InitDatabase(true)
+
+	// Create a new test user.
+	testUser, _ := createTestUser("test", "123456")
+
+	// Create a new test video.
+	testVideo, _ := createTestVideo(testUser.ID, time.Now(), "test")
+
+	vs := &VideoService{}
+
+	status_code, statue_msg, videoList := vs.GetVideoListByVideoIDList([]int64{testVideo.ID}, 1)
+
+	assert.Equal(t, int32(0), status_code)
+	assert.Equal(t, "get video list successfully", statue_msg)
+	assert.Equal(t, 1, len(videoList))
+}

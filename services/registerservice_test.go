@@ -84,7 +84,7 @@ func TestRegisterWithRegisteredUsername(t *testing.T) {
 	rs := &RegisterService{}
 
 	// Create a new test user.
-	createTestUser("test", "123456")
+	models.CreateTestUser("test", "123456")
 
 	user_id, status_code, status_msg, _ := rs.Register("test", "123456")
 

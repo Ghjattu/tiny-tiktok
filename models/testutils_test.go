@@ -15,7 +15,7 @@ func TestCreateTestUser(t *testing.T) {
 		Password: "test",
 	}
 
-	returnedUser, err := createTestUser(testUser.Name, testUser.Password)
+	returnedUser, err := CreateTestUser(testUser.Name, testUser.Password)
 	if err != nil {
 		t.Fatalf("Error when creating a new user: %v", err)
 	}
@@ -33,7 +33,7 @@ func TestCreateTestVideo(t *testing.T) {
 		Title:       "test",
 	}
 
-	returnedVideo, err := createTestVideo(testVideo.AuthorID, testVideo.PublishTime, testVideo.Title)
+	returnedVideo, err := CreateTestVideo(testVideo.AuthorID, testVideo.PublishTime, testVideo.Title)
 	if err != nil {
 		t.Fatalf("Error when creating a new video: %v", err)
 	}
@@ -41,4 +41,21 @@ func TestCreateTestVideo(t *testing.T) {
 	assert.Equal(t, testVideo.AuthorID, returnedVideo.AuthorID)
 	assert.Equal(t, testVideo.PlayUrl, returnedVideo.PlayUrl)
 	assert.Equal(t, testVideo.Title, returnedVideo.Title)
+}
+
+func TestCreateTestFavoriteRel(t *testing.T) {
+	InitDatabase(true)
+
+	fr := &FavoriteRel{
+		UserID:  1,
+		VideoID: 1,
+	}
+
+	returnedFr, err := CreateTestFavoriteRel(fr.UserID, fr.VideoID)
+	if err != nil {
+		t.Fatalf("Error when creating a new favorite rel: %v", err)
+	}
+
+	assert.Equal(t, fr.UserID, returnedFr.UserID)
+	assert.Equal(t, fr.VideoID, returnedFr.VideoID)
 }

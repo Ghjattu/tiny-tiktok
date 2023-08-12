@@ -20,4 +20,5 @@ func RegisterRouter(r *gin.Engine) {
 	api.GET("/publish/list/", jwt.AuthorizeGet(), controllers.GetPublishListByAuthorID)
 
 	api.POST("/favorite/action/", jwt.AuthorizePost(), controllers.FavoriteAction)
+	api.GET("/favorite/list/", jwt.AuthorizeGet(), controllers.GetFavoriteListByUserID)
 }

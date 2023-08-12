@@ -26,7 +26,7 @@ func TestGetUserByName(t *testing.T) {
 	InitDatabase(true)
 
 	// Create a new test user.
-	testUser, _ := createTestUser("test", "test")
+	testUser, _ := CreateTestUser("test", "test")
 
 	returnedUser, err := GetUserByName(testUser.Name)
 	if err != nil {
@@ -40,7 +40,7 @@ func TestGetUserByUserID(t *testing.T) {
 	InitDatabase(true)
 
 	// Create a new test user.
-	testUser, _ := createTestUser("test", "test")
+	testUser, _ := CreateTestUser("test", "test")
 
 	returnedUser, err := GetUserByUserID(testUser.ID)
 	if err != nil {

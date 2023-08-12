@@ -33,7 +33,8 @@ func TestFavoriteActionWithNonExistVideoID(t *testing.T) {
 func TestFavoriteActionWithActionTypeOne(t *testing.T) {
 	models.InitDatabase(true)
 
-	createTestVideo(1, time.Now(), "test")
+	// Create a new test video.
+	models.CreateTestVideo(1, time.Now(), "test")
 
 	fs := &FavoriteService{}
 
@@ -46,7 +47,8 @@ func TestFavoriteActionWithActionTypeOne(t *testing.T) {
 func TestFavoriteActionWithRepetitiveActionTypeOne(t *testing.T) {
 	models.InitDatabase(true)
 
-	createTestVideo(1, time.Now(), "test")
+	// Create a new test video.
+	models.CreateTestVideo(1, time.Now(), "test")
 
 	fs := &FavoriteService{}
 
@@ -64,7 +66,8 @@ func TestFavoriteActionWithRepetitiveActionTypeOne(t *testing.T) {
 func TestFavoriteActionWithActionTypeTwo(t *testing.T) {
 	models.InitDatabase(true)
 
-	createTestVideo(1, time.Now(), "test")
+	// Create a new test video.
+	models.CreateTestVideo(1, time.Now(), "test")
 
 	fs := &FavoriteService{}
 
@@ -72,4 +75,25 @@ func TestFavoriteActionWithActionTypeTwo(t *testing.T) {
 
 	assert.Equal(t, int32(0), statusCode)
 	assert.Equal(t, "unfavorite action success", statusMsg)
+}
+
+func TestGetFavoriteVideoListByUserID(t *testing.T) {
+	models.InitDatabase(true)
+
+	// Create a new test user.
+	testUser, _ := models.CreateTestUser("test", "123456")
+
+	// Create a new test video.
+	testVideo, _ := models.CreateTestVideo(testUser.ID, time.Now(), "test")
+
+	// Create a test favorite relation.
+	models.CreateTestFavoriteRel(testUser.ID, testVideo.ID)
+
+	fs := &FavoriteService{}
+
+	statusCode, statusMsg, favoriteVideoList := fs.GetFavoriteVideoListByUserID(testUser.ID, testUser.ID)
+
+	assert.Equal(t, int32(0), statusCode)
+	assert.Equal(t, "get favorite video list successfully", statusMsg)
+	assert.Equal(t, 1, len(favoriteVideoList))
 }

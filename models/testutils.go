@@ -1,5 +1,5 @@
-// Description: This testutils.go file contains some functions that are used in test files
-// in the models package.
+// Description: This testutils.go file contains some functions
+// that are used in *_test.go files.
 
 package models
 
@@ -11,7 +11,7 @@ import "time"
 //	@param password string
 //	@return *User
 //	@return error
-func createTestUser(name string, password string) (*User, error) {
+func CreateTestUser(name string, password string) (*User, error) {
 	testUser := &User{
 		Name:     name,
 		Password: password,
@@ -28,7 +28,7 @@ func createTestUser(name string, password string) (*User, error) {
 //	@param publishTime time.Time
 //	@param title string
 //	@return *Video
-func createTestVideo(authorID int64, publishTime time.Time, title string) (*Video, error) {
+func CreateTestVideo(authorID int64, publishTime time.Time, title string) (*Video, error) {
 	testVideo := &Video{
 		AuthorID:    authorID,
 		PublishTime: publishTime,
@@ -47,7 +47,7 @@ func createTestVideo(authorID int64, publishTime time.Time, title string) (*Vide
 //	@param videoID int64
 //	@return *FavoriteRel
 //	@return error
-func createTestFavoriteRel(userID int64, videoID int64) (*FavoriteRel, error) {
+func CreateTestFavoriteRel(userID int64, videoID int64) (*FavoriteRel, error) {
 	testFavoriteRel := &FavoriteRel{
 		UserID:  userID,
 		VideoID: videoID,

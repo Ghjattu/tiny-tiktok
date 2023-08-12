@@ -11,7 +11,6 @@ import (
 	"net/http/httptest"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/Ghjattu/tiny-tiktok/middleware/jwt"
 	"github.com/Ghjattu/tiny-tiktok/models"
@@ -42,6 +41,7 @@ func init() {
 	r.GET("/douyin/publish/list/", jwt.AuthorizeGet(), GetPublishListByAuthorID)
 
 	r.POST("/douyin/favorite/action/", jwt.AuthorizePost(), FavoriteAction)
+	r.GET("/douyin/favorite/list/", jwt.AuthorizeGet(), GetFavoriteListByUserID)
 }
 
 // selectResponseType selects the response type according to the request path.
@@ -49,31 +49,23 @@ func init() {
 //	@param req *http.Request
 //	@return interface{}
 func selectResponseType(req *http.Request) interface{} {
-	pathSlice := strings.Split(req.URL.Path, "/")
-	lastPath := pathSlice[len(pathSlice)-2]
+	path, _ := strings.CutPrefix(req.URL.Path, "/douyin")
 
-	switch lastPath {
-	case "feed":
-		//  /douyin/feed/
+	switch path {
+	case "/feed/":
 		return &FeedResponse{}
-	case "register":
-		//  /douyin/user/register/
+	case "/user/register/":
 		return &RegisterResponse{}
-	case "login":
-		//  /douyin/user/login/
+	case "/user/login/":
 		return &LoginResponse{}
-	case "user":
-		//  /douyin/user/
+	case "/user/":
 		return &UserResponse{}
-	case "action":
-		//  /douyin/publish/action/
-		//  /douyin/favorite/action/
-		return &Response{}
-	case "list":
-		//  /douyin/publish/list/
+	case "/publish/list/":
 		return &PublishListResponse{}
+	case "/favorite/list/":
+		return &FavoriteListResponse{}
 	default:
-		return nil
+		return &Response{}
 	}
 }
 
@@ -95,25 +87,6 @@ func registerTestUser(name string, password string) (int64, *models.User, string
 	userID, _, _, token := rs.Register(testUser.Name, testUser.Password)
 
 	return userID, testUser, token
-}
-
-// createTestVideo create a new test video.
-//
-//	@param authorID int64
-//	@param publishTime time.Time
-//	@param title string
-//	@return *Video
-func createTestVideo(authorID int64, publishTime time.Time, title string) (*models.Video, error) {
-	testVideo := &models.Video{
-		AuthorID:    authorID,
-		PublishTime: publishTime,
-		PlayUrl:     "test",
-		Title:       title,
-	}
-
-	_, err := models.CreateNewVideo(testVideo)
-
-	return testVideo, err
 }
 
 // sendRequest sends a request to the server and

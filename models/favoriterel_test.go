@@ -28,7 +28,7 @@ func TestDeleteFavoriteRel(t *testing.T) {
 	InitDatabase(true)
 
 	// Create a new favorite rel.
-	testFavoriteRel, _ := createTestFavoriteRel(1, 1)
+	testFavoriteRel, _ := CreateTestFavoriteRel(1, 1)
 
 	// Delete the favorite rel.
 	deletedRows, err := DeleteFavoriteRel(testFavoriteRel.UserID, testFavoriteRel.VideoID)
@@ -44,7 +44,7 @@ func TestCheckFavoriteRelExist(t *testing.T) {
 	InitDatabase(true)
 
 	// Create a new favorite rel.
-	testFavoriteRel, _ := createTestFavoriteRel(1, 1)
+	testFavoriteRel, _ := CreateTestFavoriteRel(1, 1)
 
 	// Check the favorite rel exist.
 	exist, err := CheckFavoriteRelExist(testFavoriteRel.UserID, testFavoriteRel.VideoID)
@@ -59,7 +59,7 @@ func TestGetFavoriteCountByVideoID(t *testing.T) {
 	InitDatabase(true)
 
 	// Create a new favorite rel.
-	testFavoriteRel, _ := createTestFavoriteRel(1, 1)
+	testFavoriteRel, _ := CreateTestFavoriteRel(1, 1)
 
 	// Get favorite count by video id.
 	count, err := GetFavoriteCountByVideoID(testFavoriteRel.VideoID)
@@ -74,7 +74,7 @@ func TestGetFavoriteCountByUserID(t *testing.T) {
 	InitDatabase(true)
 
 	// Create a new favorite rel.
-	testFavoriteRel, _ := createTestFavoriteRel(1, 1)
+	testFavoriteRel, _ := CreateTestFavoriteRel(1, 1)
 
 	// Get favorite count by user id.
 	count, err := GetFavoriteCountByUserID(testFavoriteRel.UserID)
@@ -83,4 +83,20 @@ func TestGetFavoriteCountByUserID(t *testing.T) {
 	}
 
 	assert.Equal(t, int64(1), count)
+}
+
+func TestGetFavoriteVideoIDListByUserID(t *testing.T) {
+	InitDatabase(true)
+
+	// Create a new favorite rel.
+	testFavoriteRel, _ := CreateTestFavoriteRel(1, 1)
+
+	// Get favorite video id list by user id.
+	videoIDList, err := GetFavoriteVideoIDListByUserID(testFavoriteRel.UserID)
+	if err != nil {
+		t.Fatalf("Error when getting favorite video id list by user id: %v", err)
+	}
+
+	assert.Equal(t, 1, len(videoIDList))
+	assert.Equal(t, []int64{1}, videoIDList)
 }

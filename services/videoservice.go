@@ -82,6 +82,33 @@ func (vs *VideoService) GetMost30Videos(latestTime time.Time) (int32, string, in
 	return 0, "get most 30 videos successfully", earliestTime.Unix(), videoDetailList
 }
 
+// GetVideoListByVideoIDList returns a list of videos by video id list.
+//
+//	@receiver vs *VideoService
+//	@param videoIDList []int64
+//	@param currentUserID int64
+//	@return int32 "status_code"
+//	@return string "status_msg"
+//	@return []models.VideoDetail
+func (vs *VideoService) GetVideoListByVideoIDList(videoIDList []int64, currentUserID int64) (int32, string, []models.VideoDetail) {
+	videoList := make([]models.Video, 0, len(videoIDList))
+
+	for _, videoID := range videoIDList {
+		video, err := models.GetVideoByID(videoID)
+		if err == nil {
+			videoList = append(videoList, *video)
+		}
+	}
+
+	// Convert video list to video detail list.
+	statusCode, videoDetailList := convertVideoToVideoDetail(videoList, currentUserID)
+	if statusCode == 1 {
+		return 1, "failed to get video list", nil
+	}
+
+	return 0, "get video list successfully", videoDetailList
+}
+
 // convertVideoToVideoDetail converts video list to video detail list.
 //
 //	@param videoList []models.Video

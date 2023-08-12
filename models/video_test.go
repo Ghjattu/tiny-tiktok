@@ -31,10 +31,10 @@ func TestGetVideoListByUserID(t *testing.T) {
 	InitDatabase(true)
 
 	// Create a new test user.
-	testUser, _ := createTestUser("test", "test")
+	testUser, _ := CreateTestUser("test", "test")
 
 	// Create a new test video.
-	testVideo, _ := createTestVideo(testUser.ID, time.Now(), "test")
+	testVideo, _ := CreateTestVideo(testUser.ID, time.Now(), "test")
 
 	// Get video list by test user id.
 	videoList, err := GetVideoListByAuthorID(testUser.ID)
@@ -51,7 +51,7 @@ func TestGetMost30Videos(t *testing.T) {
 	InitDatabase(true)
 
 	// Create a new test user.
-	testUser, _ := createTestUser("test", "test")
+	testUser, _ := CreateTestUser("test", "test")
 
 	// Construct three timestamps.
 	videoOneTimestamp := time.Now()
@@ -59,8 +59,8 @@ func TestGetMost30Videos(t *testing.T) {
 	videoTwoTimestamp := time.Now().Add(time.Second * 10)
 
 	// Create two new test videos.
-	testVideoOne, _ := createTestVideo(testUser.ID, videoOneTimestamp, "testOne")
-	createTestVideo(testUser.ID, videoTwoTimestamp, "testTwo")
+	testVideoOne, _ := CreateTestVideo(testUser.ID, videoOneTimestamp, "testOne")
+	CreateTestVideo(testUser.ID, videoTwoTimestamp, "testTwo")
 
 	// Check the results.
 	videoList, earliestTime, err := GetMost30Videos(middleTimestamp)
@@ -88,7 +88,7 @@ func TestGetVideoByID(t *testing.T) {
 	InitDatabase(true)
 
 	// Create a new test video.
-	testVideo, _ := createTestVideo(1, time.Now(), "test")
+	testVideo, _ := CreateTestVideo(1, time.Now(), "test")
 
 	returnedVideo, err := GetVideoByID(testVideo.ID)
 	if err != nil {
@@ -103,7 +103,7 @@ func TestGetVideoCountByAuthorID(t *testing.T) {
 	InitDatabase(true)
 
 	// Create a new test video.
-	createTestVideo(1, time.Now(), "test")
+	CreateTestVideo(1, time.Now(), "test")
 
 	count, err := GetVideoCountByAuthorID(1)
 	if err != nil {

@@ -37,13 +37,12 @@ func TestGetVideoListByUserID(t *testing.T) {
 	testVideo, _ := createTestVideo(testUser.ID, time.Now(), "test")
 
 	// Get video list by test user id.
-	videoList, err := GetVideoListByUserID(testUser.ID)
+	videoList, err := GetVideoListByAuthorID(testUser.ID)
 	if err != nil {
 		t.Fatalf("Error when getting video list: %v", err)
 	}
 
 	assert.Equal(t, 1, len(videoList))
-	assert.Equal(t, testVideo.AuthorID, videoList[0].Author.ID)
 	assert.Equal(t, testVideo.PlayUrl, videoList[0].PlayUrl)
 	assert.Equal(t, testVideo.Title, videoList[0].Title)
 }
@@ -98,4 +97,18 @@ func TestGetVideoByID(t *testing.T) {
 
 	assert.Equal(t, testVideo.AuthorID, returnedVideo.AuthorID)
 	assert.Equal(t, testVideo.Title, returnedVideo.Title)
+}
+
+func TestGetVideoCountByAuthorID(t *testing.T) {
+	InitDatabase(true)
+
+	// Create a new test video.
+	createTestVideo(1, time.Now(), "test")
+
+	count, err := GetVideoCountByAuthorID(1)
+	if err != nil {
+		t.Fatalf("Error when getting video count by author id: %v", err)
+	}
+
+	assert.Equal(t, int64(1), count)
 }

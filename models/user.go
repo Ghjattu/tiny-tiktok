@@ -9,18 +9,27 @@ import (
 )
 
 type User struct {
-	ID              int64  `gorm:"primaryKey;autoIncrement" json:"id"`
-	Name            string `gorm:"type:varchar(255);not null;unique" json:"name"`
-	Password        string `gorm:"type:varchar(255);not null" json:"password"`
-	FollowCount     int64  `gorm:"type:int;not null" json:"follow_count"`
-	FollowerCount   int64  `gorm:"type:int;not null" json:"follower_count"`
-	IsFollow        bool   `gorm:"type:bool;not null" json:"is_follow"`
-	Avatar          string `gorm:"type:varchar(255);not null" json:"avatar"`
-	BackgroundImage string `gorm:"type:varchar(255);not null" json:"background_image"`
-	Signature       string `gorm:"type:varchar(255);not null" json:"signature"`
-	TotalFavorited  int64  `gorm:"type:int;not null" json:"total_favorited"`
-	WorkCount       int64  `gorm:"type:int;not null" json:"work_count"`
-	FavoriteCount   int64  `gorm:"type:int;not null" json:"favorite_count"`
+	ID              int64  `gorm:"primaryKey;autoIncrement"`
+	Name            string `gorm:"type:varchar(32);not null;unique"`
+	Password        string `gorm:"type:varchar(255);not null"`
+	Avatar          string `gorm:"type:varchar(255);not null"`
+	BackgroundImage string `gorm:"type:varchar(255);not null"`
+	Signature       string `gorm:"type:varchar(255);not null"`
+	TotalFavorited  int64  `gorm:"type:int;not null"`
+}
+
+type UserDetail struct {
+	ID              int64  `json:"id"`
+	Name            string `json:"name"`
+	FollowCount     int64  `json:"follow_count"`
+	FollowerCount   int64  `json:"follower_count"`
+	IsFollow        bool   `json:"is_follow"`
+	Avatar          string `json:"avatar"`
+	BackgroundImage string `json:"background_image"`
+	Signature       string `json:"signature"`
+	TotalFavorited  int64  `json:"total_favorited"`
+	WorkCount       int64  `json:"work_count"`
+	FavoriteCount   int64  `json:"favorite_count"`
 }
 
 // BeforeCreate is a hook that will be called before creating a new user.

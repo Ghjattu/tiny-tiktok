@@ -12,9 +12,9 @@ type UserService struct{}
 //
 //	@receiver us *UserService
 //	@param userID int64
-//	@return int32 status_code
-//	@return string status_msg
-//	@return *models.User user
+//	@return int32 "status_code"
+//	@return string "status_msg"
+//	@return *models.User
 func (us *UserService) GetUserByUserID(userID int64) (int32, string, *models.User) {
 	user, err := models.GetUserByUserID(userID)
 	if err != nil {
@@ -27,6 +27,40 @@ func (us *UserService) GetUserByUserID(userID int64) (int32, string, *models.Use
 	// Hide user password.
 	user.Password = ""
 
-	// TODO: Update IsFollow field.
 	return 0, "get user successfully", user
+}
+
+// GetUserDetailByUserID gets a user detail by its user id.
+//
+//	@receiver us *UserService
+//	@param userID int64
+//	@return int32 "status_code"
+//	@return string "status_msg"
+//	@return *models.UserDetail
+func (us *UserService) GetUserDetailByUserID(userID int64) (int32, string, *models.UserDetail) {
+	user, err := models.GetUserByUserID(userID)
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return 1, "user not found", nil
+		}
+		return 1, "failed to get user", nil
+	}
+
+	userDetail := &models.UserDetail{
+		ID:              user.ID,
+		Name:            user.Name,
+		Avatar:          user.Avatar,
+		BackgroundImage: user.BackgroundImage,
+		Signature:       user.Signature,
+		TotalFavorited:  user.TotalFavorited,
+	}
+
+	// TODO: Add more fields.
+	// userDetail.FollowCount =
+	// userDetail.FollowerCount =
+	// userDetail.IsFollow =
+	userDetail.WorkCount, _ = models.GetVideoCountByAuthorID(user.ID)
+	userDetail.FavoriteCount, _ = models.GetFavoriteCountByUserID(user.ID)
+
+	return 0, "get user successfully", userDetail
 }

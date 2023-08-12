@@ -44,3 +44,20 @@ func createTestVideo(authorID int64, publishTime time.Time, title string) (*mode
 
 	return testVideo, err
 }
+
+// createTestFavoriteRel create a new test favorite rel.
+//
+//	@param userID int64
+//	@param videoID int64
+//	@return *FavoriteRel
+//	@return error
+func createTestFavoriteRel(userID int64, videoID int64) (*models.FavoriteRel, error) {
+	testFavoriteRel := &models.FavoriteRel{
+		UserID:  userID,
+		VideoID: videoID,
+	}
+
+	_, err := models.CreateNewFavoriteRel(testFavoriteRel)
+
+	return testFavoriteRel, err
+}

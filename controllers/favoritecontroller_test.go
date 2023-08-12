@@ -51,7 +51,7 @@ func TestFavoriteActionWithValidVideoIDAndType(t *testing.T) {
 	userID, _, token := registerTestUser("test", "123456")
 
 	// Create a new test video.
-	testVideo, _ := createTestVideo(userID, time.Now(), "test")
+	testVideo, _ := models.CreateTestVideo(userID, time.Now(), "test")
 	videoIDStr := fmt.Sprintf("%d", testVideo.ID)
 
 	url := "http://127.0.0.1/douyin/favorite/action/?video_id=" + videoIDStr +
@@ -91,7 +91,7 @@ func TestGetFavoriteListByUserID(t *testing.T) {
 	userIDStr := fmt.Sprintf("%d", userID)
 
 	// Create a new test video.
-	testVideo, _ := createTestVideo(userID, time.Now(), "test")
+	testVideo, _ := models.CreateTestVideo(userID, time.Now(), "test")
 
 	// Create a new test favorite relation.
 	models.CreateTestFavoriteRel(userID, testVideo.ID)

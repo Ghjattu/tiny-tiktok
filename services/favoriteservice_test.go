@@ -33,7 +33,8 @@ func TestFavoriteActionWithNonExistVideoID(t *testing.T) {
 func TestFavoriteActionWithActionTypeOne(t *testing.T) {
 	models.InitDatabase(true)
 
-	createTestVideo(1, time.Now(), "test")
+	// Create a new test video.
+	models.CreateTestVideo(1, time.Now(), "test")
 
 	fs := &FavoriteService{}
 
@@ -46,7 +47,8 @@ func TestFavoriteActionWithActionTypeOne(t *testing.T) {
 func TestFavoriteActionWithRepetitiveActionTypeOne(t *testing.T) {
 	models.InitDatabase(true)
 
-	createTestVideo(1, time.Now(), "test")
+	// Create a new test video.
+	models.CreateTestVideo(1, time.Now(), "test")
 
 	fs := &FavoriteService{}
 
@@ -64,7 +66,8 @@ func TestFavoriteActionWithRepetitiveActionTypeOne(t *testing.T) {
 func TestFavoriteActionWithActionTypeTwo(t *testing.T) {
 	models.InitDatabase(true)
 
-	createTestVideo(1, time.Now(), "test")
+	// Create a new test video.
+	models.CreateTestVideo(1, time.Now(), "test")
 
 	fs := &FavoriteService{}
 
@@ -78,13 +81,13 @@ func TestGetFavoriteVideoListByUserID(t *testing.T) {
 	models.InitDatabase(true)
 
 	// Create a new test user.
-	testUser, _ := createTestUser("test", "123456")
+	testUser, _ := models.CreateTestUser("test", "123456")
 
 	// Create a new test video.
-	testVideo, _ := createTestVideo(testUser.ID, time.Now(), "test")
+	testVideo, _ := models.CreateTestVideo(testUser.ID, time.Now(), "test")
 
 	// Create a test favorite relation.
-	createTestFavoriteRel(testUser.ID, testVideo.ID)
+	models.CreateTestFavoriteRel(testUser.ID, testVideo.ID)
 
 	fs := &FavoriteService{}
 

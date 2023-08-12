@@ -49,7 +49,7 @@ func TestLoginWithWrongPassword(t *testing.T) {
 	models.InitDatabase(true)
 
 	// Create a new test user.
-	createTestUser("test", "123456")
+	models.CreateTestUser("test", "123456")
 
 	ls := &LoginService{}
 
@@ -64,7 +64,7 @@ func TestLoginWithCorrectPassword(t *testing.T) {
 	models.InitDatabase(true)
 
 	// Create a new test user.
-	testUser, _ := createTestUser("test", "123456")
+	testUser, _ := models.CreateTestUser("test", "123456")
 
 	ls := &LoginService{}
 

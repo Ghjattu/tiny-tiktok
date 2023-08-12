@@ -23,7 +23,7 @@ func TestGetUserByUserIDWithCorrectID(t *testing.T) {
 	models.InitDatabase(true)
 
 	// Create a new test user.
-	testUser, _ := createTestUser("test", "123456")
+	testUser, _ := models.CreateTestUser("test", "123456")
 
 	us := &UserService{}
 
@@ -51,7 +51,7 @@ func TestGetUserDetailByUserIDWithCorrectID(t *testing.T) {
 	models.InitDatabase(true)
 
 	// Create a new test user.
-	testUser, _ := createTestUser("test", "123456")
+	testUser, _ := models.CreateTestUser("test", "123456")
 
 	us := &UserService{}
 

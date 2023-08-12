@@ -73,3 +73,24 @@ func TestFavoriteActionWithActionTypeTwo(t *testing.T) {
 	assert.Equal(t, int32(0), statusCode)
 	assert.Equal(t, "unfavorite action success", statusMsg)
 }
+
+func TestGetFavoriteVideoListByUserID(t *testing.T) {
+	models.InitDatabase(true)
+
+	// Create a new test user.
+	testUser, _ := createTestUser("test", "123456")
+
+	// Create a new test video.
+	testVideo, _ := createTestVideo(testUser.ID, time.Now(), "test")
+
+	// Create a test favorite relation.
+	createTestFavoriteRel(testUser.ID, testVideo.ID)
+
+	fs := &FavoriteService{}
+
+	statusCode, statusMsg, favoriteVideoList := fs.GetFavoriteVideoListByUserID(testUser.ID, testUser.ID)
+
+	assert.Equal(t, int32(0), statusCode)
+	assert.Equal(t, "get favorite video list successfully", statusMsg)
+	assert.Equal(t, 1, len(favoriteVideoList))
+}

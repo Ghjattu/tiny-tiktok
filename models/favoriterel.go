@@ -45,15 +45,29 @@ func CheckFavoriteRelExist(userId int64, videoID int64) (bool, error) {
 	return count > 0, err
 }
 
-// GetFavoriteCountByVideoID get favorite count by video id.
+// GetFavoriteCountByVideoID get the count of favorite by video id.
 //
 //	@param videoID int64
-//	@return int64 "favorite count"
+//	@return int64
 //	@return error
 func GetFavoriteCountByVideoID(videoID int64) (int64, error) {
-	var count int64
+	var count int64 = 0
 	err := db.Model(&FavoriteRel{}).
 		Where("video_id = ?", videoID).
+		Count(&count).Error
+
+	return count, err
+}
+
+// GetFavoriteCountByUserID get the count of favorite by user id.
+//
+//	@param userID int64
+//	@return int64
+//	@return error
+func GetFavoriteCountByUserID(userID int64) (int64, error) {
+	var count int64 = 0
+	err := db.Model(&FavoriteRel{}).
+		Where("user_id = ?", userID).
 		Count(&count).Error
 
 	return count, err

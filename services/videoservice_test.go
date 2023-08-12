@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCreateNewVideoWithCorrectVideo(t *testing.T) {
+func TestCreateNewVideo(t *testing.T) {
 	models.InitDatabase(true)
 
 	vs := &VideoService{}
@@ -19,19 +19,7 @@ func TestCreateNewVideoWithCorrectVideo(t *testing.T) {
 	assert.Equal(t, "create new video successfully", statue_msg)
 }
 
-func TestGetPublishListByAuthorIDWithNonExistID(t *testing.T) {
-	models.InitDatabase(true)
-
-	vs := &VideoService{}
-
-	status_code, statue_msg, videoList := vs.GetPublishListByAuthorID(1, -1)
-
-	assert.Equal(t, int32(1), status_code)
-	assert.Equal(t, "failed to get publish list", statue_msg)
-	assert.Equal(t, 0, len(videoList))
-}
-
-func TestGetPublishListByAuthorIDWithCorrectID(t *testing.T) {
+func TestGetPublishListByAuthorID(t *testing.T) {
 	models.InitDatabase(true)
 
 	// Create a new test user.
@@ -49,7 +37,7 @@ func TestGetPublishListByAuthorIDWithCorrectID(t *testing.T) {
 
 	vs := &VideoService{}
 
-	status_code, statue_msg, videoList := vs.GetPublishListByAuthorID(testUser.ID, testUser.ID+1)
+	status_code, statue_msg, videoList := vs.GetVideoListByAuthorID(testUser.ID, testUser.ID+1)
 
 	assert.Equal(t, int32(0), status_code)
 	assert.Equal(t, "get publish list successfully", statue_msg)

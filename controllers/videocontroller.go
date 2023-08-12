@@ -107,7 +107,7 @@ func GetPublishListByAuthorID(c *gin.Context) {
 
 	// Get published video list by author id.
 	vs := &services.VideoService{}
-	statusCode, statusMsg, videoList := vs.GetPublishListByAuthorID(authorID, currentUserID)
+	statusCode, statusMsg, videoList := vs.GetVideoListByAuthorID(authorID, currentUserID)
 
 	c.JSON(http.StatusOK, PublishListResponse{
 		Response: Response{

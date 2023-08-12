@@ -10,36 +10,28 @@ func TestCreateNewFavoriteRel(t *testing.T) {
 	InitDatabase(true)
 
 	// Create a new favorite rel.
-	fr := &FavoriteRel{
+	testFavoriteRel := &FavoriteRel{
 		UserID:  1,
 		VideoID: 1,
 	}
 
-	favoriteRel, err := CreateNewFavoriteRel(fr)
+	favoriteRel, err := CreateNewFavoriteRel(testFavoriteRel)
 	if err != nil {
 		t.Fatalf("Error when creating a new favorite rel: %v", err)
 	}
 
-	assert.Equal(t, fr.UserID, favoriteRel.UserID)
-	assert.Equal(t, fr.VideoID, favoriteRel.VideoID)
+	assert.Equal(t, testFavoriteRel.UserID, favoriteRel.UserID)
+	assert.Equal(t, testFavoriteRel.VideoID, favoriteRel.VideoID)
 }
 
 func TestDeleteFavoriteRel(t *testing.T) {
 	InitDatabase(true)
 
 	// Create a new favorite rel.
-	fr := &FavoriteRel{
-		UserID:  1,
-		VideoID: 1,
-	}
-
-	_, err := CreateNewFavoriteRel(fr)
-	if err != nil {
-		t.Fatalf("Error when creating a new favorite rel: %v", err)
-	}
+	testFavoriteRel, _ := createTestFavoriteRel(1, 1)
 
 	// Delete the favorite rel.
-	deletedRows, err := DeleteFavoriteRel(fr.UserID, fr.VideoID)
+	deletedRows, err := DeleteFavoriteRel(testFavoriteRel.UserID, testFavoriteRel.VideoID)
 	if err != nil {
 		t.Fatalf("Error when deleting the favorite rel: %v", err)
 	}
@@ -52,18 +44,10 @@ func TestCheckFavoriteRelExist(t *testing.T) {
 	InitDatabase(true)
 
 	// Create a new favorite rel.
-	fr := &FavoriteRel{
-		UserID:  1,
-		VideoID: 1,
-	}
-
-	_, err := CreateNewFavoriteRel(fr)
-	if err != nil {
-		t.Fatalf("Error when creating a new favorite rel: %v", err)
-	}
+	testFavoriteRel, _ := createTestFavoriteRel(1, 1)
 
 	// Check the favorite rel exist.
-	exist, err := CheckFavoriteRelExist(fr.UserID, fr.VideoID)
+	exist, err := CheckFavoriteRelExist(testFavoriteRel.UserID, testFavoriteRel.VideoID)
 	if err != nil {
 		t.Fatalf("Error when checking the favorite rel exist: %v", err)
 	}
@@ -75,20 +59,27 @@ func TestGetFavoriteCountByVideoID(t *testing.T) {
 	InitDatabase(true)
 
 	// Create a new favorite rel.
-	fr := &FavoriteRel{
-		UserID:  1,
-		VideoID: 1,
-	}
-
-	_, err := CreateNewFavoriteRel(fr)
-	if err != nil {
-		t.Fatalf("Error when creating a new favorite rel: %v", err)
-	}
+	testFavoriteRel, _ := createTestFavoriteRel(1, 1)
 
 	// Get favorite count by video id.
-	count, err := GetFavoriteCountByVideoID(fr.VideoID)
+	count, err := GetFavoriteCountByVideoID(testFavoriteRel.VideoID)
 	if err != nil {
 		t.Fatalf("Error when getting favorite count by video id: %v", err)
+	}
+
+	assert.Equal(t, int64(1), count)
+}
+
+func TestGetFavoriteCountByUserID(t *testing.T) {
+	InitDatabase(true)
+
+	// Create a new favorite rel.
+	testFavoriteRel, _ := createTestFavoriteRel(1, 1)
+
+	// Get favorite count by user id.
+	count, err := GetFavoriteCountByUserID(testFavoriteRel.UserID)
+	if err != nil {
+		t.Fatalf("Error when getting favorite count by user id: %v", err)
 	}
 
 	assert.Equal(t, int64(1), count)

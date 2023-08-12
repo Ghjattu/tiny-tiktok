@@ -18,4 +18,8 @@ type VideoInterface interface {
 	// GetMost30Videos returns the most 30 videos published before latestTime.
 	// Return status_code, status_msg, next_time, video_list.
 	GetMost30Videos(latestTime time.Time) (int32, string, int64, []models.VideoDetail)
+
+	// GetVideoListByVideoIDList returns a list of videos by video id list.
+	// Return status_code, status_msg, video_list.
+	GetVideoListByVideoIDList(videoIDList []int64, currentUserID int64) (int32, string, []models.VideoDetail)
 }

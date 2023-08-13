@@ -86,3 +86,28 @@ func TestDeleteCommentByCommentID(t *testing.T) {
 	assert.Equal(t, "delete comment successfully", statusMsg)
 	assert.Equal(t, int64(1), commentDetail.ID)
 }
+
+func TestGetCommentListByVideoIDWithNonExistVideo(t *testing.T) {
+	models.InitDatabase(true)
+
+	statusCode, statusMsg, _ := commentService.GetCommentListByVideoID(1)
+
+	assert.Equal(t, int32(1), statusCode)
+	assert.Equal(t, "the video is not exist", statusMsg)
+}
+
+func TestGetCommentListByVideoID(t *testing.T) {
+	models.InitDatabase(true)
+
+	// Create a test video.
+	testVideo, _ := models.CreateTestVideo(1, time.Now(), "test")
+	// Create a test comment.
+	models.CreateTestComment(1, testVideo.ID)
+
+	statusCode, statusMsg, commentList := commentService.GetCommentListByVideoID(testVideo.ID)
+
+	assert.Equal(t, int32(0), statusCode)
+	assert.Equal(t, "get comment list successfully", statusMsg)
+	assert.Equal(t, 1, len(commentList))
+	assert.Equal(t, int64(1), commentList[0].ID)
+}

@@ -92,3 +92,42 @@ func TestCommentActionWithActionTypeTwo(t *testing.T) {
 	assert.Equal(t, 200, w.Code)
 	assert.Equal(t, int32(0), res.StatusCode)
 }
+
+func TestCommentListWithInvalidVideoID(t *testing.T) {
+	models.InitDatabase(true)
+
+	// Register a test user.
+	_, _, token := registerTestUser("test", "123456")
+
+	url := "http://127.0.0.1/douyin/comment/list/?video_id=abc&token=" + token
+	req := httptest.NewRequest("GET", url, nil)
+
+	w, r := sendRequest(req)
+	res := r.(*CommentListResponse)
+
+	assert.Equal(t, 400, w.Code)
+	assert.Equal(t, int32(1), res.StatusCode)
+}
+
+func TestCommentList(t *testing.T) {
+	models.InitDatabase(true)
+
+	// Register a test user.
+	userID, _, token := registerTestUser("test", "123456")
+	// Create a test video.
+	testVideo, _ := models.CreateTestVideo(userID, time.Now(), "test")
+	testVideoIDStr := fmt.Sprintf("%d", testVideo.ID)
+	// Create a test comment.
+	models.CreateTestComment(userID, testVideo.ID)
+
+	url := "http://127.0.0.1/douyin/comment/list/?video_id=" + testVideoIDStr +
+		"&token=" + token
+	req := httptest.NewRequest("GET", url, nil)
+
+	w, r := sendRequest(req)
+	res := r.(*CommentListResponse)
+
+	assert.Equal(t, 200, w.Code)
+	assert.Equal(t, int32(0), res.StatusCode)
+	assert.Equal(t, 1, len(res.CommentList))
+}

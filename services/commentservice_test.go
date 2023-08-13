@@ -9,12 +9,8 @@ import (
 )
 
 var (
-	commentService *CommentService
-)
-
-func init() {
 	commentService = &CommentService{}
-}
+)
 
 func TestCreateNewCommentWithNonExistVideo(t *testing.T) {
 	models.InitDatabase(true)

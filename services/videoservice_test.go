@@ -8,12 +8,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var (
+	videoService = &VideoService{}
+)
+
 func TestCreateNewVideo(t *testing.T) {
 	models.InitDatabase(true)
 
-	vs := &VideoService{}
-
-	status_code, statue_msg := vs.CreateNewVideo("test", "test", 1, time.Now())
+	status_code, statue_msg := videoService.CreateNewVideo("test", "test", 1, time.Now())
 
 	assert.Equal(t, int32(0), status_code)
 	assert.Equal(t, "create new video successfully", statue_msg)
@@ -24,16 +26,12 @@ func TestGetPublishListByAuthorID(t *testing.T) {
 
 	// Create a new test user.
 	testUser, _ := models.CreateTestUser("test", "123456")
-
 	// Create a new test video.
 	testVideo, _ := models.CreateTestVideo(testUser.ID, time.Now(), "test")
-
 	// Create a test favorite relation.
 	models.CreateTestFavoriteRel(testUser.ID+1, testVideo.ID)
 
-	vs := &VideoService{}
-
-	status_code, statue_msg, videoList := vs.GetVideoListByAuthorID(testUser.ID, testUser.ID+1)
+	status_code, statue_msg, videoList := videoService.GetVideoListByAuthorID(testUser.ID, testUser.ID+1)
 
 	assert.Equal(t, int32(0), status_code)
 	assert.Equal(t, "get publish list successfully", statue_msg)
@@ -45,9 +43,7 @@ func TestGetPublishListByAuthorID(t *testing.T) {
 func TestGetMost30Videos(t *testing.T) {
 	models.InitDatabase(true)
 
-	vs := &VideoService{}
-
-	status_code, statue_msg, _, videoList := vs.GetMost30Videos(time.Now())
+	status_code, statue_msg, _, videoList := videoService.GetMost30Videos(time.Now())
 
 	assert.Equal(t, int32(0), status_code)
 	assert.Equal(t, "get most 30 videos successfully", statue_msg)
@@ -59,13 +55,10 @@ func TestGetVideoListByVideoIDList(t *testing.T) {
 
 	// Create a new test user.
 	testUser, _ := models.CreateTestUser("test", "123456")
-
 	// Create a new test video.
 	testVideo, _ := models.CreateTestVideo(testUser.ID, time.Now(), "test")
 
-	vs := &VideoService{}
-
-	status_code, statue_msg, videoList := vs.GetVideoListByVideoIDList([]int64{testVideo.ID}, 1)
+	status_code, statue_msg, videoList := videoService.GetVideoListByVideoIDList([]int64{testVideo.ID}, 1)
 
 	assert.Equal(t, int32(0), status_code)
 	assert.Equal(t, "get video list successfully", statue_msg)

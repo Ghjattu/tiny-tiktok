@@ -7,12 +7,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var (
+	loginService = &LoginService{}
+)
+
 func TestLoginWithLongUsername(t *testing.T) {
 	models.InitDatabase(true)
 
-	ls := &LoginService{}
-
-	user_id, status_code, status_msg, _ := ls.Login(
+	user_id, status_code, status_msg, _ := loginService.Login(
 		"1234567890123456789012345678901234567890123456789012345678901234567890", "123456")
 
 	assert.Equal(t, int64(-1), user_id)
@@ -23,9 +25,7 @@ func TestLoginWithLongUsername(t *testing.T) {
 func TestLoginWithLongPassword(t *testing.T) {
 	models.InitDatabase(true)
 
-	ls := &LoginService{}
-
-	user_id, status_code, status_msg, _ := ls.Login("test",
+	user_id, status_code, status_msg, _ := loginService.Login("test",
 		"1234567890123456789012345678901234567890123456789012345678901234567890")
 
 	assert.Equal(t, int64(-1), user_id)
@@ -36,9 +36,7 @@ func TestLoginWithLongPassword(t *testing.T) {
 func TestLoginWithNotExistName(t *testing.T) {
 	models.InitDatabase(true)
 
-	ls := &LoginService{}
-
-	user_id, status_code, status_msg, _ := ls.Login("test", "123456")
+	user_id, status_code, status_msg, _ := loginService.Login("test", "123456")
 
 	assert.Equal(t, int64(-1), user_id)
 	assert.Equal(t, int32(1), status_code)
@@ -51,9 +49,7 @@ func TestLoginWithWrongPassword(t *testing.T) {
 	// Create a new test user.
 	models.CreateTestUser("test", "123456")
 
-	ls := &LoginService{}
-
-	user_id, status_code, status_msg, _ := ls.Login("test", "12345")
+	user_id, status_code, status_msg, _ := loginService.Login("test", "12345")
 
 	assert.Equal(t, int64(-1), user_id)
 	assert.Equal(t, int32(1), status_code)
@@ -66,9 +62,7 @@ func TestLoginWithCorrectPassword(t *testing.T) {
 	// Create a new test user.
 	testUser, _ := models.CreateTestUser("test", "123456")
 
-	ls := &LoginService{}
-
-	user_id, status_code, status_msg, _ := ls.Login("test", "123456")
+	user_id, status_code, status_msg, _ := loginService.Login("test", "123456")
 
 	assert.Equal(t, int64(1), user_id)
 	assert.Equal(t, int32(0), status_code)

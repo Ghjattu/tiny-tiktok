@@ -7,12 +7,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var (
+	userService = &UserService{}
+)
+
 func TestGetUserByUserIDWithNonExistID(t *testing.T) {
 	models.InitDatabase(true)
 
-	us := &UserService{}
-
-	statusCode, statusMsg, _ := us.GetUserByUserID(1)
+	statusCode, statusMsg, _ := userService.GetUserByUserID(1)
 
 	assert.Equal(t, int32(1), statusCode)
 	assert.Equal(t, "user not found", statusMsg)
@@ -24,9 +26,7 @@ func TestGetUserByUserIDWithCorrectID(t *testing.T) {
 	// Create a new test user.
 	testUser, _ := models.CreateTestUser("test", "123456")
 
-	us := &UserService{}
-
-	statusCode, statusMsg, user := us.GetUserByUserID(testUser.ID)
+	statusCode, statusMsg, user := userService.GetUserByUserID(testUser.ID)
 
 	assert.Equal(t, int32(0), statusCode)
 	assert.Equal(t, "get user successfully", statusMsg)
@@ -37,9 +37,7 @@ func TestGetUserByUserIDWithCorrectID(t *testing.T) {
 func TestGetUserDetailByUserIDWithNonExistID(t *testing.T) {
 	models.InitDatabase(true)
 
-	us := &UserService{}
-
-	statusCode, statusMsg, _ := us.GetUserDetailByUserID(1)
+	statusCode, statusMsg, _ := userService.GetUserDetailByUserID(1)
 
 	assert.Equal(t, int32(1), statusCode)
 	assert.Equal(t, "user not found", statusMsg)
@@ -51,9 +49,7 @@ func TestGetUserDetailByUserIDWithCorrectID(t *testing.T) {
 	// Create a new test user.
 	testUser, _ := models.CreateTestUser("test", "123456")
 
-	us := &UserService{}
-
-	statusCode, statusMsg, userDetail := us.GetUserDetailByUserID(testUser.ID)
+	statusCode, statusMsg, userDetail := userService.GetUserDetailByUserID(testUser.ID)
 
 	assert.Equal(t, int32(0), statusCode)
 	assert.Equal(t, "get user successfully", statusMsg)

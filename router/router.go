@@ -21,4 +21,5 @@ func RegisterRouter(r *gin.Engine) {
 
 	api.POST("/favorite/action/", jwt.AuthorizePost(), controllers.FavoriteAction)
 	api.GET("/favorite/list/", jwt.AuthorizeGet(), controllers.GetFavoriteListByUserID)
+	api.POST("/comment/action/", jwt.AuthorizePost(), controllers.CommentAction)
 }

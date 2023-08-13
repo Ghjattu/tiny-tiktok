@@ -57,3 +57,22 @@ func CreateTestFavoriteRel(userID int64, videoID int64) (*FavoriteRel, error) {
 
 	return testFavoriteRel, err
 }
+
+// CreateTestComment create a new test comment.
+//
+//	@param userID int64
+//	@param videoID int64
+//	@return *Comment
+//	@return error
+func CreateTestComment(userID int64, videoID int64) (*Comment, error) {
+	testComment := &Comment{
+		UserID:     userID,
+		VideoID:    videoID,
+		Content:    "test content",
+		CreateDate: time.Now(),
+	}
+
+	returnedComment, err := CreateNewComment(testComment)
+
+	return returnedComment, err
+}

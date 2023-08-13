@@ -59,3 +59,20 @@ func TestCreateTestFavoriteRel(t *testing.T) {
 	assert.Equal(t, fr.UserID, returnedFr.UserID)
 	assert.Equal(t, fr.VideoID, returnedFr.VideoID)
 }
+
+func TestCreateTestComment(t *testing.T) {
+	InitDatabase(true)
+
+	comment := &Comment{
+		UserID:  1,
+		VideoID: 1,
+	}
+
+	returnedComment, err := CreateTestComment(comment.UserID, comment.VideoID)
+	if err != nil {
+		t.Fatalf("Error when creating a new comment: %v", err)
+	}
+
+	assert.Equal(t, comment.UserID, returnedComment.UserID)
+	assert.Equal(t, comment.VideoID, returnedComment.VideoID)
+}

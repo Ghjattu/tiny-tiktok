@@ -43,6 +43,7 @@ func init() {
 	r.POST("/douyin/favorite/action/", jwt.AuthorizePost(), FavoriteAction)
 	r.GET("/douyin/favorite/list/", jwt.AuthorizeGet(), GetFavoriteListByUserID)
 	r.POST("/douyin/comment/action/", jwt.AuthorizePost(), CommentAction)
+	r.GET("/douyin/comment/list/", jwt.AuthorizeGet(), CommentList)
 }
 
 // selectResponseType selects the response type according to the request path.
@@ -67,6 +68,8 @@ func selectResponseType(req *http.Request) interface{} {
 		return &FavoriteListResponse{}
 	case "/comment/action/":
 		return &CommentActionResponse{}
+	case "/comment/list/":
+		return &CommentListResponse{}
 	default:
 		return &Response{}
 	}

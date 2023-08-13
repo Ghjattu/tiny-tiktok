@@ -3,7 +3,7 @@ package models
 import "time"
 
 type Video struct {
-	ID          int64     `gorm:"primary_key;auto_increment"`
+	ID          int64     `gorm:"primaryKey;autoIncrement"`
 	AuthorID    int64     `gorm:"type:int;not null"`
 	PublishTime time.Time `gorm:"not null"`
 	PlayUrl     string    `gorm:"type:varchar(255);not null"`

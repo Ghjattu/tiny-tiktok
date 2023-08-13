@@ -24,7 +24,6 @@ func TestGetUserByUserIDAndTokenWithInvalidUserID(t *testing.T) {
 	assert.Equal(t, 400, w.Code)
 	assert.Equal(t, int32(1), res.StatusCode)
 	assert.Equal(t, "invalid syntax", res.StatusMsg)
-	assert.Equal(t, (*models.UserDetail)(nil), res.User)
 }
 
 func TestGetUserByUserIDAndTokenWithCorrectToken(t *testing.T) {

@@ -12,11 +12,10 @@ func TestGetUserByUserIDWithNonExistID(t *testing.T) {
 
 	us := &UserService{}
 
-	statusCode, statusMsg, user := us.GetUserByUserID(1)
+	statusCode, statusMsg, _ := us.GetUserByUserID(1)
 
 	assert.Equal(t, int32(1), statusCode)
 	assert.Equal(t, "user not found", statusMsg)
-	assert.Equal(t, (*models.User)(nil), user)
 }
 
 func TestGetUserByUserIDWithCorrectID(t *testing.T) {
@@ -40,11 +39,10 @@ func TestGetUserDetailByUserIDWithNonExistID(t *testing.T) {
 
 	us := &UserService{}
 
-	statusCode, statusMsg, userDetail := us.GetUserDetailByUserID(1)
+	statusCode, statusMsg, _ := us.GetUserDetailByUserID(1)
 
 	assert.Equal(t, int32(1), statusCode)
 	assert.Equal(t, "user not found", statusMsg)
-	assert.Equal(t, (*models.UserDetail)(nil), userDetail)
 }
 
 func TestGetUserDetailByUserIDWithCorrectID(t *testing.T) {

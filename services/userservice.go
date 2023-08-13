@@ -41,9 +41,9 @@ func (us *UserService) GetUserDetailByUserID(userID int64) (int32, string, *mode
 	user, err := models.GetUserByUserID(userID)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return 1, "user not found", nil
+			return 1, "user not found", &models.UserDetail{}
 		}
-		return 1, "failed to get user", nil
+		return 1, "failed to get user", &models.UserDetail{}
 	}
 
 	userDetail := &models.UserDetail{

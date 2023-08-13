@@ -64,3 +64,16 @@ func GetCommentByCommentID(commentID int64) (*Comment, error) {
 
 	return comment, err
 }
+
+// GetCommentListByVideoID a video's comment list by its id.
+//
+//	@param videoID int64
+//	@return []Comment
+//	@return error
+func GetCommentListByVideoID(videoID int64) ([]Comment, error) {
+	commentList := make([]Comment, 0)
+
+	err := db.Model(&Comment{}).Where("video_id = ?", videoID).Find(&commentList).Error
+
+	return commentList, err
+}

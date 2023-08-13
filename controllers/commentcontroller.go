@@ -15,6 +15,11 @@ type CommentActionResponse struct {
 	Comment *models.CommentDetail `json:"comment"`
 }
 
+type CommentListResponse struct {
+	Response
+	CommentList []models.CommentDetail `json:"comment_list"`
+}
+
 // Endpoint: /douyin/comment/action/
 func CommentAction(c *gin.Context) {
 	videoIDStr := c.Query("video_id")
@@ -63,5 +68,32 @@ func CommentAction(c *gin.Context) {
 			StatusMsg:  statusMsg,
 		},
 		Comment: comment,
+	})
+}
+
+func CommentList(c *gin.Context) {
+	videoIDStr := c.Query("video_id")
+
+	statusCode, statusMsg, videoID := utils.ParseInt64(videoIDStr)
+	if statusCode == 1 {
+		c.JSON(http.StatusBadRequest, CommentListResponse{
+			Response: Response{
+				StatusCode: statusCode,
+				StatusMsg:  statusMsg,
+			},
+			CommentList: nil,
+		})
+		return
+	}
+
+	cs := &services.CommentService{}
+	statusCode, statusMsg, commentList := cs.GetCommentListByVideoID(videoID)
+
+	c.JSON(http.StatusOK, CommentListResponse{
+		Response: Response{
+			StatusCode: statusCode,
+			StatusMsg:  statusMsg,
+		},
+		CommentList: commentList,
 	})
 }

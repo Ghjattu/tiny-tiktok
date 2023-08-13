@@ -90,6 +90,39 @@ func (cs *CommentService) DeleteCommentByCommentID(currentUserID int64, commentI
 	return 0, "delete comment successfully", commentDetail
 }
 
+// GetCommentListByVideoID gets a video's comment list by its id.
+//
+//	@receiver cs *CommentService
+//	@param videoID int64
+//	@return int32 "status code"
+//	@return string "status message"
+//	@return []models.CommentDetail
+func (cs *CommentService) GetCommentListByVideoID(videoID int64) (int32, string, []models.CommentDetail) {
+	// Check if the video exist.
+	_, err := models.GetVideoByID(videoID)
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return 1, "the video is not exist", nil
+		}
+		return 1, "failed to check if the video exist", nil
+	}
+
+	// Get the comment list.
+	commentList, err := models.GetCommentListByVideoID(videoID)
+	if err != nil {
+		return 1, "failed to get comment list", nil
+	}
+
+	// Convert the comment list to a comment detail list.
+	commentDetailList := make([]models.CommentDetail, 0, len(commentList))
+	for _, comment := range commentList {
+		_, commentDetail := convertCommentToCommentDetail(&comment)
+		commentDetailList = append(commentDetailList, *commentDetail)
+	}
+
+	return 0, "get comment list successfully", commentDetailList
+}
+
 // convertCommentToCommentDetail converts a comment to a comment detail.
 //
 //	@param comment *models.Comment

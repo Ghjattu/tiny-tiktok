@@ -11,7 +11,7 @@ type RegisterService struct{}
 
 // Register registers a new user.
 // Return user_id, status_code, status_msg, token
-func (rs *RegisterService) Register(username string, password string) (int64, int32, string, string) {
+func (rs *RegisterService) Register(username, password string) (int64, int32, string, string) {
 	// Check username and password is non-empty.
 	if username == "" || password == "" {
 		return -1, 1, "invalid username or password", ""

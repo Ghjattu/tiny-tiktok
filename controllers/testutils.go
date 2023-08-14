@@ -44,6 +44,8 @@ func init() {
 	r.GET("/douyin/favorite/list/", jwt.AuthorizeGet(), GetFavoriteListByUserID)
 	r.POST("/douyin/comment/action/", jwt.AuthorizePost(), CommentAction)
 	r.GET("/douyin/comment/list/", jwt.AuthorizeGet(), CommentList)
+
+	r.POST("/douyin/relation/action/", jwt.AuthorizePost(), FollowAction)
 }
 
 // selectResponseType selects the response type according to the request path.

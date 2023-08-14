@@ -37,7 +37,7 @@ func TestGetUserByUserIDWithCorrectID(t *testing.T) {
 func TestGetUserDetailByUserIDWithNonExistID(t *testing.T) {
 	models.InitDatabase(true)
 
-	statusCode, statusMsg, _ := userService.GetUserDetailByUserID(1)
+	statusCode, statusMsg, _ := userService.GetUserDetailByUserID(1, 2)
 
 	assert.Equal(t, int32(1), statusCode)
 	assert.Equal(t, "user not found", statusMsg)
@@ -49,7 +49,7 @@ func TestGetUserDetailByUserIDWithCorrectID(t *testing.T) {
 	// Create a new test user.
 	testUser, _ := models.CreateTestUser("test", "123456")
 
-	statusCode, statusMsg, userDetail := userService.GetUserDetailByUserID(testUser.ID)
+	statusCode, statusMsg, userDetail := userService.GetUserDetailByUserID(testUser.ID+1, testUser.ID)
 
 	assert.Equal(t, int32(0), statusCode)
 	assert.Equal(t, "get user successfully", statusMsg)

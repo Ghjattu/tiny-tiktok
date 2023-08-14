@@ -33,11 +33,12 @@ func (us *UserService) GetUserByUserID(userID int64) (int32, string, *models.Use
 // GetUserDetailByUserID gets a user detail by its user id.
 //
 //	@receiver us *UserService
+//	@param currentUserID int64
 //	@param userID int64
-//	@return int32 "status_code"
-//	@return string "status_msg"
+//	@return int32 "status code"
+//	@return string "status message"
 //	@return *models.UserDetail
-func (us *UserService) GetUserDetailByUserID(userID int64) (int32, string, *models.UserDetail) {
+func (us *UserService) GetUserDetailByUserID(currentUserID, userID int64) (int32, string, *models.UserDetail) {
 	user, err := models.GetUserByUserID(userID)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -55,10 +56,9 @@ func (us *UserService) GetUserDetailByUserID(userID int64) (int32, string, *mode
 		TotalFavorited:  user.TotalFavorited,
 	}
 
-	// TODO: Add more fields.
-	// userDetail.FollowCount =
-	// userDetail.FollowerCount =
-	// userDetail.IsFollow =
+	userDetail.FollowCount, _ = models.GetFollowingCountByUserID(user.ID)
+	userDetail.FollowerCount, _ = models.GetFollowerCountByUserID(user.ID)
+	userDetail.IsFollow, _ = models.CheckFollowRelExist(currentUserID, user.ID)
 	userDetail.WorkCount, _ = models.GetVideoCountByAuthorID(user.ID)
 	userDetail.FavoriteCount, _ = models.GetFavoriteCountByUserID(user.ID)
 

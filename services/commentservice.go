@@ -20,7 +20,7 @@ type CommentService struct{}
 //	@return int32 "status code"
 //	@return string "status message"
 //	@return *models.CommentDetail
-func (cs *CommentService) CreateNewComment(currentUserID int64, videoID int64, content string, timestamp time.Time) (int32, string, *models.CommentDetail) {
+func (cs *CommentService) CreateNewComment(currentUserID, videoID int64, content string, timestamp time.Time) (int32, string, *models.CommentDetail) {
 	// Check if the content is empty.
 	if content == "" {
 		return 1, "comment text cannot be empty", nil
@@ -49,7 +49,7 @@ func (cs *CommentService) CreateNewComment(currentUserID int64, videoID int64, c
 	}
 
 	// Convert the comment to a comment detail.
-	_, commentDetail := convertCommentToCommentDetail(comment)
+	_, commentDetail := convertCommentToCommentDetail(currentUserID, comment)
 
 	return 0, "create new comment successfully", commentDetail
 }
@@ -62,7 +62,7 @@ func (cs *CommentService) CreateNewComment(currentUserID int64, videoID int64, c
 //	@return int32 "status code"
 //	@return string "status message"
 //	@return *models.CommentDetail
-func (cs *CommentService) DeleteCommentByCommentID(currentUserID int64, commentID int64) (int32, string, *models.CommentDetail) {
+func (cs *CommentService) DeleteCommentByCommentID(currentUserID, commentID int64) (int32, string, *models.CommentDetail) {
 	// Check if the comment exist.
 	comment, err := models.GetCommentByCommentID(commentID)
 	if err != nil {
@@ -79,7 +79,7 @@ func (cs *CommentService) DeleteCommentByCommentID(currentUserID int64, commentI
 	}
 
 	// Convert the comment to a comment detail.
-	_, commentDetail := convertCommentToCommentDetail(comment)
+	_, commentDetail := convertCommentToCommentDetail(currentUserID, comment)
 
 	// Delete the comment.
 	_, err = models.DeleteCommentByCommentID(commentID)
@@ -93,11 +93,12 @@ func (cs *CommentService) DeleteCommentByCommentID(currentUserID int64, commentI
 // GetCommentListByVideoID gets a video's comment list by its id.
 //
 //	@receiver cs *CommentService
+//	@param currentUserID int64
 //	@param videoID int64
 //	@return int32 "status code"
 //	@return string "status message"
 //	@return []models.CommentDetail
-func (cs *CommentService) GetCommentListByVideoID(videoID int64) (int32, string, []models.CommentDetail) {
+func (cs *CommentService) GetCommentListByVideoID(currentUserID, videoID int64) (int32, string, []models.CommentDetail) {
 	// Check if the video exist.
 	_, err := models.GetVideoByID(videoID)
 	if err != nil {
@@ -116,7 +117,7 @@ func (cs *CommentService) GetCommentListByVideoID(videoID int64) (int32, string,
 	// Convert the comment list to a comment detail list.
 	commentDetailList := make([]models.CommentDetail, 0, len(commentList))
 	for _, comment := range commentList {
-		_, commentDetail := convertCommentToCommentDetail(&comment)
+		_, commentDetail := convertCommentToCommentDetail(currentUserID, &comment)
 		commentDetailList = append(commentDetailList, *commentDetail)
 	}
 
@@ -125,10 +126,11 @@ func (cs *CommentService) GetCommentListByVideoID(videoID int64) (int32, string,
 
 // convertCommentToCommentDetail converts a comment to a comment detail.
 //
+//	@param currentUserID int64
 //	@param comment *models.Comment
 //	@return int32 "status code"
 //	@return *models.CommentDetail
-func convertCommentToCommentDetail(comment *models.Comment) (int32, *models.CommentDetail) {
+func convertCommentToCommentDetail(currentUserID int64, comment *models.Comment) (int32, *models.CommentDetail) {
 	us := &UserService{}
 	commentDetail := &models.CommentDetail{
 		ID:         comment.ID,
@@ -137,7 +139,7 @@ func convertCommentToCommentDetail(comment *models.Comment) (int32, *models.Comm
 	}
 
 	// Get the user detail by user id.
-	_, _, user := us.GetUserDetailByUserID(comment.UserID)
+	_, _, user := us.GetUserDetailByUserID(currentUserID, comment.UserID)
 	commentDetail.User = user
 
 	return 0, commentDetail

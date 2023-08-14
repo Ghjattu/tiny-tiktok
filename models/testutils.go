@@ -76,3 +76,20 @@ func CreateTestComment(userID int64, videoID int64) (*Comment, error) {
 
 	return returnedComment, err
 }
+
+// CreateTestFollowRel create a new test follow rel.
+//
+//	@param followerID int64
+//	@param followingID int64
+//	@return *FollowRel
+//	@return error
+func CreateTestFollowRel(followerID, followingID int64) (*FollowRel, error) {
+	testFollowRel := &FollowRel{
+		FollowerID:  followerID,
+		FollowingID: followingID,
+	}
+
+	_, err := CreateNewFollowRel(testFollowRel)
+
+	return testFollowRel, err
+}

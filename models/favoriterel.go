@@ -24,7 +24,7 @@ func CreateNewFavoriteRel(fr *FavoriteRel) (*FavoriteRel, error) {
 //	@param videoID int64
 //	@return int64 "number of rows deleted"
 //	@return error
-func DeleteFavoriteRel(userID int64, videoID int64) (int64, error) {
+func DeleteFavoriteRel(userID, videoID int64) (int64, error) {
 	res := db.Delete(&FavoriteRel{}, "user_id = ? AND video_id = ?", userID, videoID)
 
 	return res.RowsAffected, res.Error
@@ -36,7 +36,7 @@ func DeleteFavoriteRel(userID int64, videoID int64) (int64, error) {
 //	@param videoID int64
 //	@return bool
 //	@return error
-func CheckFavoriteRelExist(userId int64, videoID int64) (bool, error) {
+func CheckFavoriteRelExist(userId, videoID int64) (bool, error) {
 	var count int64
 	err := db.Model(&FavoriteRel{}).
 		Where("user_id = ? AND video_id = ?", userId, videoID).

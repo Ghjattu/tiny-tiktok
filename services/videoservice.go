@@ -18,7 +18,7 @@ type VideoService struct{}
 //	@param publishTime  time.Time
 //	@return int32 "status_code"
 //	@return string "status_msg"
-func (vs *VideoService) CreateNewVideo(playUrl string, title string, authorID int64, publishTime time.Time) (int32, string) {
+func (vs *VideoService) CreateNewVideo(playUrl, title string, authorID int64, publishTime time.Time) (int32, string) {
 	video := &models.Video{
 		AuthorID:    authorID,
 		PublishTime: publishTime,
@@ -43,7 +43,7 @@ func (vs *VideoService) CreateNewVideo(playUrl string, title string, authorID in
 //	@return int32 "status_code"
 //	@return string "status_msg"
 //	@return []models.VideoDetail
-func (vs *VideoService) GetVideoListByAuthorID(authorID int64, currentUserID int64) (int32, string, []models.VideoDetail) {
+func (vs *VideoService) GetVideoListByAuthorID(authorID, currentUserID int64) (int32, string, []models.VideoDetail) {
 	// Get video list by author id.
 	videoList, err := models.GetVideoListByAuthorID(authorID)
 	if err != nil {

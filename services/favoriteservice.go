@@ -8,7 +8,7 @@ import (
 // FavoriteService implements FavoriteInterface.
 type FavoriteService struct{}
 
-func (fs *FavoriteService) FavoriteAction(userID int64, videoID int64, actionType int64) (int32, string) {
+func (fs *FavoriteService) FavoriteAction(userID, videoID, actionType int64) (int32, string) {
 	// Check if the action type is valid.
 	if actionType != 1 && actionType != 2 {
 		return 1, "action type is invalid"
@@ -58,7 +58,7 @@ func (fs *FavoriteService) FavoriteAction(userID int64, videoID int64, actionTyp
 	return 0, "unfavorite action success"
 }
 
-func (fs *FavoriteService) GetFavoriteVideoListByUserID(currentUserID int64, queryUserID int64) (int32, string, []models.VideoDetail) {
+func (fs *FavoriteService) GetFavoriteVideoListByUserID(currentUserID, queryUserID int64) (int32, string, []models.VideoDetail) {
 	// Get favorite video id list by user id.
 	favoriteVideoIDList, err := models.GetFavoriteVideoIDListByUserID(queryUserID)
 	if err != nil {

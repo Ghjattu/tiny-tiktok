@@ -20,7 +20,7 @@ type CommentService struct{}
 //	@return int32 "status code"
 //	@return string "status message"
 //	@return *models.CommentDetail
-func (cs *CommentService) CreateNewComment(currentUserID int64, videoID int64, content string, timestamp time.Time) (int32, string, *models.CommentDetail) {
+func (cs *CommentService) CreateNewComment(currentUserID, videoID int64, content string, timestamp time.Time) (int32, string, *models.CommentDetail) {
 	// Check if the content is empty.
 	if content == "" {
 		return 1, "comment text cannot be empty", nil
@@ -62,7 +62,7 @@ func (cs *CommentService) CreateNewComment(currentUserID int64, videoID int64, c
 //	@return int32 "status code"
 //	@return string "status message"
 //	@return *models.CommentDetail
-func (cs *CommentService) DeleteCommentByCommentID(currentUserID int64, commentID int64) (int32, string, *models.CommentDetail) {
+func (cs *CommentService) DeleteCommentByCommentID(currentUserID, commentID int64) (int32, string, *models.CommentDetail) {
 	// Check if the comment exist.
 	comment, err := models.GetCommentByCommentID(commentID)
 	if err != nil {
@@ -98,7 +98,7 @@ func (cs *CommentService) DeleteCommentByCommentID(currentUserID int64, commentI
 //	@return int32 "status code"
 //	@return string "status message"
 //	@return []models.CommentDetail
-func (cs *CommentService) GetCommentListByVideoID(currentUserID int64, videoID int64) (int32, string, []models.CommentDetail) {
+func (cs *CommentService) GetCommentListByVideoID(currentUserID, videoID int64) (int32, string, []models.CommentDetail) {
 	// Check if the video exist.
 	_, err := models.GetVideoByID(videoID)
 	if err != nil {

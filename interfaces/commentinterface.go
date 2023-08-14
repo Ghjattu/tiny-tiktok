@@ -17,5 +17,5 @@ type CommentInterface interface {
 
 	// GetCommentListByVideoID gets a video's comment list by its id.
 	// Return status_code, status_msg, comment_detail_list.
-	GetCommentListByVideoID(videoID int64) (int32, string, []models.CommentDetail)
+	GetCommentListByVideoID(currentUserID int64, videoID int64) (int32, string, []models.CommentDetail)
 }

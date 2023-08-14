@@ -86,8 +86,10 @@ func CommentList(c *gin.Context) {
 		return
 	}
 
+	currentUserID := c.GetInt64("user_id")
+
 	cs := &services.CommentService{}
-	statusCode, statusMsg, commentList := cs.GetCommentListByVideoID(videoID)
+	statusCode, statusMsg, commentList := cs.GetCommentListByVideoID(currentUserID, videoID)
 
 	c.JSON(http.StatusOK, CommentListResponse{
 		Response: Response{

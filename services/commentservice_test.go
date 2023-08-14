@@ -33,11 +33,14 @@ func TestCreateNewCommentWithEmptyContent(t *testing.T) {
 func TestCreateNewComment(t *testing.T) {
 	models.InitDatabase(true)
 
+	// Create a test user.
+	testUser, _ := models.CreateTestUser("test", "123456")
 	// Create a new video.
 	testVideo, _ := models.CreateTestVideo(1, time.Now(), "test")
 
 	timestamp := time.Now()
-	statusCode, statusMsg, commentDetail := commentService.CreateNewComment(1, testVideo.ID, "test", timestamp)
+	statusCode, statusMsg, commentDetail :=
+		commentService.CreateNewComment(testUser.ID, testVideo.ID, "test", timestamp)
 
 	assert.Equal(t, int32(0), statusCode)
 	assert.Equal(t, "create new comment successfully", statusMsg)
@@ -76,7 +79,8 @@ func TestDeleteCommentByCommentID(t *testing.T) {
 	// Create a test comment.
 	testComment, _ := models.CreateTestComment(1, testVideo.ID)
 
-	statusCode, statusMsg, commentDetail := commentService.DeleteCommentByCommentID(1, testComment.ID)
+	statusCode, statusMsg, commentDetail :=
+		commentService.DeleteCommentByCommentID(1, testComment.ID)
 
 	assert.Equal(t, int32(0), statusCode)
 	assert.Equal(t, "delete comment successfully", statusMsg)
@@ -86,7 +90,7 @@ func TestDeleteCommentByCommentID(t *testing.T) {
 func TestGetCommentListByVideoIDWithNonExistVideo(t *testing.T) {
 	models.InitDatabase(true)
 
-	statusCode, statusMsg, _ := commentService.GetCommentListByVideoID(1)
+	statusCode, statusMsg, _ := commentService.GetCommentListByVideoID(1, 1)
 
 	assert.Equal(t, int32(1), statusCode)
 	assert.Equal(t, "the video is not exist", statusMsg)
@@ -95,12 +99,15 @@ func TestGetCommentListByVideoIDWithNonExistVideo(t *testing.T) {
 func TestGetCommentListByVideoID(t *testing.T) {
 	models.InitDatabase(true)
 
+	// Create a test user.
+	testUser, _ := models.CreateTestUser("test", "123456")
 	// Create a test video.
 	testVideo, _ := models.CreateTestVideo(1, time.Now(), "test")
 	// Create a test comment.
 	models.CreateTestComment(1, testVideo.ID)
 
-	statusCode, statusMsg, commentList := commentService.GetCommentListByVideoID(testVideo.ID)
+	statusCode, statusMsg, commentList :=
+		commentService.GetCommentListByVideoID(testUser.ID, testVideo.ID)
 
 	assert.Equal(t, int32(0), statusCode)
 	assert.Equal(t, "get comment list successfully", statusMsg)

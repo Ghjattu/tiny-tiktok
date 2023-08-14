@@ -128,7 +128,7 @@ func convertVideoToVideoDetail(videoList []models.Video, currentUserID int64) (i
 		videoDetail.Title = video.Title
 
 		// Get the video's author.
-		statusCode, _, author := us.GetUserDetailByUserID(video.AuthorID)
+		statusCode, _, author := us.GetUserDetailByUserID(currentUserID, video.AuthorID)
 		if statusCode == 1 {
 			return 1, nil
 		}

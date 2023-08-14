@@ -9,5 +9,5 @@ type UserInterface interface {
 
 	// GetUserDetailByUserID gets a user detail by its user_id.
 	// Return status_code, status_msg, user detail.
-	GetUserDetailByUserID(userID int64) (int32, string, *models.UserDetail)
+	GetUserDetailByUserID(currentUserID, userID int64) (int32, string, *models.UserDetail)
 }

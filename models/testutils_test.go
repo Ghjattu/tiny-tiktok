@@ -76,3 +76,20 @@ func TestCreateTestComment(t *testing.T) {
 	assert.Equal(t, comment.UserID, returnedComment.UserID)
 	assert.Equal(t, comment.VideoID, returnedComment.VideoID)
 }
+
+func TestCreateTestFollowRel(t *testing.T) {
+	InitDatabase(true)
+
+	fr := &FollowRel{
+		FollowerID:  1,
+		FollowingID: 2,
+	}
+
+	returnedFr, err := CreateTestFollowRel(fr.FollowerID, fr.FollowingID)
+	if err != nil {
+		t.Fatalf("Error when creating a new follow rel: %v", err)
+	}
+
+	assert.Equal(t, fr.FollowerID, returnedFr.FollowerID)
+	assert.Equal(t, fr.FollowingID, returnedFr.FollowingID)
+}

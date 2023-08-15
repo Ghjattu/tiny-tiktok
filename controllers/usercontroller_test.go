@@ -9,24 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetUserByUserIDAndTokenWithInvalidUserID(t *testing.T) {
-	models.InitDatabase(true)
-
-	// Register a new test user.
-	_, _, token := registerTestUser("test", "123456")
-
-	req := httptest.NewRequest("GET",
-		"http://127.0.0.1/douyin/user/?user_id=abc"+"&token="+token, nil)
-
-	w, r := sendRequest(req)
-	res := r.(*UserResponse)
-
-	assert.Equal(t, 400, w.Code)
-	assert.Equal(t, int32(1), res.StatusCode)
-	assert.Equal(t, "invalid syntax", res.StatusMsg)
-}
-
-func TestGetUserByUserIDAndTokenWithCorrectToken(t *testing.T) {
+func TestGetUserByUserIDAndToken(t *testing.T) {
 	models.InitDatabase(true)
 
 	// Register a new test user.

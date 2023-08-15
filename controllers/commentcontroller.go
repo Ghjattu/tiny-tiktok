@@ -6,7 +6,6 @@ import (
 
 	"github.com/Ghjattu/tiny-tiktok/models"
 	"github.com/Ghjattu/tiny-tiktok/services"
-	"github.com/Ghjattu/tiny-tiktok/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -22,47 +21,27 @@ type CommentListResponse struct {
 
 // Endpoint: /douyin/comment/action/
 func CommentAction(c *gin.Context) {
-	videoIDStr := c.Query("video_id")
-	actionTypeStr := c.Query("action_type")
-
-	statusCode, statusMsg, videoID := utils.ParseInt64(videoIDStr)
-	if statusCode == 1 {
-		c.JSON(http.StatusBadRequest, CommentActionResponse{
-			Response: Response{
-				StatusCode: statusCode,
-				StatusMsg:  statusMsg,
-			},
-			Comment: nil,
-		})
-		return
-	}
-
+	videoID := c.GetInt64("video_id")
+	actionType := c.GetInt64("action_type")
 	currentUserID := c.GetInt64("current_user_id")
 
-	httpCode := http.StatusOK
-	statusCode = 1
-	statusMsg = "action type is invalid"
+	statusCode := int32(1)
+	statusMsg := "action type is invalid"
 	comment := (*models.CommentDetail)(nil)
 
 	cs := &services.CommentService{}
-	if actionTypeStr == "1" {
+	if actionType == 1 {
 		commentText := c.Query("comment_text")
+
 		statusCode, statusMsg, comment =
 			cs.CreateNewComment(currentUserID, videoID, commentText, time.Now())
-	} else if actionTypeStr == "2" {
-		commentIDStr := c.Query("comment_id")
+	} else if actionType == 2 {
+		commentID := c.GetInt64("comment_id")
 
-		code, msg, commentID := utils.ParseInt64(commentIDStr)
-		if code == 1 {
-			httpCode = http.StatusBadRequest
-			statusCode = code
-			statusMsg = msg
-		} else {
-			statusCode, statusMsg, comment = cs.DeleteCommentByCommentID(currentUserID, commentID)
-		}
+		statusCode, statusMsg, comment = cs.DeleteCommentByCommentID(currentUserID, commentID)
 	}
 
-	c.JSON(httpCode, CommentActionResponse{
+	c.JSON(http.StatusOK, CommentActionResponse{
 		Response: Response{
 			StatusCode: statusCode,
 			StatusMsg:  statusMsg,
@@ -72,20 +51,7 @@ func CommentAction(c *gin.Context) {
 }
 
 func CommentList(c *gin.Context) {
-	videoIDStr := c.Query("video_id")
-
-	statusCode, statusMsg, videoID := utils.ParseInt64(videoIDStr)
-	if statusCode == 1 {
-		c.JSON(http.StatusBadRequest, CommentListResponse{
-			Response: Response{
-				StatusCode: statusCode,
-				StatusMsg:  statusMsg,
-			},
-			CommentList: nil,
-		})
-		return
-	}
-
+	videoID := c.GetInt64("video_id")
 	currentUserID := c.GetInt64("current_user_id")
 
 	cs := &services.CommentService{}

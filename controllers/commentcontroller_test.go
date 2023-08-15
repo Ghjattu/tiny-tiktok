@@ -10,36 +10,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCommentActionWithInvalidVideoID(t *testing.T) {
-	models.InitDatabase(true)
-	// Register a test user.
-	_, _, token := registerTestUser("test", "123456")
-
-	url := "http://127.0.0.1/douyin/comment/action/?video_id=abc&action_type=1&token=" + token
-	req := httptest.NewRequest("POST", url, nil)
-
-	w, r := sendRequest(req)
-	res := r.(*CommentActionResponse)
-
-	assert.Equal(t, 400, w.Code)
-	assert.Equal(t, int32(1), res.StatusCode)
-}
-
-func TestCommentActionWithInvalidActionType(t *testing.T) {
-	models.InitDatabase(true)
-	// Register a test user.
-	_, _, token := registerTestUser("test", "123456")
-
-	url := "http://127.0.0.1/douyin/comment/action/?video_id=1&action_type=3&token=" + token
-	req := httptest.NewRequest("POST", url, nil)
-
-	w, r := sendRequest(req)
-	res := r.(*CommentActionResponse)
-
-	assert.Equal(t, 200, w.Code)
-	assert.Equal(t, int32(1), res.StatusCode)
-}
-
 func TestCommentActionWithActionTypeOne(t *testing.T) {
 	models.InitDatabase(true)
 	// Register a test user.
@@ -59,21 +29,6 @@ func TestCommentActionWithActionTypeOne(t *testing.T) {
 	assert.Equal(t, int32(0), res.StatusCode)
 }
 
-func TestCommentActionWithInvalidCommentID(t *testing.T) {
-	models.InitDatabase(true)
-	// Register a test user.
-	_, _, token := registerTestUser("test", "123456")
-
-	url := "http://127.0.0.1/douyin/comment/action/?video_id=1&action_type=2&comment_id=abc&token=" + token
-	req := httptest.NewRequest("POST", url, nil)
-
-	w, r := sendRequest(req)
-	res := r.(*CommentActionResponse)
-
-	assert.Equal(t, 400, w.Code)
-	assert.Equal(t, int32(1), res.StatusCode)
-}
-
 func TestCommentActionWithActionTypeTwo(t *testing.T) {
 	models.InitDatabase(true)
 	// Register a test user.
@@ -91,22 +46,6 @@ func TestCommentActionWithActionTypeTwo(t *testing.T) {
 
 	assert.Equal(t, 200, w.Code)
 	assert.Equal(t, int32(0), res.StatusCode)
-}
-
-func TestCommentListWithInvalidVideoID(t *testing.T) {
-	models.InitDatabase(true)
-
-	// Register a test user.
-	_, _, token := registerTestUser("test", "123456")
-
-	url := "http://127.0.0.1/douyin/comment/list/?video_id=abc&token=" + token
-	req := httptest.NewRequest("GET", url, nil)
-
-	w, r := sendRequest(req)
-	res := r.(*CommentListResponse)
-
-	assert.Equal(t, 400, w.Code)
-	assert.Equal(t, int32(1), res.StatusCode)
 }
 
 func TestCommentList(t *testing.T) {

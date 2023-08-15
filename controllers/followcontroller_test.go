@@ -9,22 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestFollowActionWithInvalidUserID(t *testing.T) {
-	models.InitDatabase(true)
-
-	// Register a test user.
-	_, _, token := registerTestUser("test", "123456")
-
-	url := "http://127.0.0.1/douyin/relation/action/?to_user_id=abd&action_type=1&token=" + token
-	req := httptest.NewRequest("POST", url, nil)
-
-	w, r := sendRequest(req)
-	res := r.(*Response)
-
-	assert.Equal(t, 400, w.Code)
-	assert.Equal(t, int32(1), res.StatusCode)
-}
-
 func TestFollowActionWithInvalidActionType(t *testing.T) {
 	models.InitDatabase(true)
 
@@ -61,22 +45,6 @@ func TestFollowActionWithActionTypeOne(t *testing.T) {
 	assert.Equal(t, int32(0), res.StatusCode)
 }
 
-func TestFollowingListWithInvalidUserID(t *testing.T) {
-	models.InitDatabase(true)
-
-	// Register a test user.
-	_, _, token := registerTestUser("test", "123456")
-
-	url := "http://127.0.0.1/douyin/relation/follow/list/?user_id=abc&token=" + token
-	req := httptest.NewRequest("GET", url, nil)
-
-	w, r := sendRequest(req)
-	res := r.(*UserListResponse)
-
-	assert.Equal(t, 400, w.Code)
-	assert.Equal(t, int32(1), res.StatusCode)
-}
-
 func TestFollowingList(t *testing.T) {
 	models.InitDatabase(true)
 
@@ -98,22 +66,6 @@ func TestFollowingList(t *testing.T) {
 	assert.Equal(t, 200, w.Code)
 	assert.Equal(t, int32(0), res.StatusCode)
 	assert.Equal(t, 1, len(res.UserList))
-}
-
-func TestFollowerListWithInvalidUserID(t *testing.T) {
-	models.InitDatabase(true)
-
-	// Register a test user.
-	_, _, token := registerTestUser("test", "123456")
-
-	url := "http://127.0.0.1/douyin/relation/follow/list/?user_id=abc&token=" + token
-	req := httptest.NewRequest("GET", url, nil)
-
-	w, r := sendRequest(req)
-	res := r.(*UserListResponse)
-
-	assert.Equal(t, 400, w.Code)
-	assert.Equal(t, int32(1), res.StatusCode)
 }
 
 func TestFollowerList(t *testing.T) {

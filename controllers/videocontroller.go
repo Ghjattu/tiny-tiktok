@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -45,7 +44,6 @@ func PublishNewVideo(c *gin.Context) {
 		return
 	}
 
-	log.Println("title: ", title)
 	// Check title is empty or not.
 	if title == "" {
 		c.JSON(http.StatusOK, Response{
@@ -87,21 +85,7 @@ func PublishNewVideo(c *gin.Context) {
 
 // Endpoint: /douyin/publish/list/
 func GetPublishListByAuthorID(c *gin.Context) {
-	authorIDStr := c.Query("user_id")
-
-	// Check user id is valid.
-	statusCode, statusMsg, authorID := utils.ParseInt64(authorIDStr)
-	if statusCode == 1 {
-		c.JSON(http.StatusBadRequest, PublishListResponse{
-			Response: Response{
-				StatusCode: statusCode,
-				StatusMsg:  statusMsg,
-			},
-			VideoList: nil,
-		})
-		return
-	}
-
+	authorID := c.GetInt64("user_id")
 	// Get current login user id.
 	currentUserID := c.GetInt64("current_user_id")
 

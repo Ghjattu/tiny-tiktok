@@ -26,3 +26,17 @@ func TestCreateNewMessage(t *testing.T) {
 	assert.Equal(t, message.ReceiverID, returnedMessage.ReceiverID)
 	assert.Equal(t, message.Content, returnedMessage.Content)
 }
+
+func TestGetMessageList(t *testing.T) {
+	InitDatabase(true)
+
+	// Create a test message.
+	CreateTestMessage(1, 2)
+
+	messageList, err := GetMessageList(1, 2)
+	if err != nil {
+		t.Fatalf("Error when getting message list: %v", err)
+	}
+
+	assert.Equal(t, 1, len(messageList))
+}

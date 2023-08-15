@@ -69,6 +69,21 @@ func TestGetFollowingCountByUserID(t *testing.T) {
 	assert.Equal(t, int64(0), count)
 }
 
+func TestGetFollowingListByUserID(t *testing.T) {
+	InitDatabase(true)
+
+	// Create a test follow relationship.
+	testFollowRel, _ := CreateTestFollowRel(1, 2)
+
+	list, err := GetFollowingListByUserID(testFollowRel.FollowerID)
+	if err != nil {
+		t.Fatalf("Error getting following list: %v", err)
+	}
+
+	assert.Equal(t, 1, len(list))
+	assert.Equal(t, testFollowRel.FollowingID, list[0])
+}
+
 func TestGetFollowerCountByUserID(t *testing.T) {
 	InitDatabase(true)
 
@@ -85,4 +100,19 @@ func TestGetFollowerCountByUserID(t *testing.T) {
 	count, _ = GetFollowerCountByUserID(testFollowRel.FollowerID)
 
 	assert.Equal(t, int64(0), count)
+}
+
+func TestGetFollowerListByUserID(t *testing.T) {
+	InitDatabase(true)
+
+	// Create a test follow relationship.
+	testFollowRel, _ := CreateTestFollowRel(1, 2)
+
+	list, err := GetFollowerListByUserID(testFollowRel.FollowingID)
+	if err != nil {
+		t.Fatalf("Error getting follower list: %v", err)
+	}
+
+	assert.Equal(t, 1, len(list))
+	assert.Equal(t, testFollowRel.FollowerID, list[0])
 }

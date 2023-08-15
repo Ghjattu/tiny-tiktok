@@ -29,4 +29,5 @@ func RegisterRouter(r *gin.Engine) {
 	api.POST("/relation/action/", jwt.AuthorizePost(), controllers.FollowAction)
 	api.GET("/relation/follow/list/", jwt.AuthorizeGet(), controllers.FollowingList)
 	api.GET("/relation/follower/list/", jwt.AuthorizeGet(), controllers.FollowerList)
+	api.POST("/message/action/", jwt.AuthorizePost(), controllers.MessageAction)
 }

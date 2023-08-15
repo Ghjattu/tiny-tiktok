@@ -50,6 +50,7 @@ func init() {
 	r.POST("/douyin/relation/action/", jwt.AuthorizePost(), FollowAction)
 	r.GET("/douyin/relation/follow/list/", jwt.AuthorizeGet(), FollowingList)
 	r.GET("/douyin/relation/follower/list/", jwt.AuthorizeGet(), FollowerList)
+	r.POST("/douyin/message/action/", jwt.AuthorizePost(), MessageAction)
 }
 
 // selectResponseType selects the response type according to the request path.

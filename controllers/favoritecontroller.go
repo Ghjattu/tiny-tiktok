@@ -40,10 +40,10 @@ func FavoriteAction(c *gin.Context) {
 	}
 
 	// Get user id from context.
-	userID := c.GetInt64("user_id")
+	currentUserID := c.GetInt64("current_user_id")
 
 	fs := &services.FavoriteService{}
-	statusCode, statusMsg = fs.FavoriteAction(userID, videoID, actionType)
+	statusCode, statusMsg = fs.FavoriteAction(currentUserID, videoID, actionType)
 
 	c.JSON(http.StatusOK, Response{
 		StatusCode: statusCode,
@@ -66,7 +66,7 @@ func GetFavoriteListByUserID(c *gin.Context) {
 	}
 
 	// Get login user id from context.
-	currentUserID := c.GetInt64("user_id")
+	currentUserID := c.GetInt64("current_user_id")
 
 	// Get user's favorite video list by user id.
 	fs := &services.FavoriteService{}

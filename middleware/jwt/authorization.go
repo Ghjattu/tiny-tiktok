@@ -32,7 +32,7 @@ func AuthorizeGet() gin.HandlerFunc {
 		}
 
 		// If the token is valid, set the user_id and name to the context.
-		c.Set("user_id", userID)
+		c.Set("current_user_id", userID)
 		c.Set("username", name)
 		c.Next()
 	}
@@ -63,7 +63,7 @@ func AuthorizePost() gin.HandlerFunc {
 		}
 
 		// If the token is valid, set the user_id and name to the context.
-		c.Set("user_id", userID)
+		c.Set("current_user_id", userID)
 		c.Set("username", name)
 		c.Next()
 	}
@@ -99,7 +99,7 @@ func AuthorizeFeed() gin.HandlerFunc {
 		}
 
 		// If the token is valid, set the user_id and name to the context.
-		c.Set("user_id", userID)
+		c.Set("current_user_id", userID)
 		c.Set("username", name)
 		c.Next()
 	}

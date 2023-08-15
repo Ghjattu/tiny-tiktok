@@ -28,7 +28,7 @@ func FollowAction(c *gin.Context) {
 		return
 	}
 
-	currentUserID := c.GetInt64("user_id")
+	currentUserID := c.GetInt64("current_user_id")
 
 	statusCode = 1
 	statusMsg = "action type is invalid"
@@ -62,7 +62,7 @@ func FollowingList(c *gin.Context) {
 		return
 	}
 
-	currentUserID := c.GetInt64("user_id")
+	currentUserID := c.GetInt64("current_user_id")
 
 	fs := &services.FollowService{}
 	statusCode, statusMsg, userList := fs.GetFollowingListByUserID(currentUserID, userID)
@@ -92,7 +92,7 @@ func FollowerList(c *gin.Context) {
 		return
 	}
 
-	currentUserID := c.GetInt64("user_id")
+	currentUserID := c.GetInt64("current_user_id")
 
 	fs := &services.FollowService{}
 	statusCode, statusMsg, userList := fs.GetFollowerListByUserID(currentUserID, userID)

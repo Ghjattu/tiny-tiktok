@@ -31,7 +31,7 @@ func GetUserByUserIDAndToken(c *gin.Context) {
 		return
 	}
 
-	currentUserID := c.GetInt64("user_id")
+	currentUserID := c.GetInt64("current_user_id")
 
 	us := &services.UserService{}
 	statusCode, statusMsg, user := us.GetUserDetailByUserID(currentUserID, userID)

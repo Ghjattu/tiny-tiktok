@@ -37,7 +37,7 @@ func CommentAction(c *gin.Context) {
 		return
 	}
 
-	currentUserID := c.GetInt64("user_id")
+	currentUserID := c.GetInt64("current_user_id")
 
 	httpCode := http.StatusOK
 	statusCode = 1
@@ -86,7 +86,7 @@ func CommentList(c *gin.Context) {
 		return
 	}
 
-	currentUserID := c.GetInt64("user_id")
+	currentUserID := c.GetInt64("current_user_id")
 
 	cs := &services.CommentService{}
 	statusCode, statusMsg, commentList := cs.GetCommentListByVideoID(currentUserID, videoID)

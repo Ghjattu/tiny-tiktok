@@ -55,11 +55,11 @@ func PublishNewVideo(c *gin.Context) {
 		return
 	}
 
-	userID := c.GetInt64("user_id")
+	currentUserID := c.GetInt64("current_user_id")
 
 	// Save video to local.
 	videoName := filepath.Base(data.Filename)
-	finalVideoName := fmt.Sprintf("%s_%s", strconv.Itoa(int(userID)), videoName)
+	finalVideoName := fmt.Sprintf("%s_%s", strconv.Itoa(int(currentUserID)), videoName)
 	savedPath := filepath.Join("../public/", finalVideoName)
 
 	if err := c.SaveUploadedFile(data, savedPath); err != nil {
@@ -77,7 +77,7 @@ func PublishNewVideo(c *gin.Context) {
 
 	// Create new video.
 	vs := &services.VideoService{}
-	statusCode, statusMsg := vs.CreateNewVideo(playUrl, title, userID, publishTime)
+	statusCode, statusMsg := vs.CreateNewVideo(playUrl, title, currentUserID, publishTime)
 
 	c.JSON(http.StatusOK, Response{
 		StatusCode: statusCode,
@@ -103,7 +103,7 @@ func GetPublishListByAuthorID(c *gin.Context) {
 	}
 
 	// Get current login user id.
-	currentUserID := c.GetInt64("user_id")
+	currentUserID := c.GetInt64("current_user_id")
 
 	// Get published video list by author id.
 	vs := &services.VideoService{}

@@ -3,9 +3,15 @@ package controllers
 import (
 	"net/http"
 
+	"github.com/Ghjattu/tiny-tiktok/models"
 	"github.com/Ghjattu/tiny-tiktok/services"
 	"github.com/gin-gonic/gin"
 )
+
+type MessageChatResponse struct {
+	Response
+	MessageList []models.MessageDetail `json:"message_list"`
+}
 
 func MessageAction(c *gin.Context) {
 	receiverID := c.GetInt64("to_user_id")
@@ -24,5 +30,21 @@ func MessageAction(c *gin.Context) {
 	c.JSON(http.StatusOK, Response{
 		StatusCode: statusCode,
 		StatusMsg:  statusMsg,
+	})
+}
+
+func MessageChat(c *gin.Context) {
+	receiverID := c.GetInt64("to_user_id")
+	currentUserID := c.GetInt64("current_user_id")
+
+	ms := &services.MessageService{}
+	statusCode, statusMsg, messages := ms.GetMessageList(currentUserID, receiverID)
+
+	c.JSON(http.StatusOK, MessageChatResponse{
+		Response: Response{
+			StatusCode: statusCode,
+			StatusMsg:  statusMsg,
+		},
+		MessageList: messages,
 	})
 }

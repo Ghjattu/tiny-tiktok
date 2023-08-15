@@ -43,3 +43,30 @@ func TestCreateNewMessage(t *testing.T) {
 	assert.Equal(t, int32(0), statusCode)
 	assert.Equal(t, "create new message successfully", statusMsg)
 }
+
+func TestGetMessageListWithNonExistUser(t *testing.T) {
+	models.InitDatabase(true)
+
+	statusCode, statusMsg, _ := messageService.GetMessageList(1, 2)
+
+	assert.Equal(t, int32(1), statusCode)
+	assert.Equal(t, "receiver does not exist", statusMsg)
+}
+
+func TestGetMessageList(t *testing.T) {
+	models.InitDatabase(true)
+
+	// Create two test users.
+	testUserOne, _ := models.CreateTestUser("testOne", "123456")
+	testUserTwo, _ := models.CreateTestUser("testTwo", "123456")
+	// Create a test message.
+	models.CreateTestMessage(testUserOne.ID, testUserTwo.ID)
+
+	statusCode, statusMsg, messageList :=
+		messageService.GetMessageList(testUserOne.ID, testUserTwo.ID)
+
+	assert.Equal(t, int32(0), statusCode)
+	assert.Equal(t, "get message list successfully", statusMsg)
+	assert.Equal(t, 1, len(messageList))
+
+}

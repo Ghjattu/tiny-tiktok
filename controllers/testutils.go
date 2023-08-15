@@ -51,6 +51,7 @@ func init() {
 	r.GET("/douyin/relation/follow/list/", jwt.AuthorizeGet(), FollowingList)
 	r.GET("/douyin/relation/follower/list/", jwt.AuthorizeGet(), FollowerList)
 	r.POST("/douyin/message/action/", jwt.AuthorizePost(), MessageAction)
+	r.GET("/douyin/message/chat/", jwt.AuthorizeGet(), MessageChat)
 }
 
 // selectResponseType selects the response type according to the request path.
@@ -81,6 +82,8 @@ func selectResponseType(req *http.Request) interface{} {
 		return &UserListResponse{}
 	case "/relation/follower/list/":
 		return &UserListResponse{}
+	case "/message/chat/":
+		return &MessageChatResponse{}
 	default:
 		return &Response{}
 	}

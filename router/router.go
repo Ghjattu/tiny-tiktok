@@ -3,6 +3,7 @@ package router
 import (
 	"github.com/Ghjattu/tiny-tiktok/controllers"
 	"github.com/Ghjattu/tiny-tiktok/middleware/jwt"
+	"github.com/Ghjattu/tiny-tiktok/middleware/parse"
 	"github.com/gin-gonic/gin"
 )
 
@@ -11,6 +12,7 @@ func RegisterRouter(r *gin.Engine) {
 	r.Static("/static/videos", "../public/")
 
 	api := r.Group("/douyin")
+	api.Use(parse.ParseQueryParams())
 
 	api.GET("/feed", jwt.AuthorizeFeed(), controllers.Feed)
 	api.POST("/user/register/", controllers.Register)

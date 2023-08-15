@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/Ghjattu/tiny-tiktok/middleware/jwt"
+	"github.com/Ghjattu/tiny-tiktok/middleware/parse"
 	"github.com/Ghjattu/tiny-tiktok/models"
 	"github.com/Ghjattu/tiny-tiktok/services"
 	"github.com/gin-gonic/gin"
@@ -33,6 +34,7 @@ func init() {
 	serverPort = os.Getenv("SERVER_PORT")
 
 	r = gin.Default()
+	r.Use(parse.ParseQueryParams())
 	r.GET("/douyin/feed/", jwt.AuthorizeFeed(), Feed)
 	r.POST("/douyin/user/register/", Register)
 	r.POST("/douyin/user/login/", Login)

@@ -93,3 +93,22 @@ func CreateTestFollowRel(followerID, followingID int64) (*FollowRel, error) {
 
 	return testFollowRel, err
 }
+
+// CreateTestMessage create a new test message.
+//
+//	@param senderID int64
+//	@param receiverID int64
+//	@return *Message
+//	@return error
+func CreateTestMessage(senderID, receiverID int64) (*Message, error) {
+	testMessage := &Message{
+		SenderID:   senderID,
+		ReceiverID: receiverID,
+		Content:    "test content",
+		CreateDate: time.Now(),
+	}
+
+	_, err := CreateNewMessage(testMessage)
+
+	return testMessage, err
+}

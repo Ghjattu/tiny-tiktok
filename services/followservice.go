@@ -60,3 +60,77 @@ func (fs *FollowService) DeleteFollowRel(followerID, followingID int64) (int32, 
 
 	return 0, "unfollow success"
 }
+
+// GetFollowingListByUserID get the list of users that a user is following.
+//
+//	@receiver fs *FollowService
+//	@param currentUserID int64
+//	@param queryUserID int64
+//	@return int32 "status code"
+//	@return string "status message"
+//	@return []models.UserDetail
+func (fs *FollowService) GetFollowingListByUserID(currentUserID, queryUserID int64) (int32, string, []models.UserDetail) {
+	// Check if the user exists.
+	_, err := models.GetUserByUserID(queryUserID)
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return 1, "the user you want to query does not exist", nil
+		}
+		return 1, "failed to check user existence", nil
+	}
+
+	// Get the following list.
+	followingList, err := models.GetFollowingListByUserID(queryUserID)
+	if err != nil {
+		return 1, "failed to get following list", nil
+	}
+
+	// Get the user detail list.
+	us := &UserService{}
+	userList := make([]models.UserDetail, 0, len(followingList))
+	for _, followingID := range followingList {
+		statusCode, _, user := us.GetUserDetailByUserID(currentUserID, followingID)
+		if statusCode == 0 {
+			userList = append(userList, *user)
+		}
+	}
+
+	return 0, "get following list success", userList
+}
+
+// GetFollowerListByUserID get the list of followers of a user.
+//
+//	@receiver fs *FollowService
+//	@param currentUserID int64
+//	@param queryUserID int64
+//	@return int32 "status code"
+//	@return string "status message"
+//	@return []models.UserDetail
+func (fs *FollowService) GetFollowerListByUserID(currentUserID, queryUserID int64) (int32, string, []models.UserDetail) {
+	// Check if the user exists.
+	_, err := models.GetUserByUserID(queryUserID)
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return 1, "the user you want to query does not exist", nil
+		}
+		return 1, "failed to check user existence", nil
+	}
+
+	// Get the follower list.
+	followerList, err := models.GetFollowerListByUserID(queryUserID)
+	if err != nil {
+		return 1, "failed to get follower list", nil
+	}
+
+	// Get the user detail list.
+	us := &UserService{}
+	userList := make([]models.UserDetail, 0, len(followerList))
+	for _, followerID := range followerList {
+		statusCode, _, user := us.GetUserDetailByUserID(currentUserID, followerID)
+		if statusCode == 0 {
+			userList = append(userList, *user)
+		}
+	}
+
+	return 0, "get follower list success", userList
+}

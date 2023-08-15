@@ -60,6 +60,22 @@ func GetFollowingCountByUserID(userID int64) (int64, error) {
 	return count, err
 }
 
+// GetFollowingListByUserID get the list of users that a user is following.
+//
+//	@param userID int64
+//	@return []int64 "id list of users that a user is following"
+//	@return error
+func GetFollowingListByUserID(userID int64) ([]int64, error) {
+	followingList := make([]int64, 0)
+
+	err := db.Model(&FollowRel{}).
+		Where("follower_id = ?", userID).
+		Distinct().
+		Pluck("following_id", &followingList).Error
+
+	return followingList, err
+}
+
 // GetFollowerCountByUserID get the number of followers of a user.
 //
 //	@param userID int64
@@ -70,4 +86,20 @@ func GetFollowerCountByUserID(userID int64) (int64, error) {
 	err := db.Model(&FollowRel{}).Where("following_id = ?", userID).Count(&count).Error
 
 	return count, err
+}
+
+// GetFollowerListByUserID get the list of followers of a user.
+//
+//	@param userID int64
+//	@return []int64 "id list of followers"
+//	@return error
+func GetFollowerListByUserID(userID int64) ([]int64, error) {
+	followerList := make([]int64, 0)
+
+	err := db.Model(&FollowRel{}).
+		Where("following_id = ?", userID).
+		Distinct().
+		Pluck("follower_id", &followerList).Error
+
+	return followerList, err
 }

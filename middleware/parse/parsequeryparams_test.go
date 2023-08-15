@@ -54,6 +54,7 @@ func TestParseQueryParamsWithInvalidIntParam(t *testing.T) {
 	res := getResponse(w)
 
 	assert.NotEqual(t, int32(0), res.StatusCode)
+	assert.Equal(t, "invalid syntax", res.StatusMsg)
 }
 
 func TestParseQueryParams(t *testing.T) {

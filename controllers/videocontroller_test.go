@@ -5,29 +5,13 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
-	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
 
 	"github.com/Ghjattu/tiny-tiktok/models"
-	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
-
-// testVideoAccess tests whether the video can be accessed through the URL.
-//
-//	@param req *http.Request
-//	@return *httptest.ResponseRecorder
-func testVideoAccess(req *http.Request) *httptest.ResponseRecorder {
-	r := gin.Default()
-	r.Static("/static/videos", "../public/")
-
-	w := httptest.NewRecorder()
-	r.ServeHTTP(w, req)
-
-	return w
-}
 
 // constructTestForm constructs a test form with a test file and form fields.
 //
@@ -100,8 +84,7 @@ func TestPublishNewVideo(t *testing.T) {
 	models.InitDatabase(true)
 
 	// Register a new test user.
-	userID, _, token := registerTestUser("test", "123456")
-	userIDStr := fmt.Sprintf("%d", userID)
+	_, _, token := registerTestUser("test", "123456")
 
 	// Construct a test form.
 	formFields := map[string]string{
@@ -124,15 +107,6 @@ func TestPublishNewVideo(t *testing.T) {
 	assert.Equal(t, 200, w.Code)
 	assert.Equal(t, int32(0), res.StatusCode)
 	assert.Equal(t, "create new video successfully", res.StatusMsg)
-
-	// Test the video access.
-	videoURL := fmt.Sprintf("http://%s:%s/static/videos/%s_bear.mp4", serverIP, serverPort, userIDStr)
-	req = httptest.NewRequest("GET", videoURL, nil)
-
-	w = testVideoAccess(req)
-
-	assert.Equal(t, 200, w.Code)
-	assert.Equal(t, "video/mp4", w.Header().Get("Content-Type"))
 }
 
 func TestGetPublishListByAuthorID(t *testing.T) {

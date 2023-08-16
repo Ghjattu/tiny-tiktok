@@ -9,7 +9,6 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"strings"
 
 	"github.com/Ghjattu/tiny-tiktok/middleware/jwt"
@@ -17,21 +16,14 @@ import (
 	"github.com/Ghjattu/tiny-tiktok/models"
 	"github.com/Ghjattu/tiny-tiktok/services"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 )
 
 var (
-	serverIP   string
-	serverPort string
-
 	r *gin.Engine
 )
 
 // init() retrieves the environment variables, initializes the gin engine.
 func init() {
-	godotenv.Load("../.env")
-	serverIP = os.Getenv("SERVER_IP")
-	serverPort = os.Getenv("SERVER_PORT")
 
 	r = gin.Default()
 	r.Use(parse.ParseQueryParams())

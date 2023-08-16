@@ -141,6 +141,13 @@ func convertVideoToVideoDetail(videoList []models.Video, currentUserID int64) (i
 		}
 		videoDetail.FavoriteCount = count
 
+		// Get the video's comment count.
+		count, err = models.GetCommentCountByVideoID(video.ID)
+		if err != nil {
+			return 1, nil
+		}
+		videoDetail.CommentCount = count
+
 		// Update the video's IsFavorite field.
 		isFavorite, err := models.CheckFavoriteRelExist(currentUserID, video.ID)
 		if err != nil {

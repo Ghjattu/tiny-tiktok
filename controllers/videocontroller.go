@@ -120,7 +120,7 @@ func Feed(c *gin.Context) {
 	latestTimeStr := c.Query("latest_time")
 
 	// If the latest time is empty, set it to current time.
-	if latestTimeStr == "" {
+	if latestTimeStr == "" || latestTimeStr == "0" {
 		latestTimeStr = strconv.FormatInt(time.Now().Unix(), 10)
 	}
 

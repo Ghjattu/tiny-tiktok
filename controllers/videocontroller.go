@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/Ghjattu/tiny-tiktok/models"
+	"github.com/Ghjattu/tiny-tiktok/oss"
 	"github.com/Ghjattu/tiny-tiktok/services"
 	"github.com/Ghjattu/tiny-tiktok/utils"
 	"github.com/gin-gonic/gin"
@@ -29,6 +30,7 @@ type FeedResponse struct {
 // Endpoint: /douyin/publish/action/
 func PublishNewVideo(c *gin.Context) {
 	publishTime := time.Now()
+	publishTimeStr := publishTime.Format("2006-01-02-15:04:05")
 	// publishTimeUnix := publishTime.UnixNano()
 	// publishTimeStr := strconv.FormatInt(publishTimeUnix, 10)
 
@@ -54,13 +56,24 @@ func PublishNewVideo(c *gin.Context) {
 	}
 
 	currentUserID := c.GetInt64("current_user_id")
+	currentUserIDStr := fmt.Sprintf("%d", currentUserID)
 
 	// Save video to local.
 	videoName := filepath.Base(data.Filename)
-	finalVideoName := fmt.Sprintf("%s_%s", strconv.Itoa(int(currentUserID)), videoName)
-	savedPath := filepath.Join("../public/", finalVideoName)
+	finalVideoName := fmt.Sprintf("%s_%s_%s", currentUserIDStr, publishTimeStr, videoName)
+	savedLocalPath := filepath.Join("../public/", finalVideoName)
 
-	if err := c.SaveUploadedFile(data, savedPath); err != nil {
+	if err := c.SaveUploadedFile(data, savedLocalPath); err != nil {
+		c.JSON(http.StatusOK, Response{
+			StatusCode: 1,
+			StatusMsg:  err.Error(),
+		})
+		return
+	}
+	defer os.Remove(savedLocalPath)
+
+	// Upload video to OSS.
+	if err := oss.UploadFile(finalVideoName, savedLocalPath); err != nil {
 		c.JSON(http.StatusOK, Response{
 			StatusCode: 1,
 			StatusMsg:  err.Error(),
@@ -69,9 +82,9 @@ func PublishNewVideo(c *gin.Context) {
 	}
 
 	// Construct play url.
-	serverIP := os.Getenv("SERVER_IP")
-	serverPort := os.Getenv("SERVER_PORT")
-	playUrl := fmt.Sprintf("http://%s:%s/static/videos/%s", serverIP, serverPort, finalVideoName)
+	OSSEndpoint := os.Getenv("OSS_ENDPOINT")
+	OSSBucketName := os.Getenv("OSS_BUCKET_NAME")
+	playUrl := fmt.Sprintf("https://%s.%s/%s", OSSBucketName, OSSEndpoint, finalVideoName)
 
 	// Create new video.
 	vs := &services.VideoService{}

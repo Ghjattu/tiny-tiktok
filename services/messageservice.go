@@ -19,6 +19,10 @@ type MessageService struct{}
 //	@return int32 "status code"
 //	@return string "status message"
 func (ms *MessageService) CreateNewMessage(senderID, receiverID int64, content string) (int32, string) {
+	if senderID == receiverID {
+		return 1, "you can not send messages to yourself"
+	}
+
 	// Check if the content is empty.
 	if content == "" {
 		return 1, "message content cannot be empty"

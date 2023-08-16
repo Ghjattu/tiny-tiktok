@@ -16,6 +16,10 @@ type FollowService struct{}
 //	@return int32 "status code"
 //	@return string "status message"
 func (fs *FollowService) CreateNewFollowRel(followerID, followingID int64) (int32, string) {
+	if followerID == followingID {
+		return 1, "you can not follow yourself"
+	}
+
 	// Check if the user exists.
 	_, err := models.GetUserByUserID(followingID)
 	if err != nil {

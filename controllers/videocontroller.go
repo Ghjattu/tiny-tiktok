@@ -118,6 +118,7 @@ func GetPublishListByAuthorID(c *gin.Context) {
 // Endpoint: /douyin/feed/
 func Feed(c *gin.Context) {
 	latestTimeStr := c.Query("latest_time")
+	currentUserID := c.GetInt64("current_user_id")
 
 	// If the latest time is empty, set it to current time.
 	if latestTimeStr == "" || latestTimeStr == "0" {
@@ -143,7 +144,7 @@ func Feed(c *gin.Context) {
 
 	// Get most 30 videos.
 	vs := &services.VideoService{}
-	statusCode, statusMsg, nextTime, videoList := vs.GetMost30Videos(latestTime)
+	statusCode, statusMsg, nextTime, videoList := vs.GetMost30Videos(latestTime, currentUserID)
 
 	c.JSON(http.StatusOK, FeedResponse{
 		Response: Response{

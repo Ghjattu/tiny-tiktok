@@ -43,7 +43,7 @@ func TestGetPublishListByAuthorID(t *testing.T) {
 func TestGetMost30Videos(t *testing.T) {
 	models.InitDatabase(true)
 
-	status_code, statue_msg, _, videoList := videoService.GetMost30Videos(time.Now())
+	status_code, statue_msg, _, videoList := videoService.GetMost30Videos(time.Now(), 0)
 
 	assert.Equal(t, int32(0), status_code)
 	assert.Equal(t, "get most 30 videos successfully", statue_msg)

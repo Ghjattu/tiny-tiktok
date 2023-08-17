@@ -63,18 +63,19 @@ func (vs *VideoService) GetVideoListByAuthorID(authorID, currentUserID int64) (i
 //
 //	@receiver vs *VideoService
 //	@param latestTime time.Time
-//	@return int32 "status_code"
-//	@return string "status_msg"
+//	@param currentUserID int64
+//	@return int32 "status code"
+//	@return string "status message"
 //	@return int64 "the seconds of the earliest publish time of the returned video list"
 //	@return []models.VideoDetail
-func (vs *VideoService) GetMost30Videos(latestTime time.Time) (int32, string, int64, []models.VideoDetail) {
+func (vs *VideoService) GetMost30Videos(latestTime time.Time, currentUserID int64) (int32, string, int64, []models.VideoDetail) {
 	videoList, earliestTime, err := models.GetMost30Videos(latestTime)
 	if err != nil {
 		return 1, "failed to get most 30 videos", -1, nil
 	}
 
 	// Convert video list to video detail list.
-	statusCode, videoDetailList := convertVideoToVideoDetail(videoList, 0)
+	statusCode, videoDetailList := convertVideoToVideoDetail(videoList, currentUserID)
 	if statusCode == 1 {
 		return 1, "failed to get most 30 videos", -1, nil
 	}

@@ -53,7 +53,7 @@ func constructTestForm(formFields map[string]string) (*bytes.Buffer, *multipart.
 }
 
 func TestPublishNewVideoWithEmptyTitle(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Register a new test user.
 	_, _, token := registerTestUser("test", "123456")
@@ -81,7 +81,7 @@ func TestPublishNewVideoWithEmptyTitle(t *testing.T) {
 }
 
 func TestPublishNewVideo(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Register a new test user.
 	_, _, token := registerTestUser("test", "123456")
@@ -110,7 +110,7 @@ func TestPublishNewVideo(t *testing.T) {
 }
 
 func TestGetPublishListByAuthorID(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Register a new test user.
 	userID, _, token := registerTestUser("test", "123456")
@@ -143,7 +143,7 @@ func TestFeedWithInvalidLatestTime(t *testing.T) {
 }
 
 func TestFeedWithEmptyLatestTime(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	req := httptest.NewRequest("GET", "http://127.0.0.1/douyin/feed/", nil)
 

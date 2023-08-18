@@ -11,7 +11,7 @@ import (
 )
 
 func TestFavoriteActionInvalidActionType(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Register a test user.
 	_, _, token := registerTestUser("test", "123456")
@@ -28,7 +28,7 @@ func TestFavoriteActionInvalidActionType(t *testing.T) {
 }
 
 func TestFavoriteActionWithActionTypeOne(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Register a new test user.
 	userID, _, token := registerTestUser("test", "123456")
@@ -50,7 +50,7 @@ func TestFavoriteActionWithActionTypeOne(t *testing.T) {
 }
 
 func TestFavoriteActionWithActionTypeTwo(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Register a new test user.
 	_, _, token := registerTestUser("test", "123456")
@@ -72,7 +72,7 @@ func TestFavoriteActionWithActionTypeTwo(t *testing.T) {
 }
 
 func TestGetFavoriteListByUserID(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Register a new test user.
 	userID, _, token := registerTestUser("test", "123456")

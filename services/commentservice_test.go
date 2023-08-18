@@ -13,7 +13,7 @@ var (
 )
 
 func TestCreateNewCommentWithNonExistVideo(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	statusCode, statusMsg, _ := commentService.CreateNewComment(1, 1, "test", time.Now())
 
@@ -22,7 +22,7 @@ func TestCreateNewCommentWithNonExistVideo(t *testing.T) {
 }
 
 func TestCreateNewCommentWithEmptyContent(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	statusCode, statusMsg, _ := commentService.CreateNewComment(1, 1, "", time.Now())
 
@@ -31,7 +31,7 @@ func TestCreateNewCommentWithEmptyContent(t *testing.T) {
 }
 
 func TestCreateNewComment(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Create a test user.
 	testUser, _ := models.CreateTestUser("test", "123456")
@@ -49,7 +49,7 @@ func TestCreateNewComment(t *testing.T) {
 }
 
 func TestDeleteCommentByCommentIDWithNonExistComment(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	statusCode, statusMsg, _ := commentService.DeleteCommentByCommentID(1, 1)
 
@@ -58,7 +58,7 @@ func TestDeleteCommentByCommentIDWithNonExistComment(t *testing.T) {
 }
 
 func TestDeleteCommentByCommentIDWithNonAuthor(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Create a test video.
 	testVideo, _ := models.CreateTestVideo(1, time.Now(), "test")
@@ -72,7 +72,7 @@ func TestDeleteCommentByCommentIDWithNonAuthor(t *testing.T) {
 }
 
 func TestDeleteCommentByCommentID(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Create a test video.
 	testVideo, _ := models.CreateTestVideo(1, time.Now(), "test")
@@ -88,7 +88,7 @@ func TestDeleteCommentByCommentID(t *testing.T) {
 }
 
 func TestGetCommentListByVideoIDWithNonExistVideo(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	statusCode, statusMsg, _ := commentService.GetCommentListByVideoID(1, 1)
 
@@ -97,7 +97,7 @@ func TestGetCommentListByVideoIDWithNonExistVideo(t *testing.T) {
 }
 
 func TestGetCommentListByVideoID(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Create a test user.
 	testUser, _ := models.CreateTestUser("test", "123456")

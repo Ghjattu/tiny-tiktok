@@ -13,7 +13,7 @@ var (
 )
 
 func TestCreateNewFavoriteRelWithNonExistVideo(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	statusCode, statusMsg := favoriteService.CreateNewFavoriteRel(1, 1)
 
@@ -22,7 +22,7 @@ func TestCreateNewFavoriteRelWithNonExistVideo(t *testing.T) {
 }
 
 func TestCreateNewFavoriteRel(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Create a new test video.
 	models.CreateTestVideo(1, time.Now(), "test")
@@ -34,7 +34,7 @@ func TestCreateNewFavoriteRel(t *testing.T) {
 }
 
 func TestCreateNewFavoriteRelWithRepetition(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Create a new test video.
 	models.CreateTestVideo(1, time.Now(), "test")
@@ -51,7 +51,7 @@ func TestCreateNewFavoriteRelWithRepetition(t *testing.T) {
 }
 
 func TestDeleteFavoriteRel(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Create a new test video.
 	models.CreateTestVideo(1, time.Now(), "test")
@@ -63,7 +63,7 @@ func TestDeleteFavoriteRel(t *testing.T) {
 }
 
 func TestGetFavoriteVideoListByUserID(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Create a new test user.
 	testUser, _ := models.CreateTestUser("test", "123456")
@@ -80,7 +80,7 @@ func TestGetFavoriteVideoListByUserID(t *testing.T) {
 }
 
 func TestGetTotalFavoritedByUserID(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Create a test video.
 	testVideo, _ := models.CreateTestVideo(1, time.Now(), "test")

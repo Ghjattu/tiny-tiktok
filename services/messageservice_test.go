@@ -12,7 +12,7 @@ var (
 )
 
 func TestCreateNewMessageWithSameSenderAndReceiver(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	statusCode, statusMsg := messageService.CreateNewMessage(1, 1, "Hello")
 
@@ -21,7 +21,7 @@ func TestCreateNewMessageWithSameSenderAndReceiver(t *testing.T) {
 }
 
 func TestCreateNewMessageWithEmptyContent(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Create a test user.
 	testUser, _ := models.CreateTestUser("test", "123456")
@@ -33,7 +33,7 @@ func TestCreateNewMessageWithEmptyContent(t *testing.T) {
 }
 
 func TestCreateNewMessageWithNonExistUser(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	statusCode, statusMsg := messageService.CreateNewMessage(1, 2, "Hello")
 
@@ -42,7 +42,7 @@ func TestCreateNewMessageWithNonExistUser(t *testing.T) {
 }
 
 func TestCreateNewMessage(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Create a test user.
 	testUser, _ := models.CreateTestUser("test", "123456")
@@ -54,7 +54,7 @@ func TestCreateNewMessage(t *testing.T) {
 }
 
 func TestGetMessageListWithNonExistUser(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	statusCode, statusMsg, _ := messageService.GetMessageList(1, 2)
 
@@ -63,7 +63,7 @@ func TestGetMessageListWithNonExistUser(t *testing.T) {
 }
 
 func TestGetMessageList(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Create two test users.
 	testUserOne, _ := models.CreateTestUser("testOne", "123456")

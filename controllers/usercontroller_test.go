@@ -10,7 +10,7 @@ import (
 )
 
 func TestGetUserByUserIDAndToken(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Register a new test user.
 	userID, testUser, token := registerTestUser("test", "123456")

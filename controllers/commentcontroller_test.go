@@ -11,7 +11,7 @@ import (
 )
 
 func TestCommentActionWithActionTypeOne(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 	// Register a test user.
 	userID, _, token := registerTestUser("test", "123456")
 	// Create a test video.
@@ -30,7 +30,7 @@ func TestCommentActionWithActionTypeOne(t *testing.T) {
 }
 
 func TestCommentActionWithActionTypeTwo(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 	// Register a test user.
 	userID, _, token := registerTestUser("test", "123456")
 	// Create a test video.
@@ -49,7 +49,7 @@ func TestCommentActionWithActionTypeTwo(t *testing.T) {
 }
 
 func TestCommentList(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Register a test user.
 	userID, _, token := registerTestUser("test", "123456")

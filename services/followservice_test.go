@@ -12,7 +12,7 @@ var (
 )
 
 func TestCreateNewFollowRelWithSameFollowerAndFollowing(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	statusCode, statusMsg := followService.CreateNewFollowRel(1, 1)
 
@@ -21,7 +21,7 @@ func TestCreateNewFollowRelWithSameFollowerAndFollowing(t *testing.T) {
 }
 
 func TestCreateNewFollowRelWithNonExistUser(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	statusCode, statusMsg := followService.CreateNewFollowRel(1, 2)
 
@@ -30,7 +30,7 @@ func TestCreateNewFollowRelWithNonExistUser(t *testing.T) {
 }
 
 func TestCreateNewFollowRelWithExistRel(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Create a test user.
 	testUser, _ := models.CreateTestUser("test", "123456")
@@ -44,7 +44,7 @@ func TestCreateNewFollowRelWithExistRel(t *testing.T) {
 }
 
 func TestCreateNewFollowRel(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Create a test user.
 	testUser, _ := models.CreateTestUser("test", "123456")
@@ -56,7 +56,7 @@ func TestCreateNewFollowRel(t *testing.T) {
 }
 
 func TestDeleteFollowRel(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Create a test follow relationship.
 	models.CreateTestFollowRel(1, 2)
@@ -68,7 +68,7 @@ func TestDeleteFollowRel(t *testing.T) {
 }
 
 func TestGetFollowingListByUserIDWithNonExistUser(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	statusCode, statusMsg, _ := followService.GetFollowingListByUserID(1, 2)
 
@@ -77,7 +77,7 @@ func TestGetFollowingListByUserIDWithNonExistUser(t *testing.T) {
 }
 
 func TestGetFollowingListByUserID(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Create two test users.
 	testUserOne, _ := models.CreateTestUser("test", "123456")
@@ -95,7 +95,7 @@ func TestGetFollowingListByUserID(t *testing.T) {
 }
 
 func TestGetFollowerListByUserIDWithNonExistUser(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	statusCode, statusMsg, _ := followService.GetFollowerListByUserID(1, 2)
 
@@ -104,7 +104,7 @@ func TestGetFollowerListByUserIDWithNonExistUser(t *testing.T) {
 }
 
 func TestGetFollowerListByUserID(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Create two test users.
 	testUserOne, _ := models.CreateTestUser("test", "123456")

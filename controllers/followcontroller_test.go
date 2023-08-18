@@ -10,7 +10,7 @@ import (
 )
 
 func TestFollowActionWithInvalidActionType(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Register a test user.
 	_, _, token := registerTestUser("test", "123456")
@@ -26,7 +26,7 @@ func TestFollowActionWithInvalidActionType(t *testing.T) {
 }
 
 func TestFollowActionWithActionTypeOne(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Register a test user.
 	_, _, token := registerTestUser("test", "123456")
@@ -46,7 +46,7 @@ func TestFollowActionWithActionTypeOne(t *testing.T) {
 }
 
 func TestFollowingList(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Register a test user.
 	userID, _, token := registerTestUser("test", "123456")
@@ -69,7 +69,7 @@ func TestFollowingList(t *testing.T) {
 }
 
 func TestFollowerList(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Register a test user.
 	userID, _, token := registerTestUser("test", "123456")

@@ -12,7 +12,7 @@ var (
 )
 
 func TestLoginWithLongUsername(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	user_id, status_code, status_msg, _ := loginService.Login(
 		"1234567890123456789012345678901234567890123456789012345678901234567890", "123456")
@@ -23,7 +23,7 @@ func TestLoginWithLongUsername(t *testing.T) {
 }
 
 func TestLoginWithLongPassword(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	user_id, status_code, status_msg, _ := loginService.Login("test",
 		"1234567890123456789012345678901234567890123456789012345678901234567890")
@@ -34,7 +34,7 @@ func TestLoginWithLongPassword(t *testing.T) {
 }
 
 func TestLoginWithNotExistName(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	user_id, status_code, status_msg, _ := loginService.Login("test", "123456")
 
@@ -44,7 +44,7 @@ func TestLoginWithNotExistName(t *testing.T) {
 }
 
 func TestLoginWithWrongPassword(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Create a new test user.
 	models.CreateTestUser("test", "123456")
@@ -57,7 +57,7 @@ func TestLoginWithWrongPassword(t *testing.T) {
 }
 
 func TestLoginWithCorrectPassword(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Create a new test user.
 	testUser, _ := models.CreateTestUser("test", "123456")

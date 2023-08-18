@@ -13,7 +13,7 @@ var (
 )
 
 func TestCreateNewVideo(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	status_code, statue_msg := videoService.CreateNewVideo("test", "test", 1, time.Now())
 
@@ -22,7 +22,7 @@ func TestCreateNewVideo(t *testing.T) {
 }
 
 func TestGetPublishListByAuthorID(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Create a new test user.
 	testUser, _ := models.CreateTestUser("test", "123456")
@@ -41,7 +41,7 @@ func TestGetPublishListByAuthorID(t *testing.T) {
 }
 
 func TestGetMost30Videos(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	status_code, statue_msg, _, videoList := videoService.GetMost30Videos(time.Now(), 0)
 
@@ -51,7 +51,7 @@ func TestGetMost30Videos(t *testing.T) {
 }
 
 func TestGetVideoListByVideoIDList(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Create a new test user.
 	testUser, _ := models.CreateTestUser("test", "123456")

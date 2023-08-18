@@ -11,6 +11,15 @@ var (
 	messageService = &MessageService{}
 )
 
+func TestCreateNewMessageWithSameSenderAndReceiver(t *testing.T) {
+	models.InitDatabase(true)
+
+	statusCode, statusMsg := messageService.CreateNewMessage(1, 1, "Hello")
+
+	assert.Equal(t, int32(1), statusCode)
+	assert.Equal(t, "you can not send messages to yourself", statusMsg)
+}
+
 func TestCreateNewMessageWithEmptyContent(t *testing.T) {
 	models.InitDatabase(true)
 

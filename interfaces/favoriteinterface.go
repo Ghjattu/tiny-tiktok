@@ -3,9 +3,13 @@ package interfaces
 import "github.com/Ghjattu/tiny-tiktok/models"
 
 type FavoriteInterface interface {
-	// FavoriteAction favorite or unfavorite a video by action type.
-	// Return status_code, status_msg.
-	FavoriteAction(userID, videoID, actionType int64) (int32, string)
+	// CreateNewFavoriteRel create a new favorite rel.
+	// Return status code, status message.
+	CreateNewFavoriteRel(userID, videoID int64) (int32, string)
+
+	// DeleteFavoriteRel delete a favorite rel by user id and video id.
+	// Return status code, status message.
+	DeleteFavoriteRel(userID, videoID int64) (int32, string)
 
 	// GetFavoriteVideoListByUserID get user's favorite video list by user id.
 	// Return status_code, status_msg, video_list.

@@ -87,3 +87,16 @@ func TestGetFavoriteVideoListByUserID(t *testing.T) {
 	assert.Equal(t, "get favorite video list successfully", statusMsg)
 	assert.Equal(t, 1, len(favoriteVideoList))
 }
+
+func TestGetTotalFavoritedByUserID(t *testing.T) {
+	models.InitDatabase(true)
+
+	// Create a test video.
+	testVideo, _ := models.CreateTestVideo(1, time.Now(), "test")
+	// Create a test favorite relationship.
+	models.CreateTestFavoriteRel(1, testVideo.ID)
+
+	count := favoriteService.GetTotalFavoritedByUserID(1)
+
+	assert.Equal(t, int64(1), count)
+}

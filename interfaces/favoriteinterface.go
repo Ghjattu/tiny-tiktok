@@ -10,4 +10,8 @@ type FavoriteInterface interface {
 	// GetFavoriteVideoListByUserID get user's favorite video list by user id.
 	// Return status_code, status_msg, video_list.
 	GetFavoriteVideoListByUserID(currentUserID, queryUserID int64) (int32, string, []models.VideoDetail)
+
+	// GetTotalFavoritedByUserID get total favorited count by user id.
+	// Return count.
+	GetTotalFavoritedByUserID(userID int64) int64
 }

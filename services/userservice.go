@@ -53,7 +53,6 @@ func (us *UserService) GetUserDetailByUserID(currentUserID, userID int64) (int32
 		Avatar:          user.Avatar,
 		BackgroundImage: user.BackgroundImage,
 		Signature:       user.Signature,
-		TotalFavorited:  user.TotalFavorited,
 	}
 
 	userDetail.FollowCount, _ = models.GetFollowingCountByUserID(user.ID)
@@ -61,6 +60,9 @@ func (us *UserService) GetUserDetailByUserID(currentUserID, userID int64) (int32
 	userDetail.IsFollow, _ = models.CheckFollowRelExist(currentUserID, user.ID)
 	userDetail.WorkCount, _ = models.GetVideoCountByAuthorID(user.ID)
 	userDetail.FavoriteCount, _ = models.GetFavoriteCountByUserID(user.ID)
+
+	fs := &FavoriteService{}
+	userDetail.TotalFavorited = fs.GetTotalFavoritedByUserID(user.ID)
 
 	return 0, "get user successfully", userDetail
 }

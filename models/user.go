@@ -15,7 +15,6 @@ type User struct {
 	Avatar          string `gorm:"type:varchar(255);not null"`
 	BackgroundImage string `gorm:"type:varchar(255);not null"`
 	Signature       string `gorm:"type:varchar(255);not null"`
-	TotalFavorited  int64  `gorm:"type:int;not null"`
 }
 
 type UserDetail struct {

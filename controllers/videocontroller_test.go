@@ -136,7 +136,7 @@ func TestFeedWithInvalidLatestTime(t *testing.T) {
 	w, r := sendRequest(req)
 	res := r.(*FeedResponse)
 
-	assert.Equal(t, 400, w.Code)
+	assert.Equal(t, 200, w.Code)
 	assert.Equal(t, int32(1), res.StatusCode)
 	assert.Equal(t, "invalid syntax", res.StatusMsg)
 	assert.Equal(t, 0, len(res.VideoList))

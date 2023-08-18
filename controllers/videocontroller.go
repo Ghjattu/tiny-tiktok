@@ -128,7 +128,7 @@ func Feed(c *gin.Context) {
 	statusCode, statusMsg, latestTimeInt := utils.ParseInt64(latestTimeStr)
 	// Failed to parse latest time string to int64.
 	if statusCode == 1 {
-		c.JSON(http.StatusBadRequest, FeedResponse{
+		c.JSON(http.StatusOK, FeedResponse{
 			Response: Response{
 				StatusCode: statusCode,
 				StatusMsg:  statusMsg,

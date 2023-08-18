@@ -20,8 +20,15 @@ func FavoriteAction(c *gin.Context) {
 	// Get user id from context.
 	currentUserID := c.GetInt64("current_user_id")
 
+	statusCode := int32(1)
+	statusMsg := "action type is invalid"
+
 	fs := &services.FavoriteService{}
-	statusCode, statusMsg := fs.FavoriteAction(currentUserID, videoID, actionType)
+	if actionType == 1 {
+		statusCode, statusMsg = fs.CreateNewFavoriteRel(currentUserID, videoID)
+	} else if actionType == 2 {
+		statusCode, statusMsg = fs.DeleteFavoriteRel(currentUserID, videoID)
+	}
 
 	c.JSON(http.StatusOK, Response{
 		StatusCode: statusCode,

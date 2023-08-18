@@ -8,12 +8,7 @@ import (
 // FavoriteService implements FavoriteInterface.
 type FavoriteService struct{}
 
-func (fs *FavoriteService) FavoriteAction(userID, videoID, actionType int64) (int32, string) {
-	// Check if the action type is valid.
-	if actionType != 1 && actionType != 2 {
-		return 1, "action type is invalid"
-	}
-
+func (fs *FavoriteService) CreateNewFavoriteRel(userID, videoID int64) (int32, string) {
 	// Check if the video exist.
 	_, err := models.GetVideoByID(videoID)
 	if err != nil {
@@ -23,34 +18,32 @@ func (fs *FavoriteService) FavoriteAction(userID, videoID, actionType int64) (in
 		return 1, "get video by id failed"
 	}
 
-	// If action type is 1, create a new favorite relation.
-	if actionType == 1 {
-		// Check if the favorite relation exist.
-		exist, err := models.CheckFavoriteRelExist(userID, videoID)
-		if err != nil {
-			return 1, "check favorite rel exist failed"
-		}
-
-		if exist {
-			return 1, "you have already favorited this video"
-		}
-
-		// Create a new favorite relation.
-		fr := &models.FavoriteRel{
-			UserID:  userID,
-			VideoID: videoID,
-		}
-
-		_, err = models.CreateNewFavoriteRel(fr)
-		if err != nil {
-			return 1, "favorite action failed"
-		}
-
-		return 0, "favorite action success"
+	// Check if the favorite relation exist.
+	exist, err := models.CheckFavoriteRelExist(userID, videoID)
+	if err != nil {
+		return 1, "check favorite rel exist failed"
 	}
 
-	// Otherwise action type is 2, delete the favorite relation.
-	_, err = models.DeleteFavoriteRel(userID, videoID)
+	if exist {
+		return 1, "you have already favorited this video"
+	}
+
+	// Create a new favorite relation.
+	fr := &models.FavoriteRel{
+		UserID:  userID,
+		VideoID: videoID,
+	}
+
+	_, err = models.CreateNewFavoriteRel(fr)
+	if err != nil {
+		return 1, "favorite action failed"
+	}
+
+	return 0, "favorite action success"
+}
+
+func (fs *FavoriteService) DeleteFavoriteRel(userID, videoID int64) (int32, string) {
+	_, err := models.DeleteFavoriteRel(userID, videoID)
 	if err != nil {
 		return 1, "unfavorite action failed"
 	}
@@ -73,4 +66,21 @@ func (fs *FavoriteService) GetFavoriteVideoListByUserID(currentUserID, queryUser
 	}
 
 	return 0, "get favorite video list successfully", favoriteVideoList
+}
+
+// GetTotalFavoritedByUserID returns the total number of favorited by user id.
+//
+//	@receiver fs FavoriteService
+//	@param userID int64
+//	@return int64
+func (fs *FavoriteService) GetTotalFavoritedByUserID(userID int64) int64 {
+	totalFavorited := int64(0)
+
+	videoList, _ := models.GetVideoListByAuthorID(userID)
+	for _, video := range videoList {
+		count, _ := models.GetFavoriteCountByVideoID(video.ID)
+		totalFavorited += count
+	}
+
+	return totalFavorited
 }

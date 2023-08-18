@@ -32,10 +32,12 @@ func TestMessageAction(t *testing.T) {
 	models.InitDatabase(true)
 
 	// Register a test user.
-	userID, _, token := registerTestUser("test", "123456")
-	userIDStr := fmt.Sprintf("%d", userID)
+	_, _, token := registerTestUser("test", "123456")
+	// Create a test user.
+	testUser, _ := models.CreateTestUser("test2", "123456")
+	testUserIDStr := fmt.Sprintf("%d", testUser.ID)
 
-	url := "http://127.0.0.1/douyin/message/action/?to_user_id=" + userIDStr +
+	url := "http://127.0.0.1/douyin/message/action/?to_user_id=" + testUserIDStr +
 		"&action_type=1&content=abc&token=" + token
 	req := httptest.NewRequest("POST", url, nil)
 

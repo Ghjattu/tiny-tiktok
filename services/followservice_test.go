@@ -11,6 +11,15 @@ var (
 	followService = &FollowService{}
 )
 
+func TestCreateNewFollowRelWithSameFollowerAndFollowing(t *testing.T) {
+	models.InitDatabase(true)
+
+	statusCode, statusMsg := followService.CreateNewFollowRel(1, 1)
+
+	assert.Equal(t, int32(1), statusCode)
+	assert.Equal(t, "you can not follow yourself", statusMsg)
+}
+
 func TestCreateNewFollowRelWithNonExistUser(t *testing.T) {
 	models.InitDatabase(true)
 

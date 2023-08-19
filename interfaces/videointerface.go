@@ -22,4 +22,8 @@ type VideoInterface interface {
 	// GetVideoListByVideoIDList returns a list of videos by video id list.
 	// Return status_code, status_msg, video_list.
 	GetVideoListByVideoIDList(videoIDList []int64, currentUserID int64) (int32, string, []models.VideoDetail)
+
+	// GetVideoDetailByVideoID returns the detail of the video by video id.
+	// Return video detail, error.
+	GetVideoDetailByVideoID(videoID, currentUserID int64) (*models.VideoDetail, error)
 }

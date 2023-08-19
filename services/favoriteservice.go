@@ -38,6 +38,10 @@ func (fs *FavoriteService) CreateNewFavoriteRel(userID, videoID int64) (int32, s
 	userKey := redis.UserKey + strconv.FormatInt(userID, 10)
 	redis.HashIncrBy(userKey, "favorite_count", 1)
 
+	// Update the FavoriteCount of the video in cache.
+	videoKey := redis.VideoKey + strconv.FormatInt(videoID, 10)
+	redis.HashIncrBy(videoKey, "favorite_count", 1)
+
 	// Create a new favorite relation.
 	fr := &models.FavoriteRel{
 		UserID:  userID,
@@ -78,6 +82,10 @@ func (fs *FavoriteService) DeleteFavoriteRel(userID, videoID int64) (int32, stri
 	// Update the FavoriteCount of the user in cache.
 	userKey := redis.UserKey + strconv.FormatInt(userID, 10)
 	redis.HashIncrBy(userKey, "favorite_count", -1)
+
+	// Update the FavoriteCount of the video in cache.
+	videoKey := redis.VideoKey + strconv.FormatInt(videoID, 10)
+	redis.HashIncrBy(videoKey, "favorite_count", -1)
 
 	_, err = models.DeleteFavoriteRel(userID, videoID)
 	if err != nil {

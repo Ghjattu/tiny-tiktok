@@ -1,8 +1,10 @@
 package services
 
 import (
+	"strconv"
 	"time"
 
+	"github.com/Ghjattu/tiny-tiktok/middleware/redis"
 	"github.com/Ghjattu/tiny-tiktok/models"
 	"gorm.io/gorm"
 )
@@ -43,6 +45,10 @@ func (cs *CommentService) CreateNewComment(currentUserID, videoID int64, content
 		CreateDate: timestamp,
 	}
 
+	// Update the CommentCount of the video in cache.
+	videoKey := redis.VideoKey + strconv.FormatInt(videoID, 10)
+	redis.HashIncrBy(videoKey, "comment_count", 1)
+
 	_, err = models.CreateNewComment(comment)
 	if err != nil {
 		return 1, "failed to create new comment", nil
@@ -80,6 +86,10 @@ func (cs *CommentService) DeleteCommentByCommentID(currentUserID, commentID int6
 
 	// Convert the comment to a comment detail.
 	_, commentDetail := convertCommentToCommentDetail(currentUserID, comment)
+
+	// Update the CommentCount of the video in cache.
+	videoKey := redis.VideoKey + strconv.FormatInt(comment.VideoID, 10)
+	redis.HashIncrBy(videoKey, "comment_count", -1)
 
 	// Delete the comment.
 	_, err = models.DeleteCommentByCommentID(commentID)

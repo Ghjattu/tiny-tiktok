@@ -72,6 +72,15 @@ func TestCreateNewFavoriteRelWithRepetition(t *testing.T) {
 	assert.Equal(t, "you have already favorited this video", statusMsg)
 }
 
+func TestDeleteFavoriteRelWithNonExistVideo(t *testing.T) {
+	models.Flush()
+
+	statusCode, statusMsg := favoriteService.DeleteFavoriteRel(1, 1)
+
+	assert.Equal(t, int32(1), statusCode)
+	assert.Equal(t, "the video is not exist", statusMsg)
+}
+
 func TestDeleteFavoriteRel(t *testing.T) {
 	models.Flush()
 

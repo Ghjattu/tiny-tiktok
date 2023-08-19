@@ -30,10 +30,7 @@ func (vs *VideoService) CreateNewVideo(playUrl, title string, authorID int64, pu
 
 	// Update the WorkCount of the user in cache.
 	userKey := redis.UserKey + strconv.FormatInt(authorID, 10)
-	if redis.Rdb.Exists(redis.Ctx, userKey).Val() == 1 {
-		redis.Rdb.HIncrBy(redis.Ctx, userKey, "work_count", 1)
-		redis.Rdb.Expire(redis.Ctx, userKey, redis.RandomDay())
-	}
+	redis.HashIncrBy(userKey, "work_count", 1)
 
 	// Insert new video to database.
 	_, err := models.CreateNewVideo(video)

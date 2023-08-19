@@ -31,17 +31,12 @@ func (fs *FavoriteService) CreateNewFavoriteRel(userID, videoID int64) (int32, s
 	}
 
 	// Update the TotalFavorited of the video's author in cache.
-	userKey := redis.UserKey + strconv.FormatInt(video.AuthorID, 10)
-	if redis.Rdb.Exists(redis.Ctx, userKey).Val() == 1 {
-		redis.Rdb.HIncrBy(redis.Ctx, userKey, "total_favorited", 1)
-		redis.Rdb.Expire(redis.Ctx, userKey, redis.RandomDay())
-	}
+	authorKey := redis.UserKey + strconv.FormatInt(video.AuthorID, 10)
+	redis.HashIncrBy(authorKey, "total_favorited", 1)
+
 	// Update the FavoriteCount of the user in cache.
-	userKey = redis.UserKey + strconv.FormatInt(userID, 10)
-	if redis.Rdb.Exists(redis.Ctx, userKey).Val() == 1 {
-		redis.Rdb.HIncrBy(redis.Ctx, userKey, "favorite_count", 1)
-		redis.Rdb.Expire(redis.Ctx, userKey, redis.RandomDay())
-	}
+	userKey := redis.UserKey + strconv.FormatInt(userID, 10)
+	redis.HashIncrBy(userKey, "favorite_count", 1)
 
 	// Create a new favorite relation.
 	fr := &models.FavoriteRel{
@@ -77,17 +72,12 @@ func (fs *FavoriteService) DeleteFavoriteRel(userID, videoID int64) (int32, stri
 	}
 
 	// Update the TotalFavorited of the video's author in cache.
-	userKey := redis.UserKey + strconv.FormatInt(video.AuthorID, 10)
-	if redis.Rdb.Exists(redis.Ctx, userKey).Val() == 1 {
-		redis.Rdb.HIncrBy(redis.Ctx, userKey, "total_favorited", -1)
-		redis.Rdb.Expire(redis.Ctx, userKey, redis.RandomDay())
-	}
+	authorKey := redis.UserKey + strconv.FormatInt(video.AuthorID, 10)
+	redis.HashIncrBy(authorKey, "total_favorited", -1)
+
 	// Update the FavoriteCount of the user in cache.
-	userKey = redis.UserKey + strconv.FormatInt(userID, 10)
-	if redis.Rdb.Exists(redis.Ctx, userKey).Val() == 1 {
-		redis.Rdb.HIncrBy(redis.Ctx, userKey, "favorite_count", -1)
-		redis.Rdb.Expire(redis.Ctx, userKey, redis.RandomDay())
-	}
+	userKey := redis.UserKey + strconv.FormatInt(userID, 10)
+	redis.HashIncrBy(userKey, "favorite_count", -1)
 
 	_, err = models.DeleteFavoriteRel(userID, videoID)
 	if err != nil {

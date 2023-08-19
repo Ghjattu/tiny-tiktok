@@ -14,6 +14,7 @@ var Ctx = context.Background()
 
 func init() {
 	godotenv.Load("../.env")
+	godotenv.Load("../../.env")
 
 	redis_ip := os.Getenv("REDIS_IP")
 	redis_port := os.Getenv("REDIS_PORT")

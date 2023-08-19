@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Ghjattu/tiny-tiktok/middleware/redis"
 	"github.com/Ghjattu/tiny-tiktok/models"
 	"github.com/stretchr/testify/assert"
 )
@@ -48,6 +49,22 @@ func TestCreateNewComment(t *testing.T) {
 	assert.Equal(t, timestamp.Format("01-02"), commentDetail.CreateDate)
 }
 
+func TestCreateNewCommentWithRedis(t *testing.T) {
+	models.Flush()
+
+	// Create a test video.
+	video, _ := models.CreateTestVideo(1, time.Now(), "test")
+	testVideo := &models.VideoDetail{ID: video.ID, CommentCount: 0}
+	// Insert the video into cache.
+	redis.Rdb.HSet(redis.Ctx, redis.VideoKey+"1", testVideo)
+
+	statusCode, _, _ := commentService.CreateNewComment(1, 1, "test", time.Now())
+	commentCount := redis.Rdb.HGet(redis.Ctx, redis.VideoKey+"1", "comment_count").Val()
+
+	assert.Equal(t, int32(0), statusCode)
+	assert.Equal(t, "1", commentCount)
+}
+
 func TestDeleteCommentByCommentIDWithNonExistComment(t *testing.T) {
 	models.Flush()
 
@@ -85,6 +102,24 @@ func TestDeleteCommentByCommentID(t *testing.T) {
 	assert.Equal(t, int32(0), statusCode)
 	assert.Equal(t, "delete comment successfully", statusMsg)
 	assert.Equal(t, int64(1), commentDetail.ID)
+}
+
+func TestDeleteCommentByCommentIDWithRedis(t *testing.T) {
+	models.Flush()
+
+	// Create a test video.
+	video, _ := models.CreateTestVideo(1, time.Now(), "test")
+	testVideo := &models.VideoDetail{ID: video.ID, CommentCount: 1}
+	// Create a test comment.
+	testComment, _ := models.CreateTestComment(1, video.ID)
+	// Insert the video into cache.
+	redis.Rdb.HSet(redis.Ctx, redis.VideoKey+"1", testVideo)
+
+	statusCode, _, _ := commentService.DeleteCommentByCommentID(1, testComment.ID)
+	commentCount := redis.Rdb.HGet(redis.Ctx, redis.VideoKey+"1", "comment_count").Val()
+
+	assert.Equal(t, int32(0), statusCode)
+	assert.Equal(t, "0", commentCount)
 }
 
 func TestGetCommentListByVideoIDWithNonExistVideo(t *testing.T) {

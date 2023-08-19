@@ -43,16 +43,11 @@ func (fs *FollowService) CreateNewFollowRel(followerID, followingID int64) (int3
 	}
 
 	// Update the FollowCount and FollowerCount of the user in cache.
-	userKey := redis.UserKey + strconv.FormatInt(followerID, 10)
-	if redis.Rdb.Exists(redis.Ctx, userKey).Val() == 1 {
-		redis.Rdb.HIncrBy(redis.Ctx, userKey, "follow_count", 1)
-		redis.Rdb.Expire(redis.Ctx, userKey, redis.RandomDay())
-	}
-	userKey = redis.UserKey + strconv.FormatInt(followingID, 10)
-	if redis.Rdb.Exists(redis.Ctx, userKey).Val() == 1 {
-		redis.Rdb.HIncrBy(redis.Ctx, userKey, "follower_count", 1)
-		redis.Rdb.Expire(redis.Ctx, userKey, redis.RandomDay())
-	}
+	followerUserKey := redis.UserKey + strconv.FormatInt(followerID, 10)
+	redis.HashIncrBy(followerUserKey, "follow_count", 1)
+
+	followingUserKey := redis.UserKey + strconv.FormatInt(followingID, 10)
+	redis.HashIncrBy(followingUserKey, "follower_count", 1)
 
 	// Create the follow relationship.
 	fr := &models.FollowRel{
@@ -85,16 +80,11 @@ func (fs *FollowService) DeleteFollowRel(followerID, followingID int64) (int32, 
 	}
 
 	// Update the FollowCount and FollowerCount of the user in cache.
-	userKey := redis.UserKey + strconv.FormatInt(followerID, 10)
-	if redis.Rdb.Exists(redis.Ctx, userKey).Val() == 1 {
-		redis.Rdb.HIncrBy(redis.Ctx, userKey, "follow_count", -1)
-		redis.Rdb.Expire(redis.Ctx, userKey, redis.RandomDay())
-	}
-	userKey = redis.UserKey + strconv.FormatInt(followingID, 10)
-	if redis.Rdb.Exists(redis.Ctx, userKey).Val() == 1 {
-		redis.Rdb.HIncrBy(redis.Ctx, userKey, "follower_count", -1)
-		redis.Rdb.Expire(redis.Ctx, userKey, redis.RandomDay())
-	}
+	followerUserKey := redis.UserKey + strconv.FormatInt(followerID, 10)
+	redis.HashIncrBy(followerUserKey, "follow_count", -1)
+
+	followingUserKey := redis.UserKey + strconv.FormatInt(followingID, 10)
+	redis.HashIncrBy(followingUserKey, "follower_count", -1)
 
 	// Delete the follow relationship.
 	_, err = models.DeleteFollowRel(followerID, followingID)

@@ -12,14 +12,14 @@ type Video struct {
 }
 
 type VideoDetail struct {
-	ID            int64       `json:"id"`
+	ID            int64       `json:"id" redis:"id"`
 	Author        *UserDetail `json:"author"`
-	PlayUrl       string      `json:"play_url"`
-	CoverUrl      string      `json:"cover_url"`
-	FavoriteCount int64       `json:"favorite_count"`
-	CommentCount  int64       `json:"comment_count"`
+	PlayUrl       string      `json:"play_url" redis:"play_url"`
+	CoverUrl      string      `json:"cover_url" redis:"cover_url"`
+	FavoriteCount int64       `json:"favorite_count" redis:"favorite_count"`
+	CommentCount  int64       `json:"comment_count" redis:"comment_count"`
 	IsFavorite    bool        `json:"is_favorite"`
-	Title         string      `json:"title"`
+	Title         string      `json:"title" redis:"title"`
 }
 
 // CreateNewVideo create a new video.
@@ -32,6 +32,7 @@ func CreateNewVideo(v *Video) (*Video, error) {
 	return v, err
 }
 
+// TODO: should be deleted.
 // GetVideoListByAuthorID get video list by user id.
 //
 //	@param authorID int64
@@ -45,13 +46,41 @@ func GetVideoListByAuthorID(authorID int64) ([]Video, error) {
 	return videoList, err
 }
 
+// GetVideoIDListByAuthorID get video id list by author id.
+//
+//	@param authorID int64
+//	@return []int64 "video id list"
+//	@return error
+func GetVideoIDListByAuthorID(authorID int64) ([]int64, error) {
+	videoIDList := make([]int64, 0)
+
+	err := db.Model(&Video{}).
+		Where("author_id = ?", authorID).
+		Pluck("id", &videoIDList).Error
+
+	return videoIDList, err
+}
+
+// GetAuthorIDByVideoID get author id by video id.
+//
+//	@param videoID int64
+//	@return int64 "author id"
+//	@return error
+func GetAuthorIDByVideoID(videoID int64) (int64, error) {
+	var authorID int64 = 0
+
+	err := db.Model(&Video{}).Where("id = ?", videoID).Pluck("author_id", &authorID).Error
+
+	return authorID, err
+}
+
 // GetMost30Videos get most 30 videos earlier than latest time.
 //
 //	@param latestTime time.Time
-//	@return []Video
+//	@return []int64 "video id list"
 //	@return time.Time "the earliest publish time of the video list"
 //	@return error
-func GetMost30Videos(latestTime time.Time) ([]Video, time.Time, error) {
+func GetMost30Videos(latestTime time.Time) ([]int64, time.Time, error) {
 	videoList := make([]Video, 0, 30)
 
 	err := db.Model(&Video{}).
@@ -72,7 +101,13 @@ func GetMost30Videos(latestTime time.Time) ([]Video, time.Time, error) {
 		earliestTime = videoList[len(videoList)-1].PublishTime
 	}
 
-	return videoList, earliestTime, err
+	// Get the video id list.
+	videoIDList := make([]int64, 0, len(videoList))
+	for _, video := range videoList {
+		videoIDList = append(videoIDList, video.ID)
+	}
+
+	return videoIDList, earliestTime, err
 }
 
 // GetVideoByID get video by video id.

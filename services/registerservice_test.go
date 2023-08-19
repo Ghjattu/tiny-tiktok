@@ -28,7 +28,7 @@ func TestRegisterWithEmptyPassword(t *testing.T) {
 }
 
 func TestRegisterWithShortPassword(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	user_id, status_code, status_msg, _ := registerService.Register("test", "123")
 
@@ -38,7 +38,7 @@ func TestRegisterWithShortPassword(t *testing.T) {
 }
 
 func TestRegisterWithLongUsername(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	user_id, status_code, status_msg, _ := registerService.Register(
 		"1234567890123456789012345678901234567890123456789012345678901234567890", "123456")
@@ -49,7 +49,7 @@ func TestRegisterWithLongUsername(t *testing.T) {
 }
 
 func TestRegisterWithLongPassword(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	user_id, status_code, status_msg, _ := registerService.Register("test",
 		"12345678901234567890123456789012345678901234567890123456789012345678901234567890")
@@ -60,7 +60,7 @@ func TestRegisterWithLongPassword(t *testing.T) {
 }
 
 func TestRegisterWithExceed72BytesPassword(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	user_id, status_code, status_msg, _ := registerService.Register("test",
 		"密码密码密码密码密码密码密码密码密码密码密码密码密码密码密码")
@@ -71,7 +71,7 @@ func TestRegisterWithExceed72BytesPassword(t *testing.T) {
 }
 
 func TestRegisterWithRegisteredUsername(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Create a new test user.
 	models.CreateTestUser("test", "123456")
@@ -84,7 +84,7 @@ func TestRegisterWithRegisteredUsername(t *testing.T) {
 }
 
 func TestRegisterWithValidUsernameAndPassword(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	user_id, status_code, status_msg, _ := registerService.Register("test", "123456")
 

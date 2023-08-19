@@ -9,7 +9,7 @@ import (
 )
 
 func TestRegisterWithEmptyUsername(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	req := httptest.NewRequest("POST",
 		"http://127.0.0.1/douyin/user/register/?password=123456", nil)
@@ -23,7 +23,7 @@ func TestRegisterWithEmptyUsername(t *testing.T) {
 }
 
 func TestRegisterWithEmptyPassword(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	req := httptest.NewRequest("POST",
 		"http://127.0.0.1/douyin/user/register/?username=test", nil)
@@ -37,7 +37,7 @@ func TestRegisterWithEmptyPassword(t *testing.T) {
 }
 
 func TestRegisterWithValidUsernameAndPassword(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	req := httptest.NewRequest("POST",
 		"http://127.0.0.1/douyin/user/register/?username=test&password=123456", nil)

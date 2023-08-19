@@ -12,7 +12,7 @@ var (
 )
 
 func TestGetUserByUserIDWithNonExistID(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	statusCode, statusMsg, _ := userService.GetUserByUserID(1)
 
@@ -20,8 +20,8 @@ func TestGetUserByUserIDWithNonExistID(t *testing.T) {
 	assert.Equal(t, "user not found", statusMsg)
 }
 
-func TestGetUserByUserIDWithCorrectID(t *testing.T) {
-	models.InitDatabase(true)
+func TestGetUserByUserID(t *testing.T) {
+	models.Flush()
 
 	// Create a new test user.
 	testUser, _ := models.CreateTestUser("test", "123456")
@@ -35,7 +35,7 @@ func TestGetUserByUserIDWithCorrectID(t *testing.T) {
 }
 
 func TestGetUserDetailByUserIDWithNonExistID(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	statusCode, statusMsg, _ := userService.GetUserDetailByUserID(1, 2)
 
@@ -43,12 +43,29 @@ func TestGetUserDetailByUserIDWithNonExistID(t *testing.T) {
 	assert.Equal(t, "user not found", statusMsg)
 }
 
-func TestGetUserDetailByUserIDWithCorrectID(t *testing.T) {
-	models.InitDatabase(true)
+func TestGetUserDetailByUserID(t *testing.T) {
+	models.Flush()
 
 	// Create a new test user.
 	testUser, _ := models.CreateTestUser("test", "123456")
 
+	statusCode, statusMsg, userDetail := userService.GetUserDetailByUserID(testUser.ID+1, testUser.ID)
+
+	assert.Equal(t, int32(0), statusCode)
+	assert.Equal(t, "get user successfully", statusMsg)
+	assert.Equal(t, testUser.Name, userDetail.Name)
+}
+
+func TestGetUserDetailByUserIDFromCache(t *testing.T) {
+	models.Flush()
+
+	// Create a new test user.
+	testUser, _ := models.CreateTestUser("test", "123456")
+
+	// Get user detail from database.
+	userService.GetUserDetailByUserID(testUser.ID+1, testUser.ID)
+
+	// Get user detail from cache.
 	statusCode, statusMsg, userDetail := userService.GetUserDetailByUserID(testUser.ID+1, testUser.ID)
 
 	assert.Equal(t, int32(0), statusCode)

@@ -10,7 +10,7 @@ import (
 )
 
 func TestMessageActionWithInvalidActionType(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Register a test user.
 	userID, _, token := registerTestUser("test", "123456")
@@ -29,7 +29,7 @@ func TestMessageActionWithInvalidActionType(t *testing.T) {
 }
 
 func TestMessageAction(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Register a test user.
 	_, _, token := registerTestUser("test", "123456")
@@ -50,7 +50,7 @@ func TestMessageAction(t *testing.T) {
 }
 
 func TestMessageChat(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Register a test user.
 	userID, _, token := registerTestUser("test", "123456")

@@ -4,14 +4,17 @@ import (
 	"context"
 	"os"
 
+	"github.com/joho/godotenv"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/redis/go-redis/v9"
 )
 
 var Rdb *redis.Client
-var ctx = context.Background()
+var Ctx = context.Background()
 
 func init() {
+	godotenv.Load("../.env")
+
 	redis_ip := os.Getenv("REDIS_IP")
 	redis_port := os.Getenv("REDIS_PORT")
 	redis_password := os.Getenv("REDIS_PASSWORD")
@@ -22,7 +25,7 @@ func init() {
 		DB:       0,
 	})
 
-	_, err := Rdb.Ping(ctx).Result()
+	_, err := Rdb.Ping(Ctx).Result()
 	if err != nil {
 		panic("failed to connect redis")
 	}

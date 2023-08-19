@@ -1,6 +1,9 @@
 package services
 
 import (
+	"strconv"
+
+	"github.com/Ghjattu/tiny-tiktok/middleware/redis"
 	"github.com/Ghjattu/tiny-tiktok/models"
 	"gorm.io/gorm"
 )
@@ -39,6 +42,24 @@ func (us *UserService) GetUserByUserID(userID int64) (int32, string, *models.Use
 //	@return string "status message"
 //	@return *models.UserDetail
 func (us *UserService) GetUserDetailByUserID(currentUserID, userID int64) (int32, string, *models.UserDetail) {
+	// Try to get user detail from redis.
+	userKey := redis.UserKey + strconv.FormatInt(userID, 10)
+	if redis.Rdb.Exists(redis.Ctx, userKey).Val() == 1 {
+		userDetail := &models.UserDetail{}
+		userCache := redis.Rdb.HGetAll(redis.Ctx, userKey)
+		if userCache.Err() == nil {
+			if err := userCache.Scan(userDetail); err == nil {
+				userDetail.IsFollow, _ = models.CheckFollowRelExist(currentUserID, userID)
+
+				// Update expire time.
+				redis.Rdb.Expire(redis.Ctx, userKey, redis.RandomDay())
+
+				return 0, "get user successfully", userDetail
+			}
+		}
+	}
+
+	// Cache miss.
 	user, err := models.GetUserByUserID(userID)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -63,6 +84,10 @@ func (us *UserService) GetUserDetailByUserID(currentUserID, userID int64) (int32
 
 	fs := &FavoriteService{}
 	userDetail.TotalFavorited = fs.GetTotalFavoritedByUserID(user.ID)
+
+	// Save user detail to redis.
+	redis.Rdb.HSet(redis.Ctx, userKey, userDetail)
+	redis.Rdb.Expire(redis.Ctx, userKey, redis.RandomDay())
 
 	return 0, "get user successfully", userDetail
 }

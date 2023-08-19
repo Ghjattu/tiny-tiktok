@@ -9,7 +9,7 @@ import (
 )
 
 func TestLoginWithWrongPassword(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Register a new test user.
 	registerTestUser("test", "123456")
@@ -26,7 +26,7 @@ func TestLoginWithWrongPassword(t *testing.T) {
 }
 
 func TestLoginWithCorrectPassword(t *testing.T) {
-	models.InitDatabase(true)
+	models.Flush()
 
 	// Register a new test user.
 	userID, _, _ := registerTestUser("test", "123456")

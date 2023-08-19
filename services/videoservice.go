@@ -1,8 +1,10 @@
 package services
 
 import (
+	"strconv"
 	"time"
 
+	"github.com/Ghjattu/tiny-tiktok/middleware/redis"
 	"github.com/Ghjattu/tiny-tiktok/models"
 )
 
@@ -26,6 +28,13 @@ func (vs *VideoService) CreateNewVideo(playUrl, title string, authorID int64, pu
 		Title:       title,
 	}
 
+	// Update the WorkCount of the user in cache.
+	userKey := redis.UserKey + strconv.FormatInt(authorID, 10)
+	if redis.Rdb.Exists(redis.Ctx, userKey).Val() == 1 {
+		redis.Rdb.HIncrBy(redis.Ctx, userKey, "work_count", 1)
+		redis.Rdb.Expire(redis.Ctx, userKey, redis.RandomDay())
+	}
+
 	// Insert new video to database.
 	_, err := models.CreateNewVideo(video)
 	if err != nil {
@@ -44,6 +53,10 @@ func (vs *VideoService) CreateNewVideo(playUrl, title string, authorID int64, pu
 //	@return string "status_msg"
 //	@return []models.VideoDetail
 func (vs *VideoService) GetVideoListByAuthorID(authorID, currentUserID int64) (int32, string, []models.VideoDetail) {
+	// TODO: retrieve video id list from redis.
+	// key = videos:author:id
+	// if hit, videoList := fs.GetVideoListByVideoIDList
+
 	// Get video list by author id.
 	videoList, err := models.GetVideoListByAuthorID(authorID)
 	if err != nil {
@@ -69,6 +82,7 @@ func (vs *VideoService) GetVideoListByAuthorID(authorID, currentUserID int64) (i
 //	@return int64 "the seconds of the earliest publish time of the returned video list"
 //	@return []models.VideoDetail
 func (vs *VideoService) GetMost30Videos(latestTime time.Time, currentUserID int64) (int32, string, int64, []models.VideoDetail) {
+	// TODO: models.GetMost30Videos should return the video id list.
 	videoList, earliestTime, err := models.GetMost30Videos(latestTime)
 	if err != nil {
 		return 1, "failed to get most 30 videos", -1, nil
@@ -95,6 +109,8 @@ func (vs *VideoService) GetVideoListByVideoIDList(videoIDList []int64, currentUs
 	videoList := make([]models.Video, 0, len(videoIDList))
 
 	for _, videoID := range videoIDList {
+		// TODO: retrieve video from redis.
+		// key = video:id
 		video, err := models.GetVideoByID(videoID)
 		if err == nil {
 			videoList = append(videoList, *video)
@@ -110,6 +126,7 @@ func (vs *VideoService) GetVideoListByVideoIDList(videoIDList []int64, currentUs
 	return 0, "get video list successfully", videoDetailList
 }
 
+// TODO: should change to convertVideoIDToVideoDetail(videoID int64, currentUserID int64) []models.VideoDetail
 // convertVideoToVideoDetail converts video list to video detail list.
 //
 //	@param videoList []models.Video

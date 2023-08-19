@@ -1,12 +1,19 @@
 package services
 
 import (
+	"strconv"
+
+	"github.com/Ghjattu/tiny-tiktok/middleware/redis"
 	"github.com/Ghjattu/tiny-tiktok/models"
 	"gorm.io/gorm"
 )
 
 // FollowService implements the FollowInterface.
 type FollowService struct{}
+
+// TODO: retrieve following and follower from redis.
+// key = following:user_id
+// key = follower:user_id
 
 // CreateNewFollowRel creates a new follow relationship.
 //
@@ -35,6 +42,18 @@ func (fs *FollowService) CreateNewFollowRel(followerID, followingID int64) (int3
 		return 1, "you have already followed this user"
 	}
 
+	// Update the FollowCount and FollowerCount of the user in cache.
+	userKey := redis.UserKey + strconv.FormatInt(followerID, 10)
+	if redis.Rdb.Exists(redis.Ctx, userKey).Val() == 1 {
+		redis.Rdb.HIncrBy(redis.Ctx, userKey, "follow_count", 1)
+		redis.Rdb.Expire(redis.Ctx, userKey, redis.RandomDay())
+	}
+	userKey = redis.UserKey + strconv.FormatInt(followingID, 10)
+	if redis.Rdb.Exists(redis.Ctx, userKey).Val() == 1 {
+		redis.Rdb.HIncrBy(redis.Ctx, userKey, "follower_count", 1)
+		redis.Rdb.Expire(redis.Ctx, userKey, redis.RandomDay())
+	}
+
 	// Create the follow relationship.
 	fr := &models.FollowRel{
 		FollowerID:  followerID,
@@ -56,8 +75,29 @@ func (fs *FollowService) CreateNewFollowRel(followerID, followingID int64) (int3
 //	@return int32 "status code"
 //	@return string "status message"
 func (fs *FollowService) DeleteFollowRel(followerID, followingID int64) (int32, string) {
+	// Check if the follow relationship exists.
+	exist, err := models.CheckFollowRelExist(followerID, followingID)
+	if err != nil {
+		return 1, "failed to check follow relationship existence"
+	}
+	if !exist {
+		return 1, "you have not followed this user"
+	}
+
+	// Update the FollowCount and FollowerCount of the user in cache.
+	userKey := redis.UserKey + strconv.FormatInt(followerID, 10)
+	if redis.Rdb.Exists(redis.Ctx, userKey).Val() == 1 {
+		redis.Rdb.HIncrBy(redis.Ctx, userKey, "follow_count", -1)
+		redis.Rdb.Expire(redis.Ctx, userKey, redis.RandomDay())
+	}
+	userKey = redis.UserKey + strconv.FormatInt(followingID, 10)
+	if redis.Rdb.Exists(redis.Ctx, userKey).Val() == 1 {
+		redis.Rdb.HIncrBy(redis.Ctx, userKey, "follower_count", -1)
+		redis.Rdb.Expire(redis.Ctx, userKey, redis.RandomDay())
+	}
+
 	// Delete the follow relationship.
-	_, err := models.DeleteFollowRel(followerID, followingID)
+	_, err = models.DeleteFollowRel(followerID, followingID)
 	if err != nil {
 		return 1, "failed to delete follow relationship"
 	}

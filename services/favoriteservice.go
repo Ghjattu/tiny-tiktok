@@ -1,6 +1,9 @@
 package services
 
 import (
+	"strconv"
+
+	"github.com/Ghjattu/tiny-tiktok/middleware/redis"
 	"github.com/Ghjattu/tiny-tiktok/models"
 	"gorm.io/gorm"
 )
@@ -10,7 +13,7 @@ type FavoriteService struct{}
 
 func (fs *FavoriteService) CreateNewFavoriteRel(userID, videoID int64) (int32, string) {
 	// Check if the video exist.
-	_, err := models.GetVideoByID(videoID)
+	video, err := models.GetVideoByID(videoID)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return 1, "the video is not exist"
@@ -23,9 +26,21 @@ func (fs *FavoriteService) CreateNewFavoriteRel(userID, videoID int64) (int32, s
 	if err != nil {
 		return 1, "check favorite rel exist failed"
 	}
-
 	if exist {
 		return 1, "you have already favorited this video"
+	}
+
+	// Update the TotalFavorited of the video's author in cache.
+	userKey := redis.UserKey + strconv.FormatInt(video.AuthorID, 10)
+	if redis.Rdb.Exists(redis.Ctx, userKey).Val() == 1 {
+		redis.Rdb.HIncrBy(redis.Ctx, userKey, "total_favorited", 1)
+		redis.Rdb.Expire(redis.Ctx, userKey, redis.RandomDay())
+	}
+	// Update the FavoriteCount of the user in cache.
+	userKey = redis.UserKey + strconv.FormatInt(userID, 10)
+	if redis.Rdb.Exists(redis.Ctx, userKey).Val() == 1 {
+		redis.Rdb.HIncrBy(redis.Ctx, userKey, "favorite_count", 1)
+		redis.Rdb.Expire(redis.Ctx, userKey, redis.RandomDay())
 	}
 
 	// Create a new favorite relation.
@@ -43,7 +58,38 @@ func (fs *FavoriteService) CreateNewFavoriteRel(userID, videoID int64) (int32, s
 }
 
 func (fs *FavoriteService) DeleteFavoriteRel(userID, videoID int64) (int32, string) {
-	_, err := models.DeleteFavoriteRel(userID, videoID)
+	// Check if the video exist.
+	video, err := models.GetVideoByID(videoID)
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return 1, "the video is not exist"
+		}
+		return 1, "failed to check if the video exist"
+	}
+
+	// Check if the favorite relation exist.
+	exist, err := models.CheckFavoriteRelExist(userID, videoID)
+	if err != nil {
+		return 1, "failed to check if the favorite relation exist"
+	}
+	if !exist {
+		return 1, "you have not favorited this video"
+	}
+
+	// Update the TotalFavorited of the video's author in cache.
+	userKey := redis.UserKey + strconv.FormatInt(video.AuthorID, 10)
+	if redis.Rdb.Exists(redis.Ctx, userKey).Val() == 1 {
+		redis.Rdb.HIncrBy(redis.Ctx, userKey, "total_favorited", -1)
+		redis.Rdb.Expire(redis.Ctx, userKey, redis.RandomDay())
+	}
+	// Update the FavoriteCount of the user in cache.
+	userKey = redis.UserKey + strconv.FormatInt(userID, 10)
+	if redis.Rdb.Exists(redis.Ctx, userKey).Val() == 1 {
+		redis.Rdb.HIncrBy(redis.Ctx, userKey, "favorite_count", -1)
+		redis.Rdb.Expire(redis.Ctx, userKey, redis.RandomDay())
+	}
+
+	_, err = models.DeleteFavoriteRel(userID, videoID)
 	if err != nil {
 		return 1, "unfavorite action failed"
 	}

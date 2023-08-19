@@ -38,21 +38,25 @@ func TestCreateNewFavoriteRelWithRedis(t *testing.T) {
 	models.Flush()
 
 	// Create a test video.
-	models.CreateTestVideo(1, time.Now(), "test")
-	// Insert two test users to redis.
+	video, _ := models.CreateTestVideo(1, time.Now(), "test")
+	testVideo := &models.VideoDetail{ID: video.ID, Title: "test"}
+	// Insert two test users and video to redis.
 	testUser1 := &models.UserDetail{ID: 1, Name: "test"}
 	testUser2 := &models.UserDetail{ID: 2, Name: "test"}
 	redis.Rdb.HSet(redis.Ctx, redis.UserKey+"1", testUser1)
 	redis.Rdb.HSet(redis.Ctx, redis.UserKey+"2", testUser2)
+	redis.Rdb.HSet(redis.Ctx, redis.VideoKey+"1", testVideo)
 
 	statusCode, statusMsg := favoriteService.CreateNewFavoriteRel(2, 1)
 	favoriteCount := redis.Rdb.HGet(redis.Ctx, redis.UserKey+"2", "favorite_count").Val()
 	totalFavorited := redis.Rdb.HGet(redis.Ctx, redis.UserKey+"1", "total_favorited").Val()
+	videoFavoriteCount := redis.Rdb.HGet(redis.Ctx, redis.VideoKey+"1", "favorite_count").Val()
 
 	assert.Equal(t, int32(0), statusCode)
 	assert.Equal(t, "favorite action success", statusMsg)
 	assert.Equal(t, "1", favoriteCount)
 	assert.Equal(t, "1", totalFavorited)
+	assert.Equal(t, "1", videoFavoriteCount)
 }
 
 func TestCreateNewFavoriteRelWithRepetition(t *testing.T) {
@@ -99,9 +103,12 @@ func TestDeleteFavoriteRelWithRedis(t *testing.T) {
 	models.Flush()
 
 	// Create a test video.
-	models.CreateTestVideo(1, time.Now(), "test")
+	video, _ := models.CreateTestVideo(1, time.Now(), "test")
 	// Create a test favorite relationship.
 	models.CreateTestFavoriteRel(2, 1)
+	// Insert video to redis.
+	testVideo := &models.VideoDetail{ID: video.ID, Title: "test", FavoriteCount: 1}
+	redis.Rdb.HSet(redis.Ctx, redis.VideoKey+"1", testVideo)
 	// Insert two test users to redis.
 	testUser1 := &models.UserDetail{ID: 1, Name: "test", TotalFavorited: 1}
 	testUser2 := &models.UserDetail{ID: 2, Name: "test", FavoriteCount: 1}
@@ -111,11 +118,13 @@ func TestDeleteFavoriteRelWithRedis(t *testing.T) {
 	statusCode, statusMsg := favoriteService.DeleteFavoriteRel(2, 1)
 	favoriteCount := redis.Rdb.HGet(redis.Ctx, redis.UserKey+"2", "favorite_count").Val()
 	totalFavorited := redis.Rdb.HGet(redis.Ctx, redis.UserKey+"1", "total_favorited").Val()
+	videoFavoriteCount := redis.Rdb.HGet(redis.Ctx, redis.VideoKey+"1", "favorite_count").Val()
 
 	assert.Equal(t, int32(0), statusCode)
 	assert.Equal(t, "unfavorite action success", statusMsg)
 	assert.Equal(t, "0", favoriteCount)
 	assert.Equal(t, "0", totalFavorited)
+	assert.Equal(t, "0", videoFavoriteCount)
 }
 
 func TestGetFavoriteVideoListByUserID(t *testing.T) {

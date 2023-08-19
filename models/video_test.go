@@ -47,6 +47,35 @@ func TestGetVideoListByUserID(t *testing.T) {
 	assert.Equal(t, testVideo.Title, videoList[0].Title)
 }
 
+func TestGetVideoIDListByAuthorID(t *testing.T) {
+	InitDatabase(true)
+
+	// Create a test video.
+	testVideo, _ := CreateTestVideo(1, time.Now(), "test")
+
+	videoIDList, err := GetVideoIDListByAuthorID(testVideo.AuthorID)
+	if err != nil {
+		t.Fatalf("Error when getting video id list by author id: %v", err)
+	}
+
+	assert.Equal(t, 1, len(videoIDList))
+	assert.Equal(t, testVideo.ID, videoIDList[0])
+}
+
+func TestGetAuthorIDByVideoID(t *testing.T) {
+	InitDatabase(true)
+
+	// Create a test video.
+	testVideo, _ := CreateTestVideo(1, time.Now(), "test")
+
+	authorID, err := GetAuthorIDByVideoID(testVideo.ID)
+	if err != nil {
+		t.Fatalf("Error when getting author id by video id: %v", err)
+	}
+
+	assert.Equal(t, testVideo.AuthorID, authorID)
+}
+
 func TestGetMost30Videos(t *testing.T) {
 	InitDatabase(true)
 
@@ -59,17 +88,16 @@ func TestGetMost30Videos(t *testing.T) {
 	videoTwoTimestamp := time.Now().Add(time.Second * 10)
 
 	// Create two new test videos.
-	testVideoOne, _ := CreateTestVideo(testUser.ID, videoOneTimestamp, "testOne")
+	CreateTestVideo(testUser.ID, videoOneTimestamp, "testOne")
 	CreateTestVideo(testUser.ID, videoTwoTimestamp, "testTwo")
 
 	// Check the results.
-	videoList, earliestTime, err := GetMost30Videos(middleTimestamp)
+	videoIDList, earliestTime, err := GetMost30Videos(middleTimestamp)
 	if err != nil {
 		t.Fatalf("Error when getting most 30 videos: %v", err)
 	}
 
-	assert.Equal(t, 1, len(videoList))
-	assert.Equal(t, testVideoOne.Title, videoList[0].Title)
+	assert.Equal(t, 1, len(videoIDList))
 	assert.Equal(t, videoOneTimestamp.Unix(), earliestTime.Unix())
 }
 

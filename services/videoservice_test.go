@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Ghjattu/tiny-tiktok/middleware/redis"
 	"github.com/Ghjattu/tiny-tiktok/models"
 	"github.com/stretchr/testify/assert"
 )
@@ -19,6 +20,26 @@ func TestCreateNewVideo(t *testing.T) {
 
 	assert.Equal(t, int32(0), status_code)
 	assert.Equal(t, "create new video successfully", statue_msg)
+}
+
+func TestCreateNewVideoWithRedis(t *testing.T) {
+	models.Flush()
+
+	// Insert a test user to redis.
+	testUser := &models.UserDetail{
+		ID:        1,
+		Name:      "test",
+		WorkCount: 0,
+	}
+	userKey := redis.UserKey + "1"
+	redis.Rdb.HSet(redis.Ctx, userKey, testUser)
+
+	statusCode, statusMsg := videoService.CreateNewVideo("test", "test", 1, time.Now())
+	workCount := redis.Rdb.HGet(redis.Ctx, userKey, "work_count").Val()
+
+	assert.Equal(t, int32(0), statusCode)
+	assert.Equal(t, "create new video successfully", statusMsg)
+	assert.Equal(t, "1", workCount)
 }
 
 func TestGetPublishListByAuthorID(t *testing.T) {

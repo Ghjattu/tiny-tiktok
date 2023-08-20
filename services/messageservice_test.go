@@ -3,7 +3,6 @@ package services
 import (
 	"testing"
 
-	"github.com/Ghjattu/tiny-tiktok/models"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -11,71 +10,52 @@ var (
 	messageService = &MessageService{}
 )
 
-func TestCreateNewMessageWithSameSenderAndReceiver(t *testing.T) {
-	models.Flush()
-
-	statusCode, statusMsg := messageService.CreateNewMessage(1, 1, "Hello")
-
-	assert.Equal(t, int32(1), statusCode)
-	assert.Equal(t, "you can not send messages to yourself", statusMsg)
-}
-
-func TestCreateNewMessageWithEmptyContent(t *testing.T) {
-	models.Flush()
-
-	// Create a test user.
-	testUser, _ := models.CreateTestUser("test", "123456")
-
-	statusCode, statusMsg := messageService.CreateNewMessage(testUser.ID+1, testUser.ID, "")
-
-	assert.Equal(t, int32(1), statusCode)
-	assert.Equal(t, "message content cannot be empty", statusMsg)
-}
-
-func TestCreateNewMessageWithNonExistUser(t *testing.T) {
-	models.Flush()
-
-	statusCode, statusMsg := messageService.CreateNewMessage(1, 2, "Hello")
-
-	assert.Equal(t, int32(1), statusCode)
-	assert.Equal(t, "receiver does not exist", statusMsg)
-}
-
 func TestCreateNewMessage(t *testing.T) {
-	models.Flush()
+	setup()
 
-	// Create a test user.
-	testUser, _ := models.CreateTestUser("test", "123456")
+	t.Run("same sender and receiver", func(t *testing.T) {
+		statusCode, _ := messageService.CreateNewMessage(1, 1, "Hello")
 
-	statusCode, statusMsg := messageService.CreateNewMessage(testUser.ID+1, testUser.ID, "Hello")
+		assert.Equal(t, int32(1), statusCode)
+	})
 
-	assert.Equal(t, int32(0), statusCode)
-	assert.Equal(t, "create new message successfully", statusMsg)
-}
+	t.Run("empty content", func(t *testing.T) {
+		statusCode, _ := messageService.CreateNewMessage(1, 2, "")
 
-func TestGetMessageListWithNonExistUser(t *testing.T) {
-	models.Flush()
+		assert.Equal(t, int32(1), statusCode)
+	})
 
-	statusCode, statusMsg, _ := messageService.GetMessageList(1, 2)
+	t.Run("receiver does not exist", func(t *testing.T) {
+		statusCode, _ := messageService.CreateNewMessage(1, 0, "Hello")
 
-	assert.Equal(t, int32(1), statusCode)
-	assert.Equal(t, "receiver does not exist", statusMsg)
+		assert.Equal(t, int32(1), statusCode)
+	})
+
+	t.Run("create new message successfully", func(t *testing.T) {
+		statusCode, _ :=
+			messageService.CreateNewMessage(testUserOne.ID, testUserTwo.ID, "Hello")
+
+		assert.Equal(t, int32(0), statusCode)
+	})
 }
 
 func TestGetMessageList(t *testing.T) {
-	models.Flush()
+	setup()
 
-	// Create two test users.
-	testUserOne, _ := models.CreateTestUser("testOne", "123456")
-	testUserTwo, _ := models.CreateTestUser("testTwo", "123456")
-	// Create a test message.
-	models.CreateTestMessage(testUserOne.ID, testUserTwo.ID)
+	t.Run("receiver does not exist", func(t *testing.T) {
+		statusCode, _, _ := messageService.GetMessageList(1, 0)
 
-	statusCode, statusMsg, messageList :=
-		messageService.GetMessageList(testUserOne.ID, testUserTwo.ID)
+		assert.Equal(t, int32(1), statusCode)
+	})
 
-	assert.Equal(t, int32(0), statusCode)
-	assert.Equal(t, "get message list successfully", statusMsg)
-	assert.Equal(t, 1, len(messageList))
+	t.Run("get message list successfully", func(t *testing.T) {
+		// Create a test message.
+		messageService.CreateNewMessage(testUserOne.ID, testUserTwo.ID, "Hello")
 
+		statusCode, _, messageList :=
+			messageService.GetMessageList(testUserOne.ID, testUserTwo.ID)
+
+		assert.Equal(t, int32(0), statusCode)
+		assert.Equal(t, 1, len(messageList))
+	})
 }

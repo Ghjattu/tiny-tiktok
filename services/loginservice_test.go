@@ -11,61 +11,51 @@ var (
 	loginService = &LoginService{}
 )
 
-func TestLoginWithLongUsername(t *testing.T) {
-	models.Flush()
-
-	user_id, status_code, status_msg, _ := loginService.Login(
-		"1234567890123456789012345678901234567890123456789012345678901234567890", "123456")
-
-	assert.Equal(t, int64(-1), user_id)
-	assert.Equal(t, int32(1), status_code)
-	assert.Equal(t, "username or password is too long", status_msg)
-}
-
-func TestLoginWithLongPassword(t *testing.T) {
-	models.Flush()
-
-	user_id, status_code, status_msg, _ := loginService.Login("test",
-		"1234567890123456789012345678901234567890123456789012345678901234567890")
-
-	assert.Equal(t, int64(-1), user_id)
-	assert.Equal(t, int32(1), status_code)
-	assert.Equal(t, "username or password is too long", status_msg)
-}
-
-func TestLoginWithNotExistName(t *testing.T) {
-	models.Flush()
-
-	user_id, status_code, status_msg, _ := loginService.Login("test", "123456")
-
-	assert.Equal(t, int64(-1), user_id)
-	assert.Equal(t, int32(1), status_code)
-	assert.Equal(t, "username not found", status_msg)
-}
-
-func TestLoginWithWrongPassword(t *testing.T) {
-	models.Flush()
-
-	// Create a new test user.
-	models.CreateTestUser("test", "123456")
-
-	user_id, status_code, status_msg, _ := loginService.Login("test", "12345")
-
-	assert.Equal(t, int64(-1), user_id)
-	assert.Equal(t, int32(1), status_code)
-	assert.Equal(t, "wrong password", status_msg)
-}
-
-func TestLoginWithCorrectPassword(t *testing.T) {
-	models.Flush()
-
+func TestLogin(t *testing.T) {
+	models.InitDatabase(true)
 	// Create a new test user.
 	testUser, _ := models.CreateTestUser("test", "123456")
 
-	user_id, status_code, status_msg, _ := loginService.Login("test", "123456")
+	t.Run("long username", func(t *testing.T) {
+		userID, statusCode, statusMsg, _ := loginService.Login(
+			"1234567890123456789012345678901234567890123456789012345678901234567890", "123456")
 
-	assert.Equal(t, int64(1), user_id)
-	assert.Equal(t, int32(0), status_code)
-	assert.Equal(t, "login successfully", status_msg)
-	assert.Equal(t, testUser.ID, user_id)
+		assert.Equal(t, int64(-1), userID)
+		assert.Equal(t, int32(1), statusCode)
+		assert.Equal(t, "username or password is too long", statusMsg)
+	})
+
+	t.Run("long password", func(t *testing.T) {
+		userID, statusCode, statusMsg, _ := loginService.Login("test",
+			"1234567890123456789012345678901234567890123456789012345678901234567890")
+
+		assert.Equal(t, int64(-1), userID)
+		assert.Equal(t, int32(1), statusCode)
+		assert.Equal(t, "username or password is too long", statusMsg)
+	})
+
+	t.Run("username does not exist", func(t *testing.T) {
+		userID, statusCode, statusMsg, _ := loginService.Login("not_exist_name", "123456")
+
+		assert.Equal(t, int64(-1), userID)
+		assert.Equal(t, int32(1), statusCode)
+		assert.Equal(t, "username not found", statusMsg)
+	})
+
+	t.Run("wrong password", func(t *testing.T) {
+		userID, statusCode, statusMsg, _ := loginService.Login("test", "12345")
+
+		assert.Equal(t, int64(-1), userID)
+		assert.Equal(t, int32(1), statusCode)
+		assert.Equal(t, "wrong password", statusMsg)
+	})
+
+	t.Run("correct password", func(t *testing.T) {
+		userID, statusCode, statusMsg, _ := loginService.Login("test", "123456")
+
+		assert.Equal(t, int64(1), userID)
+		assert.Equal(t, int32(0), statusCode)
+		assert.Equal(t, "login successfully", statusMsg)
+		assert.Equal(t, testUser.ID, userID)
+	})
 }

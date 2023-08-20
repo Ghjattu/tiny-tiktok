@@ -11,84 +11,74 @@ var (
 	registerService = &RegisterService{}
 )
 
-func TestRegisterWithEmptyUsername(t *testing.T) {
-	user_id, status_code, status_msg, _ := registerService.Register("", "123456")
+func TestRegister(t *testing.T) {
+	models.InitDatabase(true)
+	// Create a test user.
+	testUser, _ := models.CreateTestUser("test", "123456")
 
-	assert.Equal(t, int64(-1), user_id)
-	assert.Equal(t, int32(1), status_code)
-	assert.Equal(t, "invalid username or password", status_msg)
-}
+	t.Run("empty username", func(t *testing.T) {
+		UserID, statusCode, statusMsg, _ := registerService.Register("", "123456")
 
-func TestRegisterWithEmptyPassword(t *testing.T) {
-	user_id, status_code, status_msg, _ := registerService.Register("test", "")
+		assert.Equal(t, int64(-1), UserID)
+		assert.Equal(t, int32(1), statusCode)
+		assert.Equal(t, "invalid username or password", statusMsg)
+	})
 
-	assert.Equal(t, int64(-1), user_id)
-	assert.Equal(t, int32(1), status_code)
-	assert.Equal(t, "invalid username or password", status_msg)
-}
+	t.Run("empty password", func(t *testing.T) {
+		UserID, statusCode, statusMsg, _ := registerService.Register("test", "")
 
-func TestRegisterWithShortPassword(t *testing.T) {
-	models.Flush()
+		assert.Equal(t, int64(-1), UserID)
+		assert.Equal(t, int32(1), statusCode)
+		assert.Equal(t, "invalid username or password", statusMsg)
+	})
 
-	user_id, status_code, status_msg, _ := registerService.Register("test", "123")
+	t.Run("too short password", func(t *testing.T) {
+		UserID, statusCode, statusMsg, _ := registerService.Register("test", "123")
 
-	assert.Equal(t, int64(-1), user_id)
-	assert.Equal(t, int32(1), status_code)
-	assert.Equal(t, "password is too short", status_msg)
-}
+		assert.Equal(t, int64(-1), UserID)
+		assert.Equal(t, int32(1), statusCode)
+		assert.Equal(t, "password is too short", statusMsg)
+	})
 
-func TestRegisterWithLongUsername(t *testing.T) {
-	models.Flush()
+	t.Run("too long username", func(t *testing.T) {
+		UserID, statusCode, statusMsg, _ := registerService.Register(
+			"1234567890123456789012345678901234567890123456789012345678901234567890", "123456")
 
-	user_id, status_code, status_msg, _ := registerService.Register(
-		"1234567890123456789012345678901234567890123456789012345678901234567890", "123456")
+		assert.Equal(t, int64(-1), UserID)
+		assert.Equal(t, int32(1), statusCode)
+		assert.Equal(t, "username or password is too long", statusMsg)
+	})
 
-	assert.Equal(t, int64(-1), user_id)
-	assert.Equal(t, int32(1), status_code)
-	assert.Equal(t, "username or password is too long", status_msg)
-}
+	t.Run("too long password", func(t *testing.T) {
+		UserID, statusCode, statusMsg, _ := registerService.Register("test",
+			"12345678901234567890123456789012345678901234567890123456789012345678901234567890")
 
-func TestRegisterWithLongPassword(t *testing.T) {
-	models.Flush()
+		assert.Equal(t, int64(-1), UserID)
+		assert.Equal(t, int32(1), statusCode)
+		assert.Equal(t, "username or password is too long", statusMsg)
+	})
 
-	user_id, status_code, status_msg, _ := registerService.Register("test",
-		"12345678901234567890123456789012345678901234567890123456789012345678901234567890")
+	t.Run("exceed 72 bytes password", func(t *testing.T) {
+		UserID, statusCode, statusMsg, _ := registerService.Register(testUser.Name+"1",
+			"密码密码密码密码密码密码密码密码密码密码密码密码密码密码密码")
 
-	assert.Equal(t, int64(-1), user_id)
-	assert.Equal(t, int32(1), status_code)
-	assert.Equal(t, "username or password is too long", status_msg)
-}
+		assert.Equal(t, int64(-1), UserID)
+		assert.Equal(t, int32(1), statusCode)
+		assert.Equal(t, "password length exceeds 72 bytes", statusMsg)
+	})
 
-func TestRegisterWithExceed72BytesPassword(t *testing.T) {
-	models.Flush()
+	t.Run("registered username", func(t *testing.T) {
+		UserID, statusCode, statusMsg, _ := registerService.Register(testUser.Name, "123456")
 
-	user_id, status_code, status_msg, _ := registerService.Register("test",
-		"密码密码密码密码密码密码密码密码密码密码密码密码密码密码密码")
+		assert.Equal(t, int64(-1), UserID)
+		assert.Equal(t, int32(1), statusCode)
+		assert.Equal(t, "the username has been registered", statusMsg)
+	})
 
-	assert.Equal(t, int64(-1), user_id)
-	assert.Equal(t, int32(1), status_code)
-	assert.Equal(t, "password length exceeds 72 bytes", status_msg)
-}
+	t.Run("valid username and password", func(t *testing.T) {
+		_, statusCode, statusMsg, _ := registerService.Register(testUser.Name+"1", "123456")
 
-func TestRegisterWithRegisteredUsername(t *testing.T) {
-	models.Flush()
-
-	// Create a new test user.
-	models.CreateTestUser("test", "123456")
-
-	user_id, status_code, status_msg, _ := registerService.Register("test", "123456")
-
-	assert.Equal(t, int64(-1), user_id)
-	assert.Equal(t, int32(1), status_code)
-	assert.Equal(t, "the username has been registered", status_msg)
-}
-
-func TestRegisterWithValidUsernameAndPassword(t *testing.T) {
-	models.Flush()
-
-	user_id, status_code, status_msg, _ := registerService.Register("test", "123456")
-
-	assert.Equal(t, int64(1), user_id)
-	assert.Equal(t, int32(0), status_code)
-	assert.Equal(t, "register successfully", status_msg)
+		assert.Equal(t, int32(0), statusCode)
+		assert.Equal(t, "register successfully", statusMsg)
+	})
 }

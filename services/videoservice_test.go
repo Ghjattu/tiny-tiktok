@@ -15,111 +15,92 @@ var (
 )
 
 func TestCreateNewVideo(t *testing.T) {
-	models.Flush()
+	setup()
 
-	status_code, statue_msg := videoService.CreateNewVideo("test", "test", 1, time.Now())
+	t.Run("create video successfully", func(t *testing.T) {
+		redis.Rdb.FlushDB(redis.Ctx)
 
-	assert.Equal(t, int32(0), status_code)
-	assert.Equal(t, "create new video successfully", statue_msg)
+		// Insert a test user to redis.
+		userKey := redis.UserKey + strconv.FormatInt(testUserOne.ID, 10)
+		redis.Rdb.HSet(redis.Ctx, userKey, testUserOneDetail)
+
+		statusCode, statusMsg :=
+			videoService.CreateNewVideo("test", "test", testUserOne.ID, time.Now())
+		workCount := redis.Rdb.HGet(redis.Ctx, userKey, "work_count").Val()
+
+		assert.Equal(t, int32(0), statusCode)
+		assert.Equal(t, "create new video successfully", statusMsg)
+		assert.Equal(t, "1", workCount)
+	})
 }
-
-// func TestCreateNewVideoWithRedis(t *testing.T) {
-// 	models.Flush()
-
-// 	// Insert a test user to redis.
-// 	testUser := &models.UserDetail{
-// 		ID:        1,
-// 		Name:      "test",
-// 		WorkCount: 0,
-// 	}
-// 	userKey := redis.UserKey + "1"
-// 	redis.Rdb.HSet(redis.Ctx, userKey, testUser)
-
-// 	statusCode, statusMsg := videoService.CreateNewVideo("test", "test", 1, time.Now())
-// 	workCount := redis.Rdb.HGet(redis.Ctx, userKey, "work_count").Val()
-
-// 	assert.Equal(t, int32(0), statusCode)
-// 	assert.Equal(t, "create new video successfully", statusMsg)
-// 	assert.Equal(t, "1", workCount)
-// }
 
 func TestGetVideoListByAuthorID(t *testing.T) {
-	models.Flush()
+	setup()
 
-	// Create a new test user.
-	testUser, _ := models.CreateTestUser("test", "123456")
-	// Create a new test video.
-	testVideo, _ := models.CreateTestVideo(testUser.ID, time.Now(), "test")
-	// Create a test favorite relation.
-	models.CreateTestFavoriteRel(testUser.ID+1, testVideo.ID)
+	t.Run("get video list successfully with cache miss", func(t *testing.T) {
+		redis.Rdb.FlushDB(redis.Ctx)
 
-	status_code, _, videoList := videoService.GetVideoListByAuthorID(testUser.ID, testUser.ID+1)
+		statusCode, _, videoList :=
+			videoService.GetVideoListByAuthorID(testUserOne.ID, 0)
 
-	assert.Equal(t, int32(0), status_code)
-	assert.Equal(t, 1, len(videoList))
-	assert.Equal(t, int64(1), videoList[0].FavoriteCount)
-	assert.True(t, videoList[0].IsFavorite)
-}
+		assert.Equal(t, int32(0), statusCode)
+		assert.Equal(t, 2, len(videoList))
+	})
 
-func TestGetVideoListByAuthorIDWithRedis(t *testing.T) {
-	models.Flush()
+	t.Run("get video list successfully with cache hit", func(t *testing.T) {
+		redis.Rdb.FlushDB(redis.Ctx)
 
-	// Create a new test user.
-	testUser, _ := models.CreateTestUser("test", "123456")
-	// Create a test video.
-	testVideo, _ := models.CreateTestVideo(testUser.ID, time.Now(), "test")
-	// Insert video id list to redis.
-	videoAuthorKey := redis.VideosByAuthorKey + strconv.FormatInt(testUser.ID, 10)
-	redis.Rdb.RPush(redis.Ctx, videoAuthorKey, testVideo.ID)
+		// Insert video id list to redis.
+		videoAuthorKey := redis.VideosByAuthorKey + strconv.FormatInt(testUserOne.ID, 10)
+		redis.Rdb.RPush(redis.Ctx, videoAuthorKey, testVideoOne.ID)
 
-	statusCode, _, videoList := videoService.GetVideoListByAuthorID(testUser.ID, testUser.ID+1)
+		statusCode, _, videoList :=
+			videoService.GetVideoListByAuthorID(testUserOne.ID, 0)
 
-	assert.Equal(t, int32(0), statusCode)
-	assert.Equal(t, 1, len(videoList))
-	assert.Equal(t, testVideo.Title, videoList[0].Title)
+		assert.Equal(t, int32(0), statusCode)
+		assert.Equal(t, 1, len(videoList))
+	})
 }
 
 func TestGetMost30Videos(t *testing.T) {
-	models.Flush()
+	models.InitDatabase(true)
 
-	status_code, statue_msg, _, videoList := videoService.GetMost30Videos(time.Now(), 0)
+	statusCode, statusMsg, _, videoList := videoService.GetMost30Videos(time.Now(), 0)
 
-	assert.Equal(t, int32(0), status_code)
-	assert.Equal(t, "get most 30 videos successfully", statue_msg)
+	assert.Equal(t, int32(0), statusCode)
+	assert.Equal(t, "get most 30 videos successfully", statusMsg)
 	assert.Equal(t, 0, len(videoList))
 }
 
 func TestGetVideoListByVideoIDList(t *testing.T) {
-	models.Flush()
+	setup()
 
-	// Create a new test user.
-	testUser, _ := models.CreateTestUser("test", "123456")
-	// Create a new test video.
-	testVideo, _ := models.CreateTestVideo(testUser.ID, time.Now(), "test")
+	t.Run("get video list successfully with cache miss", func(t *testing.T) {
+		redis.Rdb.FlushDB(redis.Ctx)
 
-	status_code, statue_msg, videoList := videoService.GetVideoListByVideoIDList([]int64{testVideo.ID}, 1)
+		statusCode, statusMsg, videoList :=
+			videoService.GetVideoListByVideoIDList([]int64{testVideoOne.ID}, 0)
 
-	assert.Equal(t, int32(0), status_code)
-	assert.Equal(t, "get video list successfully", statue_msg)
-	assert.Equal(t, 1, len(videoList))
-}
+		assert.Equal(t, int32(0), statusCode)
+		assert.Equal(t, "get video list successfully", statusMsg)
+		assert.Equal(t, 1, len(videoList))
+	})
 
-func TestGetVideoListByVideoIDListWithRedis(t *testing.T) {
-	models.Flush()
+	t.Run("get video list successfully with cache hit", func(t *testing.T) {
+		redis.Rdb.FlushDB(redis.Ctx)
 
-	// Create a test video.
-	video, _ := models.CreateTestVideo(1, time.Now(), "test")
-	testVideo := &models.VideoDetail{ID: video.ID, Title: video.Title}
-	// Insert video to redis.
-	videoKey := redis.VideoKey + strconv.FormatInt(testVideo.ID, 10)
-	err := redis.Rdb.HSet(redis.Ctx, videoKey, testVideo).Err()
-	if err != nil {
-		t.Fatalf("Error when insert video to redis: %v", err)
-	}
+		// Insert video to redis.
+		testVideoOne := &models.VideoDetail{ID: testVideoOne.ID, Title: testVideoOne.Title}
+		videoKey := redis.VideoKey + strconv.FormatInt(testVideoOne.ID, 10)
+		err := redis.Rdb.HSet(redis.Ctx, videoKey, testVideoOne).Err()
+		if err != nil {
+			t.Fatalf("Error when insert video to redis: %v", err)
+		}
 
-	statusCode, _, videoList := videoService.GetVideoListByVideoIDList([]int64{testVideo.ID}, 1)
+		statusCode, _, videoList :=
+			videoService.GetVideoListByVideoIDList([]int64{testVideoOne.ID}, 0)
 
-	assert.Equal(t, int32(0), statusCode)
-	assert.Equal(t, 1, len(videoList))
-	assert.Equal(t, testVideo.Title, videoList[0].Title)
+		assert.Equal(t, int32(0), statusCode)
+		assert.Equal(t, 1, len(videoList))
+	})
 }

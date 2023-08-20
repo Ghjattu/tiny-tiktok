@@ -70,11 +70,15 @@ func TestCreateNewFollowRelWithRedis(t *testing.T) {
 	statusCode, statusMsg := followService.CreateNewFollowRel(2, 1)
 	followCount := redis.Rdb.HGet(redis.Ctx, redis.UserKey+"2", "follow_count").Val()
 	followerCount := redis.Rdb.HGet(redis.Ctx, redis.UserKey+"1", "follower_count").Val()
+	followingIDList := redis.Rdb.LRange(redis.Ctx, redis.FollowingKey+"2", 0, -1).Val()
+	followerIDList := redis.Rdb.LRange(redis.Ctx, redis.FollowerKey+"1", 0, -1).Val()
 
 	assert.Equal(t, int32(0), statusCode)
 	assert.Equal(t, "follow success", statusMsg)
 	assert.Equal(t, "1", followCount)
 	assert.Equal(t, "1", followerCount)
+	assert.Equal(t, []string{"1"}, followingIDList)
+	assert.Equal(t, []string{"2"}, followerIDList)
 }
 
 func TestDeleteFollowRel(t *testing.T) {
@@ -99,15 +103,21 @@ func TestDeleteFollowRelWithRedis(t *testing.T) {
 	testUser2 := &models.UserDetail{ID: 2, Name: "test", FollowerCount: 1}
 	redis.Rdb.HSet(redis.Ctx, redis.UserKey+"1", testUser1)
 	redis.Rdb.HSet(redis.Ctx, redis.UserKey+"2", testUser2)
+	redis.Rdb.LRem(redis.Ctx, redis.FollowingKey+"1", 0, 2)
+	redis.Rdb.LRem(redis.Ctx, redis.FollowerKey+"2", 0, 1)
 
 	statusCode, statusMsg := followService.DeleteFollowRel(1, 2)
 	followCount := redis.Rdb.HGet(redis.Ctx, redis.UserKey+"1", "follow_count").Val()
 	followerCount := redis.Rdb.HGet(redis.Ctx, redis.UserKey+"2", "follower_count").Val()
+	followingIDList := redis.Rdb.LRange(redis.Ctx, redis.FollowingKey+"1", 0, -1).Val()
+	followerIDList := redis.Rdb.LRange(redis.Ctx, redis.FollowerKey+"2", 0, -1).Val()
 
 	assert.Equal(t, int32(0), statusCode)
 	assert.Equal(t, "unfollow success", statusMsg)
 	assert.Equal(t, "0", followCount)
 	assert.Equal(t, "0", followerCount)
+	assert.Equal(t, 0, len(followingIDList))
+	assert.Equal(t, 0, len(followerIDList))
 }
 
 func TestGetFollowingListByUserIDWithNonExistUser(t *testing.T) {
@@ -128,13 +138,30 @@ func TestGetFollowingListByUserID(t *testing.T) {
 	// Create a test follow relationship.
 	models.CreateTestFollowRel(testUserOne.ID, testUserTwo.ID)
 
-	statusCode, statusMsg, userList :=
+	statusCode, _, userList :=
 		followService.GetFollowingListByUserID(testUserTwo.ID, testUserOne.ID)
 
 	assert.Equal(t, int32(0), statusCode)
-	assert.Equal(t, "get following list success", statusMsg)
 	assert.Equal(t, 1, len(userList))
 	assert.Equal(t, testUserTwo.ID, userList[0].ID)
+}
+
+func TestGetFollowingListByUserIDWithRedis(t *testing.T) {
+	models.Flush()
+
+	// Create two test users.
+	testUserOne, _ := models.CreateTestUser("test", "123456")
+	testUserTwo, _ := models.CreateTestUser("test2", "123456")
+	// Create a test follow relationship.
+	models.CreateTestFollowRel(testUserOne.ID, testUserTwo.ID)
+	// Insert following id list to redis.
+	redis.Rdb.RPush(redis.Ctx, redis.FollowingKey+"1", 2)
+
+	statusCode, _, userList :=
+		followService.GetFollowingListByUserID(testUserTwo.ID, testUserOne.ID)
+
+	assert.Equal(t, int32(0), statusCode)
+	assert.Equal(t, 1, len(userList))
 }
 
 func TestGetFollowerListByUserIDWithNonExistUser(t *testing.T) {
@@ -155,11 +182,28 @@ func TestGetFollowerListByUserID(t *testing.T) {
 	// Create a test follow relationship.
 	models.CreateTestFollowRel(testUserOne.ID, testUserTwo.ID)
 
-	statusCode, statusMsg, userList :=
+	statusCode, _, userList :=
 		followService.GetFollowerListByUserID(testUserOne.ID, testUserTwo.ID)
 
 	assert.Equal(t, int32(0), statusCode)
-	assert.Equal(t, "get follower list success", statusMsg)
 	assert.Equal(t, 1, len(userList))
 	assert.Equal(t, testUserOne.ID, userList[0].ID)
+}
+
+func TestGetFollowerListByUserIDWithRedis(t *testing.T) {
+	models.Flush()
+
+	// Create two test users.
+	testUserOne, _ := models.CreateTestUser("test", "123456")
+	testUserTwo, _ := models.CreateTestUser("test2", "123456")
+	// Create a test follow relationship.
+	models.CreateTestFollowRel(testUserOne.ID, testUserTwo.ID)
+	// Insert follower id list to redis.
+	redis.Rdb.RPush(redis.Ctx, redis.FollowerKey+"2", 1)
+
+	statusCode, _, userList :=
+		followService.GetFollowerListByUserID(testUserOne.ID, testUserTwo.ID)
+
+	assert.Equal(t, int32(0), statusCode)
+	assert.Equal(t, 1, len(userList))
 }

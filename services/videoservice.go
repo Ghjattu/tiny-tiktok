@@ -60,11 +60,7 @@ func (vs *VideoService) GetVideoListByAuthorID(authorID, currentUserID int64) (i
 		// Cache hit.
 		IDStrList, err := redis.Rdb.LRange(redis.Ctx, videoAuthorKey, 0, -1).Result()
 		if err == nil {
-			videoIDList := make([]int64, 0, len(IDStrList))
-			for _, IDStr := range IDStrList {
-				id, _ := strconv.ParseInt(IDStr, 10, 64)
-				videoIDList = append(videoIDList, id)
-			}
+			videoIDList, _ := redis.ConvertStringToInt64(IDStrList)
 
 			// Update the expire time.
 			redis.Rdb.Expire(redis.Ctx, videoAuthorKey, redis.RandomDay())

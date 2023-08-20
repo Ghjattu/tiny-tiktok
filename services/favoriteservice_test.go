@@ -51,12 +51,14 @@ func TestCreateNewFavoriteRelWithRedis(t *testing.T) {
 	favoriteCount := redis.Rdb.HGet(redis.Ctx, redis.UserKey+"2", "favorite_count").Val()
 	totalFavorited := redis.Rdb.HGet(redis.Ctx, redis.UserKey+"1", "total_favorited").Val()
 	videoFavoriteCount := redis.Rdb.HGet(redis.Ctx, redis.VideoKey+"1", "favorite_count").Val()
+	favoriteVideosList := redis.Rdb.LRange(redis.Ctx, redis.FavoriteVideosKey+"2", 0, -1).Val()
 
 	assert.Equal(t, int32(0), statusCode)
 	assert.Equal(t, "favorite action success", statusMsg)
 	assert.Equal(t, "1", favoriteCount)
 	assert.Equal(t, "1", totalFavorited)
 	assert.Equal(t, "1", videoFavoriteCount)
+	assert.Equal(t, 1, len(favoriteVideosList))
 }
 
 func TestCreateNewFavoriteRelWithRepetition(t *testing.T) {
@@ -137,10 +139,27 @@ func TestGetFavoriteVideoListByUserID(t *testing.T) {
 	// Create a test favorite relation.
 	models.CreateTestFavoriteRel(testUser.ID, testVideo.ID)
 
-	statusCode, statusMsg, favoriteVideoList := favoriteService.GetFavoriteVideoListByUserID(testUser.ID, testUser.ID)
+	statusCode, _, favoriteVideoList := favoriteService.GetFavoriteVideoListByUserID(testUser.ID, testUser.ID)
 
 	assert.Equal(t, int32(0), statusCode)
-	assert.Equal(t, "get favorite video list successfully", statusMsg)
+	assert.Equal(t, 1, len(favoriteVideoList))
+}
+
+func TestGetFavoriteVideoListByUserIDWithRedis(t *testing.T) {
+	models.Flush()
+
+	// Create a new test user.
+	testUser, _ := models.CreateTestUser("test", "123456")
+	// Create a new test video.
+	testVideo, _ := models.CreateTestVideo(testUser.ID, time.Now(), "test")
+	// Create a test favorite relation.
+	models.CreateTestFavoriteRel(testUser.ID, testVideo.ID)
+	// Insert video id to redis.
+	redis.Rdb.RPush(redis.Ctx, redis.FavoriteVideosKey+"1", testVideo.ID)
+
+	statusCode, _, favoriteVideoList := favoriteService.GetFavoriteVideoListByUserID(testUser.ID, testUser.ID)
+
+	assert.Equal(t, int32(0), statusCode)
 	assert.Equal(t, 1, len(favoriteVideoList))
 }
 

@@ -42,6 +42,10 @@ func (fs *FavoriteService) CreateNewFavoriteRel(userID, videoID int64) (int32, s
 	videoKey := redis.VideoKey + strconv.FormatInt(videoID, 10)
 	redis.HashIncrBy(videoKey, "favorite_count", 1)
 
+	// Update the favorite videos id list of the user in cache.
+	favoriteVideosKey := redis.FavoriteVideosKey + strconv.FormatInt(userID, 10)
+	redis.Rdb.RPush(redis.Ctx, favoriteVideosKey, videoID)
+
 	// Create a new favorite relation.
 	fr := &models.FavoriteRel{
 		UserID:  userID,
@@ -87,6 +91,10 @@ func (fs *FavoriteService) DeleteFavoriteRel(userID, videoID int64) (int32, stri
 	videoKey := redis.VideoKey + strconv.FormatInt(videoID, 10)
 	redis.HashIncrBy(videoKey, "favorite_count", -1)
 
+	// Update the favorite videos id list of the user in cache.
+	favoriteVideosKey := redis.FavoriteVideosKey + strconv.FormatInt(userID, 10)
+	redis.Rdb.LRem(redis.Ctx, favoriteVideosKey, 0, videoID)
+
 	_, err = models.DeleteFavoriteRel(userID, videoID)
 	if err != nil {
 		return 1, "unfavorite action failed"
@@ -96,20 +104,40 @@ func (fs *FavoriteService) DeleteFavoriteRel(userID, videoID int64) (int32, stri
 }
 
 func (fs *FavoriteService) GetFavoriteVideoListByUserID(currentUserID, queryUserID int64) (int32, string, []models.VideoDetail) {
+	vs := &VideoService{}
+
+	// Try to get favorite video id list from redis.
+	favoriteVideosKey := redis.FavoriteVideosKey + strconv.FormatInt(queryUserID, 10)
+	if redis.Rdb.Exists(redis.Ctx, favoriteVideosKey).Val() == 1 {
+		// Cache hit.
+		IDStrList, err := redis.Rdb.LRange(redis.Ctx, favoriteVideosKey, 0, -1).Result()
+		if err == nil {
+			videoIDList := make([]int64, 0, len(IDStrList))
+			for _, IDStr := range IDStrList {
+				id, _ := strconv.ParseInt(IDStr, 10, 64)
+				videoIDList = append(videoIDList, id)
+			}
+
+			// Update the expire time.
+			redis.Rdb.Expire(redis.Ctx, favoriteVideosKey, redis.RandomDay())
+
+			return vs.GetVideoListByVideoIDList(videoIDList, currentUserID)
+		}
+	}
+
+	// Cache miss or some error occurs.
 	// Get favorite video id list by user id.
 	favoriteVideoIDList, err := models.GetFavoriteVideoIDListByUserID(queryUserID)
 	if err != nil {
 		return 1, "failed to get favorite video id list", nil
 	}
 
-	// Get favorite video list by video id list.
-	vs := &VideoService{}
-	statusCode, _, favoriteVideoList := vs.GetVideoListByVideoIDList(favoriteVideoIDList, currentUserID)
-	if statusCode == 1 {
-		return 1, "failed to get favorite video list", nil
-	}
+	// Save favorite video id list to redis.
+	redis.Rdb.RPush(redis.Ctx, favoriteVideosKey, favoriteVideoIDList)
+	redis.Rdb.Expire(redis.Ctx, favoriteVideosKey, redis.RandomDay())
 
-	return 0, "get favorite video list successfully", favoriteVideoList
+	// Get favorite video list by video id list.
+	return vs.GetVideoListByVideoIDList(favoriteVideoIDList, currentUserID)
 }
 
 // GetTotalFavoritedByUserID returns the total number of favorited by user id.

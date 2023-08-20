@@ -142,6 +142,20 @@ func (fs *FavoriteService) GetFavoriteVideoListByUserID(currentUserID, queryUser
 //	@param userID int64
 //	@return int64
 func (fs *FavoriteService) GetTotalFavoritedByUserID(userID int64) int64 {
+	// Try to get total favorited from redis.
+	userKey := redis.UserKey + strconv.FormatInt(userID, 10)
+	if redis.Rdb.Exists(redis.Ctx, userKey).Val() == 1 {
+		// Cache hit.
+		totalFavorited, err := redis.Rdb.HGet(redis.Ctx, userKey, "total_favorited").Int64()
+		if err == nil {
+			// Update the expire time.
+			redis.Rdb.Expire(redis.Ctx, userKey, redis.RandomDay())
+
+			return totalFavorited
+		}
+	}
+
+	// Cache miss or some error occurs.
 	totalFavorited := int64(0)
 
 	videoList, _ := models.GetVideoListByAuthorID(userID)

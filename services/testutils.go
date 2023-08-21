@@ -23,7 +23,8 @@ var (
 	followingUser       *models.User
 	followingUserDetail *models.UserDetail
 
-	testCommentOne *models.Comment
+	testCommentOne      *models.Comment
+	testCommentOneCache *models.CommentCache
 )
 
 func setup() {
@@ -51,4 +52,5 @@ func setup() {
 
 	// Create a test comment.
 	testCommentOne, _ = models.CreateTestComment(testUserOne.ID, testVideoOne.ID)
+	testCommentOneCache = &models.CommentCache{ID: testCommentOne.ID, Content: testCommentOne.Content}
 }

@@ -17,6 +17,13 @@ type CommentDetail struct {
 	CreateDate string      `json:"create_date"`
 }
 
+type CommentCache struct {
+	ID         int64  `redis:"id"`
+	UserID     int64  `redis:"user_id"`
+	Content    string `redis:"content"`
+	CreateDate string `redis:"create_date"`
+}
+
 // CreateNewComment creates a new comment.
 //
 //	@param c *Comment
@@ -65,6 +72,7 @@ func GetCommentByCommentID(commentID int64) (*Comment, error) {
 	return comment, err
 }
 
+// TODO: should be deleted.
 // GetCommentListByVideoID a video's comment list by its id.
 //
 //	@param videoID int64
@@ -76,4 +84,19 @@ func GetCommentListByVideoID(videoID int64) ([]Comment, error) {
 	err := db.Model(&Comment{}).Where("video_id = ?", videoID).Find(&commentList).Error
 
 	return commentList, err
+}
+
+// GetCommentIDListByVideoID returns a video's comment id list by its id.
+//
+//	@param videoID int64
+//	@return []int64 "comment id list"
+//	@return error
+func GetCommentIDListByVideoID(videoID int64) ([]int64, error) {
+	commentIDList := make([]int64, 0)
+
+	err := db.Model(&Comment{}).
+		Where("video_id = ?", videoID).
+		Pluck("id", &commentIDList).Error
+
+	return commentIDList, err
 }

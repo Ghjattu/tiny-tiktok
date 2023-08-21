@@ -6,6 +6,7 @@ import (
 
 	"github.com/Ghjattu/tiny-tiktok/middleware/redis"
 	"github.com/Ghjattu/tiny-tiktok/models"
+	"github.com/Ghjattu/tiny-tiktok/utils"
 )
 
 // VideoService implements VideoInterface.
@@ -60,7 +61,7 @@ func (vs *VideoService) GetVideoListByAuthorID(authorID, currentUserID int64) (i
 		// Cache hit.
 		IDStrList, err := redis.Rdb.LRange(redis.Ctx, videoAuthorKey, 0, -1).Result()
 		if err == nil {
-			videoIDList, _ := redis.ConvertStringToInt64(IDStrList)
+			videoIDList, _ := utils.ConvertStringToInt64(IDStrList)
 
 			// Update the expire time.
 			redis.Rdb.Expire(redis.Ctx, videoAuthorKey, redis.RandomDay())

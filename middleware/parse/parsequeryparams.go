@@ -22,6 +22,7 @@ func ParseQueryParams() gin.HandlerFunc {
 			"comment_id":   "int",
 			"to_user_id":   "int",
 			"content":      "string",
+			"pre_msg_time": "int",
 		}
 
 		queryParams := c.Request.URL.Query()

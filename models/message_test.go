@@ -32,8 +32,10 @@ func TestGetMessageList(t *testing.T) {
 
 	// Create a test message.
 	CreateTestMessage(1, 2)
+	time.Sleep(time.Second * 2)
+	messageTwo, _ := CreateTestMessage(1, 2)
 
-	messageList, err := GetMessageList(1, 2)
+	messageList, err := GetMessageList(1, 2, messageTwo.CreateDate.Add(-time.Second))
 	if err != nil {
 		t.Fatalf("Error when getting message list: %v", err)
 	}

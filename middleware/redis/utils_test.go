@@ -45,3 +45,25 @@ func TestHashIncrBy(t *testing.T) {
 		assert.Nil(t, err)
 	})
 }
+
+func TestHashGetAll(t *testing.T) {
+	t.Run("key does not exist", func(t *testing.T) {
+		Rdb.FlushDB(Ctx)
+
+		result, err := HashGetAll("test")
+
+		assert.Nil(t, result)
+		assert.NotNil(t, err)
+		assert.Equal(t, "key does not exist", err.Error())
+	})
+
+	t.Run("key exists", func(t *testing.T) {
+		Rdb.FlushDB(Ctx)
+
+		Rdb.HSet(Ctx, "test_hash", "test", 1)
+		result, err := HashGetAll("test_hash")
+
+		assert.Nil(t, err)
+		assert.Equal(t, "1", result.Val()["test"])
+	})
+}

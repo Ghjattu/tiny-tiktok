@@ -20,4 +20,8 @@ const (
 	CommentKey = "comment:"
 	// List comments:video:<video_id> save the video's comments id.
 	CommentsByVideoKey = "comments:video:"
+
+	// String last_msg_time:<sender_id>:<receiver_id>
+	// save the last message time between sender and receiver.
+	LastMsgTimeKey = "last_msg_time:"
 )

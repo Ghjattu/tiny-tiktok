@@ -42,7 +42,7 @@ func TestCreateNewFavoriteRel(t *testing.T) {
 		userKey := redis.UserKey + strconv.FormatInt(testUserOne.ID, 10)
 		redis.Rdb.HSet(redis.Ctx, userKey, testUserOneDetail)
 		videoKey := redis.VideoKey + strconv.FormatInt(testVideoTwo.ID, 10)
-		redis.Rdb.HSet(redis.Ctx, videoKey, testVideoTwoDetail)
+		redis.Rdb.HSet(redis.Ctx, videoKey, testVideoTwoCache)
 
 		statusCode, statusMsg :=
 			favoriteService.CreateNewFavoriteRel(testUserOne.ID, testVideoTwo.ID)
@@ -89,7 +89,7 @@ func TestDeleteFavoriteRel(t *testing.T) {
 		userKey := redis.UserKey + strconv.FormatInt(testUserOne.ID, 10)
 		redis.Rdb.HSet(redis.Ctx, userKey, testUserOneDetail)
 		videoKey := redis.VideoKey + strconv.FormatInt(testVideoTwo.ID, 10)
-		redis.Rdb.HSet(redis.Ctx, videoKey, testVideoTwoDetail)
+		redis.Rdb.HSet(redis.Ctx, videoKey, testVideoTwoCache)
 
 		// Create a test favorite relationship.
 		favoriteService.CreateNewFavoriteRel(testUserOne.ID, testVideoTwo.ID)

@@ -15,4 +15,9 @@ const (
 	FollowingKey = "following:"
 	// List follower:<user_id> save the user's follower user id.
 	FollowerKey = "follower:"
+
+	// Hash comment:<comment_id> save the comment's information.
+	CommentKey = "comment:"
+	// List comments:video:<video_id> save the video's comments id.
+	CommentsByVideoKey = "comments:video:"
 )

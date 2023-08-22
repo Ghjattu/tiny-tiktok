@@ -6,6 +6,7 @@ import (
 
 	"github.com/Ghjattu/tiny-tiktok/middleware/redis"
 	"github.com/Ghjattu/tiny-tiktok/models"
+	"github.com/Ghjattu/tiny-tiktok/utils"
 	"gorm.io/gorm"
 )
 
@@ -45,14 +46,18 @@ func (cs *CommentService) CreateNewComment(currentUserID, videoID int64, content
 		CreateDate: timestamp,
 	}
 
-	// Update the CommentCount of the video in cache.
-	videoKey := redis.VideoKey + strconv.FormatInt(videoID, 10)
-	redis.HashIncrBy(videoKey, "comment_count", 1)
-
 	_, err = models.CreateNewComment(comment)
 	if err != nil {
 		return 1, "failed to create new comment", nil
 	}
+
+	// Update the CommentCount of the video in cache.
+	videoKey := redis.VideoKey + strconv.FormatInt(videoID, 10)
+	redis.HashIncrBy(videoKey, "comment_count", 1)
+
+	// Insert the comment id into cache.
+	commentVideoKey := redis.CommentsByVideoKey + strconv.FormatInt(videoID, 10)
+	redis.Rdb.RPushX(redis.Ctx, commentVideoKey, comment.ID).Val()
 
 	// Convert the comment to a comment detail.
 	_, commentDetail := convertCommentToCommentDetail(currentUserID, comment)
@@ -91,6 +96,10 @@ func (cs *CommentService) DeleteCommentByCommentID(currentUserID, commentID int6
 	videoKey := redis.VideoKey + strconv.FormatInt(comment.VideoID, 10)
 	redis.HashIncrBy(videoKey, "comment_count", -1)
 
+	// Delete the comment id from cache.
+	commentVideoKey := redis.CommentsByVideoKey + strconv.FormatInt(comment.VideoID, 10)
+	redis.Rdb.LRem(redis.Ctx, commentVideoKey, 0, comment.ID).Val()
+
 	// Delete the comment.
 	_, err = models.DeleteCommentByCommentID(commentID)
 	if err != nil {
@@ -118,20 +127,116 @@ func (cs *CommentService) GetCommentListByVideoID(currentUserID, videoID int64) 
 		return 1, "failed to check if the video exist", nil
 	}
 
-	// Get the comment list.
-	commentList, err := models.GetCommentListByVideoID(videoID)
-	if err != nil {
-		return 1, "failed to get comment list", nil
+	// Try to get comment id list from redis.
+	commentVideoKey := redis.CommentsByVideoKey + strconv.FormatInt(videoID, 10)
+	if redis.Rdb.Exists(redis.Ctx, commentVideoKey).Val() == 1 {
+		// Cache hit.
+		IDStrList, err := redis.Rdb.LRange(redis.Ctx, commentVideoKey, 0, -1).Result()
+		if err == nil {
+			commentIDList, _ := utils.ConvertStringToInt64(IDStrList)
+
+			// Update the expire time.
+			redis.Rdb.Expire(redis.Ctx, commentVideoKey, redis.RandomDay())
+
+			return cs.GetCommentListByCommentIDList(currentUserID, commentIDList)
+		}
 	}
 
-	// Convert the comment list to a comment detail list.
-	commentDetailList := make([]models.CommentDetail, 0, len(commentList))
-	for _, comment := range commentList {
-		_, commentDetail := convertCommentToCommentDetail(currentUserID, &comment)
-		commentDetailList = append(commentDetailList, *commentDetail)
+	// Cache miss or some error occurs.
+	// Get comment id list by video id.
+	commentIDList, err := models.GetCommentIDListByVideoID(videoID)
+	if err != nil {
+		return 0, "failed to get comment list", nil
+	}
+
+	redis.Rdb.RPush(redis.Ctx, commentVideoKey, commentIDList)
+	redis.Rdb.Expire(redis.Ctx, commentVideoKey, redis.RandomDay())
+
+	return cs.GetCommentListByCommentIDList(currentUserID, commentIDList)
+}
+
+// GetCommentListByCommentIDList gets a comment list by its id list.
+//
+//	@receiver cs *CommentService
+//	@param currentUserID int64
+//	@param commentIDList []int64
+//	@return int32 "status code"
+//	@return string "status message"
+//	@return []models.CommentDetail
+func (cs *CommentService) GetCommentListByCommentIDList(currentUserID int64, commentIDList []int64) (int32, string, []models.CommentDetail) {
+	commentDetailList := make([]models.CommentDetail, 0, len(commentIDList))
+
+	for _, commentID := range commentIDList {
+		// Try to get comment from redis.
+		commentKey := redis.CommentKey + strconv.FormatInt(commentID, 10)
+		result, err := redis.HashGetAll(commentKey)
+		// Cache hit.
+		if err == nil {
+			commentCache := &models.CommentCache{}
+			if err := result.Scan(commentCache); err == nil {
+				commentDetail := &models.CommentDetail{
+					ID:         commentCache.ID,
+					Content:    commentCache.Content,
+					CreateDate: commentCache.CreateDate,
+				}
+
+				us := &UserService{}
+				_, _, commentDetail.User =
+					us.GetUserDetailByUserID(currentUserID, commentCache.UserID)
+
+				commentDetailList = append(commentDetailList, *commentDetail)
+
+				redis.Rdb.Expire(redis.Ctx, commentKey, redis.RandomDay())
+
+				continue
+			}
+		}
+
+		// Cache miss or some error occurs.
+		commentDetail, err := cs.GetCommentDetailByCommentID(currentUserID, commentID)
+		if err == nil {
+			commentDetailList = append(commentDetailList, *commentDetail)
+		}
 	}
 
 	return 0, "get comment list successfully", commentDetailList
+}
+
+// GetCommentDetailByCommentID gets a comment detail by its id.
+//
+//	@receiver cs *CommentService
+//	@param currentUserID int64
+//	@param commentID int64
+//	@return *models.CommentDetail
+//	@return error
+func (cs *CommentService) GetCommentDetailByCommentID(currentUserID, commentID int64) (*models.CommentDetail, error) {
+	comment, err := models.GetCommentByCommentID(commentID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Convert the comment to a comment detail.
+	commentDetail := &models.CommentDetail{
+		ID:         comment.ID,
+		Content:    comment.Content,
+		CreateDate: comment.CreateDate.Format("01-02"),
+	}
+
+	us := &UserService{}
+	_, _, commentDetail.User = us.GetUserDetailByUserID(currentUserID, comment.UserID)
+
+	// Insert the comment into redis.
+	commentKey := redis.CommentKey + strconv.FormatInt(commentID, 10)
+	commentCache := &models.CommentCache{
+		ID:         comment.ID,
+		UserID:     comment.UserID,
+		Content:    comment.Content,
+		CreateDate: comment.CreateDate.Format("01-02"),
+	}
+	redis.Rdb.HSet(redis.Ctx, commentKey, commentCache)
+	redis.Rdb.Expire(redis.Ctx, commentKey, redis.RandomDay())
+
+	return commentDetail, nil
 }
 
 // convertCommentToCommentDetail converts a comment to a comment detail.

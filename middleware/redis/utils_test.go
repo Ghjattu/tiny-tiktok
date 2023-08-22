@@ -46,22 +46,24 @@ func TestHashIncrBy(t *testing.T) {
 	})
 }
 
-func TestConvertStringToInt64(t *testing.T) {
-	t.Run("convert successfully", func(t *testing.T) {
-		list := []string{"1", "2", "3"}
+func TestHashGetAll(t *testing.T) {
+	t.Run("key does not exist", func(t *testing.T) {
+		Rdb.FlushDB(Ctx)
 
-		res, err := ConvertStringToInt64(list)
+		result, err := HashGetAll("test")
 
-		assert.Equal(t, []int64{1, 2, 3}, res)
-		assert.Nil(t, err)
+		assert.Nil(t, result)
+		assert.NotNil(t, err)
+		assert.Equal(t, "key does not exist", err.Error())
 	})
 
-	t.Run("convert failed", func(t *testing.T) {
-		list := []string{"1", "2", "test"}
+	t.Run("key exists", func(t *testing.T) {
+		Rdb.FlushDB(Ctx)
 
-		res, err := ConvertStringToInt64(list)
+		Rdb.HSet(Ctx, "test_hash", "test", 1)
+		result, err := HashGetAll("test_hash")
 
-		assert.Nil(t, res)
-		assert.NotNil(t, err)
+		assert.Nil(t, err)
+		assert.Equal(t, "1", result.Val()["test"])
 	})
 }

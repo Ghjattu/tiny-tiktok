@@ -90,7 +90,7 @@ func TestGetVideoListByVideoIDList(t *testing.T) {
 		redis.Rdb.FlushDB(redis.Ctx)
 
 		// Insert video to redis.
-		testVideoOne := &models.VideoDetail{ID: testVideoOne.ID, Title: testVideoOne.Title}
+		testVideoOne := &models.VideoCache{ID: testVideoOne.ID, Title: testVideoOne.Title}
 		videoKey := redis.VideoKey + strconv.FormatInt(testVideoOne.ID, 10)
 		err := redis.Rdb.HSet(redis.Ctx, videoKey, testVideoOne).Err()
 		if err != nil {

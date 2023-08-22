@@ -3,8 +3,8 @@ package services
 import (
 	"strconv"
 
-	"github.com/Ghjattu/tiny-tiktok/middleware/redis"
 	"github.com/Ghjattu/tiny-tiktok/models"
+	"github.com/Ghjattu/tiny-tiktok/redis"
 	"github.com/Ghjattu/tiny-tiktok/utils"
 	"gorm.io/gorm"
 )

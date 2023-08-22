@@ -6,7 +6,7 @@ package models
 import (
 	"time"
 
-	"github.com/Ghjattu/tiny-tiktok/middleware/redis"
+	"github.com/Ghjattu/tiny-tiktok/redis"
 )
 
 func Flush() {

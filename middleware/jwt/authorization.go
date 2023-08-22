@@ -23,7 +23,7 @@ func AuthorizeGet() gin.HandlerFunc {
 
 		// If the token is invalid, return an error.
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, Response{
+			c.JSON(http.StatusOK, Response{
 				StatusCode: 1,
 				StatusMsg:  "invalid token",
 			})
@@ -54,7 +54,7 @@ func AuthorizePost() gin.HandlerFunc {
 
 		// If the token is invalid, return an error.
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, Response{
+			c.JSON(http.StatusOK, Response{
 				StatusCode: 1,
 				StatusMsg:  "invalid token",
 			})
@@ -90,7 +90,7 @@ func AuthorizeFeed() gin.HandlerFunc {
 
 		// If the token is invalid, return an error.
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, Response{
+			c.JSON(http.StatusOK, Response{
 				StatusCode: 1,
 				StatusMsg:  "invalid token",
 			})

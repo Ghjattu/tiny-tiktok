@@ -58,10 +58,11 @@ func (ms *MessageService) CreateNewMessage(senderID, receiverID int64, content s
 //	@receiver ms *MessageService
 //	@param senderID int64
 //	@param receiverID int64
+//	@param preMsgTime time.Time
 //	@return int32 "status code"
 //	@return string "status message"
 //	@return []models.MessageDetail
-func (ms *MessageService) GetMessageList(senderID, receiverID int64) (int32, string, []models.MessageDetail) {
+func (ms *MessageService) GetMessageList(senderID, receiverID int64, preMsgTime time.Time) (int32, string, []models.MessageDetail) {
 	// Check if the receiver exists.
 	_, err := models.GetUserByUserID(receiverID)
 	if err != nil {
@@ -72,7 +73,7 @@ func (ms *MessageService) GetMessageList(senderID, receiverID int64) (int32, str
 	}
 
 	// Get the message list.
-	messageList, err := models.GetMessageList(senderID, receiverID)
+	messageList, err := models.GetMessageList(senderID, receiverID, preMsgTime)
 	if err != nil {
 		return 1, "failed to get message list", nil
 	}
@@ -96,7 +97,7 @@ func convertMessageToMessageDetail(messageList []models.Message) []models.Messag
 			SenderID:   message.SenderID,
 			ReceiverID: message.ReceiverID,
 			Content:    message.Content,
-			CreateTime: message.CreateDate.Format("2006-01-02 15:04:05"),
+			CreateTime: message.CreateDate.Unix(),
 		}
 		messageDetailList = append(messageDetailList, messageDetail)
 	}

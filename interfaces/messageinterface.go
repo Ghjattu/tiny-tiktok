@@ -1,6 +1,10 @@
 package interfaces
 
-import "github.com/Ghjattu/tiny-tiktok/models"
+import (
+	"time"
+
+	"github.com/Ghjattu/tiny-tiktok/models"
+)
 
 type MessageInterface interface {
 	// CreateNewMessage creates a new message.
@@ -9,5 +13,5 @@ type MessageInterface interface {
 
 	// GetMessageList gets message list between sender and receiver.
 	// Return status code, status message, message detail list.
-	GetMessageList(senderID, receiverID int64) (int32, string, []models.MessageDetail)
+	GetMessageList(senderID, receiverID int64, preMsgTime time.Time) (int32, string, []models.MessageDetail)
 }

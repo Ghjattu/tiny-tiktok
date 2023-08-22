@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/Ghjattu/tiny-tiktok/models"
 	"github.com/Ghjattu/tiny-tiktok/services"
@@ -36,9 +37,11 @@ func MessageAction(c *gin.Context) {
 func MessageChat(c *gin.Context) {
 	receiverID := c.GetInt64("to_user_id")
 	currentUserID := c.GetInt64("current_user_id")
+	preMsgTimeInt := c.GetInt64("pre_msg_time")
+	preMsgTime := time.Unix(preMsgTimeInt, 0)
 
 	ms := &services.MessageService{}
-	statusCode, statusMsg, messages := ms.GetMessageList(currentUserID, receiverID)
+	statusCode, statusMsg, messages := ms.GetMessageList(currentUserID, receiverID, preMsgTime)
 
 	c.JSON(http.StatusOK, MessageChatResponse{
 		Response: Response{

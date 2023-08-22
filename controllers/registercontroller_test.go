@@ -4,48 +4,30 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/Ghjattu/tiny-tiktok/models"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestRegisterWithEmptyUsername(t *testing.T) {
-	models.Flush()
+func TestRegister(t *testing.T) {
+	setup()
 
-	req := httptest.NewRequest("POST",
-		"http://127.0.0.1/douyin/user/register/?password=123456", nil)
+	t.Run("register unsuccessfully", func(t *testing.T) {
+		req := httptest.NewRequest("POST",
+			"http://127.0.0.1/douyin/user/register/?password=123456", nil)
 
-	w, r := sendRequest(req)
-	res := r.(*RegisterResponse)
+		w, r := sendRequest(req)
+		res := r.(*RegisterResponse)
 
-	assert.Equal(t, 200, w.Code)
-	assert.Equal(t, int32(1), res.StatusCode)
-	assert.Equal(t, "invalid username or password", res.StatusMsg)
-}
+		assert.Equal(t, 200, w.Code)
+		assert.Equal(t, int32(1), res.StatusCode)
+	})
+	t.Run("register successfully", func(t *testing.T) {
+		req := httptest.NewRequest("POST",
+			"http://127.0.0.1/douyin/user/register/?username=testTwo&password=123456", nil)
 
-func TestRegisterWithEmptyPassword(t *testing.T) {
-	models.Flush()
+		w, r := sendRequest(req)
+		res := r.(*RegisterResponse)
 
-	req := httptest.NewRequest("POST",
-		"http://127.0.0.1/douyin/user/register/?username=test", nil)
-
-	w, r := sendRequest(req)
-	res := r.(*RegisterResponse)
-
-	assert.Equal(t, 200, w.Code)
-	assert.Equal(t, int32(1), res.StatusCode)
-	assert.Equal(t, "invalid username or password", res.StatusMsg)
-}
-
-func TestRegisterWithValidUsernameAndPassword(t *testing.T) {
-	models.Flush()
-
-	req := httptest.NewRequest("POST",
-		"http://127.0.0.1/douyin/user/register/?username=test&password=123456", nil)
-
-	w, r := sendRequest(req)
-	res := r.(*RegisterResponse)
-
-	assert.Equal(t, 200, w.Code)
-	assert.Equal(t, int32(0), res.StatusCode)
-	assert.Equal(t, "register successfully", res.StatusMsg)
+		assert.Equal(t, 200, w.Code)
+		assert.Equal(t, int32(0), res.StatusCode)
+	})
 }

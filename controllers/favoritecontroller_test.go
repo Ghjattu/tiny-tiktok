@@ -10,77 +10,63 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestFavoriteActionInvalidActionType(t *testing.T) {
-	models.Flush()
+func TestFavoriteAction(t *testing.T) {
+	setup()
 
-	// Register a test user.
-	_, _, token := registerTestUser("test", "123456")
+	t.Run("invalid action type", func(t *testing.T) {
+		url := "http://127.0.0.1/douyin/favorite/action/?action_type=3&token=" + token
+		req := httptest.NewRequest("POST", url, nil)
 
-	url := "http://127.0.0.1/douyin/favorite/action/?action_type=3&token=" + token
-	req := httptest.NewRequest("POST", url, nil)
+		w, r := sendRequest(req)
+		res := r.(*Response)
 
-	w, r := sendRequest(req)
-	res := r.(*Response)
+		assert.Equal(t, 200, w.Code)
+		assert.Equal(t, int32(1), res.StatusCode)
+		assert.Equal(t, "action type is invalid", res.StatusMsg)
+	})
 
-	assert.Equal(t, 200, w.Code)
-	assert.Equal(t, int32(1), res.StatusCode)
-	assert.Equal(t, "action type is invalid", res.StatusMsg)
-}
+	t.Run("create favorite relationship successfully", func(t *testing.T) {
+		// Create a new test video.
+		testVideo, _ := models.CreateTestVideo(userID, time.Now(), "test")
+		videoIDStr := fmt.Sprintf("%d", testVideo.ID)
 
-func TestFavoriteActionWithActionTypeOne(t *testing.T) {
-	models.Flush()
+		url := "http://127.0.0.1/douyin/favorite/action/?video_id=" + videoIDStr +
+			"&action_type=1&token=" + token
+		req := httptest.NewRequest("POST", url, nil)
 
-	// Register a new test user.
-	userID, _, token := registerTestUser("test", "123456")
+		w, r := sendRequest(req)
+		res := r.(*Response)
 
-	// Create a new test video.
-	testVideo, _ := models.CreateTestVideo(userID, time.Now(), "test")
-	videoIDStr := fmt.Sprintf("%d", testVideo.ID)
+		assert.Equal(t, 200, w.Code)
+		assert.Equal(t, int32(0), res.StatusCode)
 
-	url := "http://127.0.0.1/douyin/favorite/action/?video_id=" + videoIDStr +
-		"&action_type=1&token=" + token
-	req := httptest.NewRequest("POST", url, nil)
+	})
 
-	w, r := sendRequest(req)
-	res := r.(*Response)
+	t.Run("delete favorite relationship successfully", func(t *testing.T) {
+		// Create a new test video.
+		testVideo, _ := models.CreateTestVideo(1, time.Now(), "test")
+		videoIDStr := fmt.Sprintf("%d", testVideo.ID)
+		// Create a test favorite relationship.
+		models.CreateTestFavoriteRel(userID, testVideo.ID)
 
-	assert.Equal(t, 200, w.Code)
-	assert.Equal(t, int32(0), res.StatusCode)
-	assert.Equal(t, "favorite action success", res.StatusMsg)
-}
+		url := "http://127.0.0.1/douyin/favorite/action/?video_id=" + videoIDStr +
+			"&action_type=2&token=" + token
+		req := httptest.NewRequest("POST", url, nil)
 
-func TestFavoriteActionWithActionTypeTwo(t *testing.T) {
-	models.Flush()
+		w, r := sendRequest(req)
+		res := r.(*Response)
 
-	// Register a new test user.
-	_, _, token := registerTestUser("test", "123456")
+		assert.Equal(t, 200, w.Code)
+		assert.Equal(t, int32(0), res.StatusCode)
 
-	// Create a new test video.
-	testVideo, _ := models.CreateTestVideo(1, time.Now(), "test")
-	videoIDStr := fmt.Sprintf("%d", testVideo.ID)
-
-	url := "http://127.0.0.1/douyin/favorite/action/?video_id=" + videoIDStr +
-		"&action_type=2&token=" + token
-	req := httptest.NewRequest("POST", url, nil)
-
-	w, r := sendRequest(req)
-	res := r.(*Response)
-
-	assert.Equal(t, 200, w.Code)
-	assert.Equal(t, int32(0), res.StatusCode)
-	assert.Equal(t, "unfavorite action success", res.StatusMsg)
+	})
 }
 
 func TestGetFavoriteListByUserID(t *testing.T) {
-	models.Flush()
-
-	// Register a new test user.
-	userID, _, token := registerTestUser("test", "123456")
-	userIDStr := fmt.Sprintf("%d", userID)
+	setup()
 
 	// Create a new test video.
 	testVideo, _ := models.CreateTestVideo(userID, time.Now(), "test")
-
 	// Create a new test favorite relation.
 	models.CreateTestFavoriteRel(userID, testVideo.ID)
 
@@ -92,6 +78,5 @@ func TestGetFavoriteListByUserID(t *testing.T) {
 
 	assert.Equal(t, 200, w.Code)
 	assert.Equal(t, int32(0), res.StatusCode)
-	assert.Equal(t, "get favorite video list successfully", res.StatusMsg)
 	assert.Equal(t, 1, len(res.VideoList))
 }

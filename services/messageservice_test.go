@@ -2,6 +2,7 @@ package services
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -43,7 +44,7 @@ func TestGetMessageList(t *testing.T) {
 	setup()
 
 	t.Run("receiver does not exist", func(t *testing.T) {
-		statusCode, _, _ := messageService.GetMessageList(1, 0)
+		statusCode, _, _ := messageService.GetMessageList(1, 0, time.Now())
 
 		assert.Equal(t, int32(1), statusCode)
 	})
@@ -52,8 +53,9 @@ func TestGetMessageList(t *testing.T) {
 		// Create a test message.
 		messageService.CreateNewMessage(testUserOne.ID, testUserTwo.ID, "Hello")
 
+		timestamp := time.Now().Add(-time.Hour)
 		statusCode, _, messageList :=
-			messageService.GetMessageList(testUserOne.ID, testUserTwo.ID)
+			messageService.GetMessageList(testUserOne.ID, testUserTwo.ID, timestamp)
 
 		assert.Equal(t, int32(0), statusCode)
 		assert.Equal(t, 1, len(messageList))

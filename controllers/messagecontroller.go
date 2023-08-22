@@ -2,10 +2,13 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/Ghjattu/tiny-tiktok/models"
+	"github.com/Ghjattu/tiny-tiktok/redis"
 	"github.com/Ghjattu/tiny-tiktok/services"
+	"github.com/Ghjattu/tiny-tiktok/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -39,6 +42,16 @@ func MessageChat(c *gin.Context) {
 	currentUserID := c.GetInt64("current_user_id")
 	preMsgTimeInt := c.GetInt64("pre_msg_time")
 	preMsgTime := time.Unix(preMsgTimeInt, 0)
+
+	if preMsgTime.Year() > 9999 {
+		// Get last message time from redis.
+		lastMsgTimeKey := redis.LastMsgTimeKey + strconv.FormatInt(currentUserID, 10) + ":" +
+			strconv.FormatInt(receiverID, 10)
+		preMsgTimeStr := redis.Rdb.Get(redis.Ctx, lastMsgTimeKey).Val()
+
+		_, _, preMsgTimeInt = utils.ParseInt64(preMsgTimeStr)
+		preMsgTime = time.Unix(preMsgTimeInt, 0)
+	}
 
 	ms := &services.MessageService{}
 	statusCode, statusMsg, messages := ms.GetMessageList(currentUserID, receiverID, preMsgTime)

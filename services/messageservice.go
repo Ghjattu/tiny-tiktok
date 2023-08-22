@@ -1,9 +1,11 @@
 package services
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/Ghjattu/tiny-tiktok/models"
+	"github.com/Ghjattu/tiny-tiktok/redis"
 	"gorm.io/gorm"
 )
 
@@ -50,6 +52,11 @@ func (ms *MessageService) CreateNewMessage(senderID, receiverID int64, content s
 		return 1, "failed to create new message"
 	}
 
+	// Update the last message time between sender and receiver.
+	lastMsgTimeKey := redis.LastMsgTimeKey + strconv.FormatInt(senderID, 10) + ":" +
+		strconv.FormatInt(receiverID, 10)
+	redis.Rdb.Set(redis.Ctx, lastMsgTimeKey, message.CreateDate.Unix(), redis.RandomDay())
+
 	return 0, "create new message successfully"
 }
 
@@ -80,6 +87,16 @@ func (ms *MessageService) GetMessageList(senderID, receiverID int64, preMsgTime 
 
 	// Convert the message list to message detail list.
 	messageDetailList := convertMessageToMessageDetail(messageList)
+
+	// Update the last message time between sender and receiver.
+	len := len(messageDetailList)
+	if len != 0 {
+		lastMsgTime := messageDetailList[len-1].CreateTime
+
+		lastMsgTimeKey := redis.LastMsgTimeKey + strconv.FormatInt(senderID, 10) + ":" +
+			strconv.FormatInt(receiverID, 10)
+		redis.Rdb.Set(redis.Ctx, lastMsgTimeKey, lastMsgTime, redis.RandomDay())
+	}
 
 	return 0, "get message list successfully", messageDetailList
 }

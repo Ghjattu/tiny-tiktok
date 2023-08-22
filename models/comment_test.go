@@ -68,18 +68,16 @@ func TestGetCommentByCommentID(t *testing.T) {
 	assert.Equal(t, testComment.VideoID, comment.VideoID)
 }
 
-func TestGetCommentListByVideoID(t *testing.T) {
+func TestGetCommentIDListByVideoID(t *testing.T) {
 	InitDatabase(true)
 
 	// Create a test comment.
 	testComment, _ := CreateTestComment(1, 1)
 
-	commentList, err := GetCommentListByVideoID(testComment.VideoID)
+	commentIDList, err := GetCommentIDListByVideoID(testComment.VideoID)
 	if err != nil {
-		t.Errorf("Error when getting comment list: %v", err)
+		t.Errorf("Error when getting comment id list: %v", err)
 	}
 
-	assert.Equal(t, 1, len(commentList))
-	assert.Equal(t, testComment.UserID, commentList[0].UserID)
-	assert.Equal(t, testComment.VideoID, commentList[0].VideoID)
+	assert.Equal(t, testComment.ID, commentIDList[0])
 }

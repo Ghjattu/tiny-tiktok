@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Ghjattu/tiny-tiktok/middleware/redis"
 	"github.com/Ghjattu/tiny-tiktok/models"
+	"github.com/Ghjattu/tiny-tiktok/redis"
 	"github.com/stretchr/testify/assert"
 )
 

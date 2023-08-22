@@ -27,26 +27,6 @@ func TestCreateNewVideo(t *testing.T) {
 	assert.Equal(t, testVideo.Title, returnedVideo.Title)
 }
 
-func TestGetVideoListByUserID(t *testing.T) {
-	InitDatabase(true)
-
-	// Create a new test user.
-	testUser, _ := CreateTestUser("test", "test")
-
-	// Create a new test video.
-	testVideo, _ := CreateTestVideo(testUser.ID, time.Now(), "test")
-
-	// Get video list by test user id.
-	videoList, err := GetVideoListByAuthorID(testUser.ID)
-	if err != nil {
-		t.Fatalf("Error when getting video list: %v", err)
-	}
-
-	assert.Equal(t, 1, len(videoList))
-	assert.Equal(t, testVideo.PlayUrl, videoList[0].PlayUrl)
-	assert.Equal(t, testVideo.Title, videoList[0].Title)
-}
-
 func TestGetVideoIDListByAuthorID(t *testing.T) {
 	InitDatabase(true)
 

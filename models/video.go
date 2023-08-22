@@ -42,20 +42,6 @@ func CreateNewVideo(v *Video) (*Video, error) {
 	return v, err
 }
 
-// TODO: should be deleted.
-// GetVideoListByAuthorID get video list by user id.
-//
-//	@param authorID int64
-//	@return []Video
-//	@return error
-func GetVideoListByAuthorID(authorID int64) ([]Video, error) {
-	videoList := make([]Video, 0)
-
-	err := db.Model(&Video{}).Where("author_id = ?", authorID).Find(&videoList).Error
-
-	return videoList, err
-}
-
 // GetVideoIDListByAuthorID get video id list by author id.
 //
 //	@param authorID int64

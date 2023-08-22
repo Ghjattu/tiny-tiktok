@@ -3,8 +3,8 @@ package services
 import (
 	"strconv"
 
-	"github.com/Ghjattu/tiny-tiktok/middleware/redis"
 	"github.com/Ghjattu/tiny-tiktok/models"
+	"github.com/Ghjattu/tiny-tiktok/redis"
 	"github.com/Ghjattu/tiny-tiktok/utils"
 	"gorm.io/gorm"
 )
@@ -159,9 +159,9 @@ func (fs *FavoriteService) GetTotalFavoritedByUserID(userID int64) int64 {
 	// Cache miss or some error occurs.
 	totalFavorited := int64(0)
 
-	videoList, _ := models.GetVideoListByAuthorID(userID)
-	for _, video := range videoList {
-		count, _ := models.GetFavoriteCountByVideoID(video.ID)
+	videoIDList, _ := models.GetVideoIDListByAuthorID(userID)
+	for _, videoID := range videoIDList {
+		count, _ := models.GetFavoriteCountByVideoID(videoID)
 		totalFavorited += count
 	}
 

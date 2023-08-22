@@ -12,10 +12,10 @@ var (
 	testUserTwo       *models.User
 	// testUserTwoDetail *models.UserDetail
 
-	testVideoOne       *models.Video
-	testVideoOneDetail *models.VideoDetail
-	testVideoTwo       *models.Video
-	testVideoTwoDetail *models.VideoDetail
+	testVideoOne      *models.Video
+	testVideoOneCache *models.VideoCache
+	testVideoTwo      *models.Video
+	testVideoTwoCache *models.VideoCache
 
 	followerUser       *models.User
 	followerUserDetail *models.UserDetail
@@ -38,9 +38,9 @@ func setup() {
 
 	// Create two test videos.
 	testVideoOne, _ = models.CreateTestVideo(testUserOne.ID, time.Now(), "testOne")
-	testVideoOneDetail = &models.VideoDetail{ID: testVideoOne.ID}
+	testVideoOneCache = &models.VideoCache{ID: testVideoOne.ID, AuthorID: testVideoOne.AuthorID}
 	testVideoTwo, _ = models.CreateTestVideo(testUserOne.ID, time.Now(), "testTwo")
-	testVideoTwoDetail = &models.VideoDetail{ID: testVideoTwo.ID}
+	testVideoTwoCache = &models.VideoCache{ID: testVideoTwo.ID, AuthorID: testVideoOne.AuthorID}
 
 	// Create a test follower user.
 	followerUser, _ = models.CreateTestUser("follower", "123456")

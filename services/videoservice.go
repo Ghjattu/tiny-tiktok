@@ -117,25 +117,34 @@ func (vs *VideoService) GetVideoListByVideoIDList(videoIDList []int64, currentUs
 	for _, videoID := range videoIDList {
 		// Try to get video from redis.
 		videoKey := redis.VideoKey + strconv.FormatInt(videoID, 10)
-		if redis.Rdb.Exists(redis.Ctx, videoKey).Val() == 1 {
+		result, err := redis.HashGetAll(videoKey)
+		if err == nil {
 			// Cache hit.
-			videoDetail := &models.VideoDetail{}
-			videoCache := redis.Rdb.HGetAll(redis.Ctx, videoKey)
-			if videoCache.Err() == nil {
-				if err := videoCache.Scan(videoDetail); err == nil {
-					// Get the video's author.
-					authorID, _ := models.GetAuthorIDByVideoID(videoID)
-					us := &UserService{}
-					_, _, videoDetail.Author = us.GetUserDetailByUserID(currentUserID, authorID)
-					// Update the video's IsFavorite field.
-					videoDetail.IsFavorite, _ = models.CheckFavoriteRelExist(currentUserID, videoID)
-
-					videoDetailList = append(videoDetailList, *videoDetail)
-
-					redis.Rdb.Expire(redis.Ctx, videoKey, redis.RandomDay())
-
-					continue
+			videoCache := &models.VideoCache{}
+			if err := result.Scan(videoCache); err == nil {
+				// Get the video's author.
+				// authorID, _ := models.GetAuthorIDByVideoID(videoID)
+				videoDetail := &models.VideoDetail{
+					ID:            videoCache.ID,
+					PlayUrl:       videoCache.PlayUrl,
+					CoverUrl:      videoCache.CoverUrl,
+					FavoriteCount: videoCache.FavoriteCount,
+					CommentCount:  videoCache.CommentCount,
+					Title:         videoCache.Title,
 				}
+
+				us := &UserService{}
+				_, _, videoDetail.Author =
+					us.GetUserDetailByUserID(currentUserID, videoCache.AuthorID)
+
+				// Update the video's IsFavorite field.
+				videoDetail.IsFavorite, _ = models.CheckFavoriteRelExist(currentUserID, videoID)
+
+				videoDetailList = append(videoDetailList, *videoDetail)
+
+				redis.Rdb.Expire(redis.Ctx, videoKey, redis.RandomDay())
+
+				continue
 			}
 		}
 
@@ -180,7 +189,16 @@ func (vs *VideoService) GetVideoDetailByVideoID(videoID, currentUserID int64) (*
 
 	// Insert the video to redis.
 	videoKey := redis.VideoKey + strconv.FormatInt(videoID, 10)
-	redis.Rdb.HSet(redis.Ctx, videoKey, videoDetail)
+	videoCache := &models.VideoCache{
+		ID:            videoDetail.ID,
+		AuthorID:      videoDetail.Author.ID,
+		PlayUrl:       videoDetail.PlayUrl,
+		CoverUrl:      videoDetail.CoverUrl,
+		FavoriteCount: videoDetail.FavoriteCount,
+		CommentCount:  videoDetail.CommentCount,
+		Title:         videoDetail.Title,
+	}
+	redis.Rdb.HSet(redis.Ctx, videoKey, videoCache)
 	redis.Rdb.Expire(redis.Ctx, videoKey, redis.RandomDay())
 
 	return videoDetail, nil

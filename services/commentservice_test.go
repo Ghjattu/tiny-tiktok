@@ -33,7 +33,7 @@ func TestCreateNewComment(t *testing.T) {
 
 		// Insert test video into cache.
 		videoKey := redis.VideoKey + strconv.FormatInt(testVideoOne.ID, 10)
-		redis.Rdb.HSet(redis.Ctx, videoKey, testVideoOneDetail)
+		redis.Rdb.HSet(redis.Ctx, videoKey, testVideoOneCache)
 		// Create a comment id list.
 		commentVideoKey := redis.CommentsByVideoKey + strconv.FormatInt(testVideoOne.ID, 10)
 		redis.Rdb.RPush(redis.Ctx, commentVideoKey, "")
@@ -69,8 +69,8 @@ func TestDeleteCommentByCommentID(t *testing.T) {
 
 		// Insert test video into cache.
 		videoKey := redis.VideoKey + strconv.FormatInt(testVideoOne.ID, 10)
-		testVideoOneDetail.CommentCount = 1
-		redis.Rdb.HSet(redis.Ctx, videoKey, testVideoOneDetail)
+		testVideoOneCache.CommentCount = 1
+		redis.Rdb.HSet(redis.Ctx, videoKey, testVideoOneCache)
 		// Create a comment id list.
 		commentVideoKey := redis.CommentsByVideoKey + strconv.FormatInt(testVideoOne.ID, 10)
 		redis.Rdb.RPush(redis.Ctx, commentVideoKey, testCommentOne.ID)
@@ -110,8 +110,8 @@ func TestGetCommentListByVideoID(t *testing.T) {
 
 		// Insert test video into cache.
 		// videoKey := redis.VideoKey + strconv.FormatInt(testVideoOne.ID, 10)
-		// testVideoOneDetail.CommentCount = 1
-		// redis.Rdb.HSet(redis.Ctx, videoKey, testVideoOneDetail)
+		// testVideoOneCache.CommentCount = 1
+		// redis.Rdb.HSet(redis.Ctx, videoKey, testVideoOneCache)
 		// Create a comment id list.
 		commentVideoKey := redis.CommentsByVideoKey + strconv.FormatInt(testVideoOne.ID, 10)
 		redis.Rdb.RPush(redis.Ctx, commentVideoKey, testCommentOne.ID)

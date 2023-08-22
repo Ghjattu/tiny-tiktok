@@ -169,28 +169,26 @@ func (cs *CommentService) GetCommentListByCommentIDList(currentUserID int64, com
 	for _, commentID := range commentIDList {
 		// Try to get comment from redis.
 		commentKey := redis.CommentKey + strconv.FormatInt(commentID, 10)
-		if redis.Rdb.Exists(redis.Ctx, commentKey).Val() == 1 {
-			// Cache hit.
-			result := redis.Rdb.HGetAll(redis.Ctx, commentKey)
-			if result.Err() == nil {
-				commentCache := &models.CommentCache{}
-				if err := result.Scan(commentCache); err == nil {
-					commentDetail := &models.CommentDetail{
-						ID:         commentCache.ID,
-						Content:    commentCache.Content,
-						CreateDate: commentCache.CreateDate,
-					}
-
-					us := &UserService{}
-					_, _, commentDetail.User =
-						us.GetUserDetailByUserID(currentUserID, commentCache.UserID)
-
-					commentDetailList = append(commentDetailList, *commentDetail)
-
-					redis.Rdb.Expire(redis.Ctx, commentKey, redis.RandomDay())
-
-					continue
+		result, err := redis.HashGetAll(commentKey)
+		// Cache hit.
+		if err == nil {
+			commentCache := &models.CommentCache{}
+			if err := result.Scan(commentCache); err == nil {
+				commentDetail := &models.CommentDetail{
+					ID:         commentCache.ID,
+					Content:    commentCache.Content,
+					CreateDate: commentCache.CreateDate,
 				}
+
+				us := &UserService{}
+				_, _, commentDetail.User =
+					us.GetUserDetailByUserID(currentUserID, commentCache.UserID)
+
+				commentDetailList = append(commentDetailList, *commentDetail)
+
+				redis.Rdb.Expire(redis.Ctx, commentKey, redis.RandomDay())
+
+				continue
 			}
 		}
 

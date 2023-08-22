@@ -1,8 +1,11 @@
 package redis
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
+
+	"github.com/redis/go-redis/v9"
 )
 
 // RandomDay returns a random time.Duration between 24h and 48h.
@@ -29,4 +32,24 @@ func HashIncrBy(key, field string, incr int64) (int64, string, error) {
 	}
 
 	return 0, "key does not exist", nil
+}
+
+// HashGetAll calls HGetAll command of redis.
+//
+//	@param key string
+//	@return *redis.MapStringStringCmd
+//	@return error
+func HashGetAll(key string) (*redis.MapStringStringCmd, error) {
+	exist, err := Rdb.Exists(Ctx, key).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	if exist == 1 {
+		result := Rdb.HGetAll(Ctx, key)
+
+		return result, result.Err()
+	}
+
+	return nil, fmt.Errorf("key does not exist")
 }

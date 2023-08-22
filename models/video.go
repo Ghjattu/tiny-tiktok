@@ -12,14 +12,24 @@ type Video struct {
 }
 
 type VideoDetail struct {
-	ID            int64       `json:"id" redis:"id"`
+	ID            int64       `json:"id"`
 	Author        *UserDetail `json:"author"`
-	PlayUrl       string      `json:"play_url" redis:"play_url"`
-	CoverUrl      string      `json:"cover_url" redis:"cover_url"`
-	FavoriteCount int64       `json:"favorite_count" redis:"favorite_count"`
-	CommentCount  int64       `json:"comment_count" redis:"comment_count"`
+	PlayUrl       string      `json:"play_url"`
+	CoverUrl      string      `json:"cover_url"`
+	FavoriteCount int64       `json:"favorite_count"`
+	CommentCount  int64       `json:"comment_count"`
 	IsFavorite    bool        `json:"is_favorite"`
-	Title         string      `json:"title" redis:"title"`
+	Title         string      `json:"title"`
+}
+
+type VideoCache struct {
+	ID            int64  `redis:"id"`
+	AuthorID      int64  `redis:"author_id"`
+	PlayUrl       string `redis:"play_url"`
+	CoverUrl      string `redis:"cover_url"`
+	FavoriteCount int64  `redis:"favorite_count"`
+	CommentCount  int64  `redis:"comment_count"`
+	Title         string `redis:"title"`
 }
 
 // CreateNewVideo create a new video.

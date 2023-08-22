@@ -36,33 +36,35 @@ func init() {
 	r.GET("/test/", testHandler)
 }
 
-func TestParseQueryParamsWithInvalidParam(t *testing.T) {
-	req := httptest.NewRequest("GET", "/test/?p=abc", nil)
-	w := httptest.NewRecorder()
-	r.ServeHTTP(w, req)
-
-	res := getResponse(w)
-
-	assert.Equal(t, int32(0), res.StatusCode)
-}
-
-func TestParseQueryParamsWithInvalidIntParam(t *testing.T) {
-	req := httptest.NewRequest("GET", "/test/?user_id=abc", nil)
-	w := httptest.NewRecorder()
-	r.ServeHTTP(w, req)
-
-	res := getResponse(w)
-
-	assert.NotEqual(t, int32(0), res.StatusCode)
-	assert.Equal(t, "invalid syntax", res.StatusMsg)
-}
-
 func TestParseQueryParams(t *testing.T) {
-	req := httptest.NewRequest("GET", "/test/?user_id=1&comment_text=abc", nil)
-	w := httptest.NewRecorder()
-	r.ServeHTTP(w, req)
+	t.Run("invalid param", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/test/?p=abc", nil)
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req)
 
-	res := getResponse(w)
+		res := getResponse(w)
 
-	assert.Equal(t, int32(0), res.StatusCode)
+		assert.Equal(t, int32(0), res.StatusCode)
+	})
+
+	t.Run("invalid int param", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/test/?user_id=abc", nil)
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req)
+
+		res := getResponse(w)
+
+		assert.NotEqual(t, int32(0), res.StatusCode)
+		assert.Equal(t, "invalid syntax", res.StatusMsg)
+	})
+
+	t.Run("parse int param successfully", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/test/?user_id=1&comment_text=abc", nil)
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req)
+
+		res := getResponse(w)
+
+		assert.Equal(t, int32(0), res.StatusCode)
+	})
 }

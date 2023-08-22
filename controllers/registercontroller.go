@@ -21,29 +21,12 @@ func Register(c *gin.Context) {
 	rs := &services.RegisterService{}
 	userID, statusCode, statusMsg, token := rs.Register(username, password)
 
-	if statusCode == 0 {
-		c.JSON(http.StatusOK, RegisterResponse{
-			Response: Response{
-				StatusCode: statusCode,
-				StatusMsg:  statusMsg,
-			},
-			UserID: userID,
-			Token:  token,
-		})
-
-		// If register successfully, set the user_id and name to the context.
-		c.Set("user_id", userID)
-		c.Set("username", username)
-
-		return
-	}
-
 	c.JSON(http.StatusOK, RegisterResponse{
 		Response: Response{
 			StatusCode: statusCode,
 			StatusMsg:  statusMsg,
 		},
-		UserID: -1,
-		Token:  "",
+		UserID: userID,
+		Token:  token,
 	})
 }

@@ -10,49 +10,56 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCommentActionWithActionTypeOne(t *testing.T) {
-	models.Flush()
-	// Register a test user.
-	userID, _, token := registerTestUser("test", "123456")
-	// Create a test video.
-	testVideo, _ := models.CreateTestVideo(userID, time.Now(), "test")
-	testVideoIDStr := fmt.Sprintf("%d", testVideo.ID)
+func TestCommentAction(t *testing.T) {
+	setup()
 
-	url := "http://127.0.0.1/douyin/comment/action/?video_id=" + testVideoIDStr +
-		"&action_type=1&comment_text=abc&token=" + token
-	req := httptest.NewRequest("POST", url, nil)
+	t.Run("invalid action type", func(t *testing.T) {
+		url := "http://127.0.0.1/douyin/comment/action/?action_type=3&token=" + token
+		req := httptest.NewRequest("POST", url, nil)
 
-	w, r := sendRequest(req)
-	res := r.(*CommentActionResponse)
+		w, r := sendRequest(req)
+		res := r.(*CommentActionResponse)
 
-	assert.Equal(t, 200, w.Code)
-	assert.Equal(t, int32(0), res.StatusCode)
-}
+		assert.Equal(t, 200, w.Code)
+		assert.Equal(t, int32(1), res.StatusCode)
+	})
 
-func TestCommentActionWithActionTypeTwo(t *testing.T) {
-	models.Flush()
-	// Register a test user.
-	userID, _, token := registerTestUser("test", "123456")
-	// Create a test video.
-	testVideo, _ := models.CreateTestVideo(userID, time.Now(), "test")
-	// Create a test comment.
-	models.CreateTestComment(userID, testVideo.ID)
+	t.Run("create comment successfully", func(t *testing.T) {
+		// Create a test video.
+		testVideo, _ := models.CreateTestVideo(userID, time.Now(), "test")
+		testVideoIDStr := fmt.Sprintf("%d", testVideo.ID)
 
-	url := "http://127.0.0.1/douyin/comment/action/?video_id=1&action_type=2&comment_id=1&token=" + token
-	req := httptest.NewRequest("POST", url, nil)
+		url := "http://127.0.0.1/douyin/comment/action/?video_id=" + testVideoIDStr +
+			"&action_type=1&comment_text=abc&token=" + token
+		req := httptest.NewRequest("POST", url, nil)
 
-	w, r := sendRequest(req)
-	res := r.(*CommentActionResponse)
+		w, r := sendRequest(req)
+		res := r.(*CommentActionResponse)
 
-	assert.Equal(t, 200, w.Code)
-	assert.Equal(t, int32(0), res.StatusCode)
+		assert.Equal(t, 200, w.Code)
+		assert.Equal(t, int32(0), res.StatusCode)
+	})
+
+	t.Run("delete comment successfully", func(t *testing.T) {
+		// Create a test video.
+		testVideo, _ := models.CreateTestVideo(userID, time.Now(), "test")
+		// Create a test comment.
+		models.CreateTestComment(userID, testVideo.ID)
+
+		url := "http://127.0.0.1/douyin/comment/action/?video_id=1&action_type=2&comment_id=1&token=" + token
+		req := httptest.NewRequest("POST", url, nil)
+
+		w, r := sendRequest(req)
+		res := r.(*CommentActionResponse)
+
+		assert.Equal(t, 200, w.Code)
+		assert.Equal(t, int32(0), res.StatusCode)
+	})
 }
 
 func TestCommentList(t *testing.T) {
-	models.Flush()
+	setup()
 
-	// Register a test user.
-	userID, _, token := registerTestUser("test", "123456")
 	// Create a test video.
 	testVideo, _ := models.CreateTestVideo(userID, time.Now(), "test")
 	testVideoIDStr := fmt.Sprintf("%d", testVideo.ID)

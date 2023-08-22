@@ -5,10 +5,14 @@
 package controllers
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 
 	"github.com/Ghjattu/tiny-tiktok/middleware/jwt"
@@ -20,10 +24,18 @@ import (
 
 var (
 	r *gin.Engine
+
+	userID    int64
+	userIDStr string
+	token     string
 )
 
-// init() retrieves the environment variables, initializes the gin engine.
-func init() {
+func setup() {
+	models.InitDatabase(true)
+
+	// Register a test user.
+	userID, _, token = registerTestUser("test", "123456")
+	userIDStr = fmt.Sprintf("%d", userID)
 
 	r = gin.Default()
 	r.Use(parse.ParseQueryParams())
@@ -116,4 +128,43 @@ func sendRequest(req *http.Request) (*httptest.ResponseRecorder, interface{}) {
 	json.Unmarshal(bytes, res)
 
 	return w, res
+}
+
+// constructTestForm constructs a test form with a test file and form fields.
+//
+//	@param formFields map[string]string
+//	@return *bytes.Buffer
+//	@return *multipart.Writer
+//	@return error
+func constructTestForm(formFields map[string]string) (*bytes.Buffer, *multipart.Writer, error) {
+	// Read the test video.
+	file, err := os.Open("../data/bear.mp4")
+	if err != nil {
+		return nil, nil, err
+	}
+	defer file.Close()
+
+	// Construct form data.
+	form := bytes.NewBuffer([]byte(""))
+	writer := multipart.NewWriter(form)
+	defer writer.Close()
+
+	// Add form fields.
+	for key, value := range formFields {
+		writer.WriteField(key, value)
+	}
+
+	// Add form file.
+	part, err := writer.CreateFormFile("data", "bear.mp4")
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Copy file data to form file.
+	_, err = io.Copy(part, file)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return form, writer, nil
 }

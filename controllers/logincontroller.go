@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"net/http"
+
 	"github.com/Ghjattu/tiny-tiktok/services"
 	"github.com/gin-gonic/gin"
 )
@@ -19,30 +21,12 @@ func Login(c *gin.Context) {
 	ls := &services.LoginService{}
 	userID, statusCode, statusMsg, token := ls.Login(username, password)
 
-	// Login successfully.
-	if statusCode == 0 {
-		c.JSON(200, LoginResponse{
-			Response: Response{
-				StatusCode: statusCode,
-				StatusMsg:  statusMsg,
-			},
-			UserID: userID,
-			Token:  token,
-		})
-
-		// If login successfully, set the user_id and name to the context.
-		c.Set("user_id", userID)
-		c.Set("username", username)
-
-		return
-	}
-
-	c.JSON(200, LoginResponse{
+	c.JSON(http.StatusOK, LoginResponse{
 		Response: Response{
 			StatusCode: statusCode,
 			StatusMsg:  statusMsg,
 		},
-		UserID: -1,
-		Token:  "",
+		UserID: userID,
+		Token:  token,
 	})
 }

@@ -5,14 +5,7 @@ package models
 
 import (
 	"time"
-
-	"github.com/Ghjattu/tiny-tiktok/redis"
 )
-
-func Flush() {
-	InitDatabase(true)
-	redis.Rdb.FlushDB(redis.Ctx)
-}
 
 // createTestUser create a new test user.
 //

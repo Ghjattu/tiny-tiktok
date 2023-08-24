@@ -17,13 +17,6 @@ type CommentDetail struct {
 	CreateDate string      `json:"create_date"`
 }
 
-type CommentCache struct {
-	ID         int64  `redis:"id"`
-	UserID     int64  `redis:"user_id"`
-	Content    string `redis:"content"`
-	CreateDate string `redis:"create_date"`
-}
-
 // CreateNewComment creates a new comment.
 //
 //	@param c *Comment

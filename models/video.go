@@ -22,16 +22,6 @@ type VideoDetail struct {
 	Title         string      `json:"title"`
 }
 
-type VideoCache struct {
-	ID            int64  `redis:"id"`
-	AuthorID      int64  `redis:"author_id"`
-	PlayUrl       string `redis:"play_url"`
-	CoverUrl      string `redis:"cover_url"`
-	FavoriteCount int64  `redis:"favorite_count"`
-	CommentCount  int64  `redis:"comment_count"`
-	Title         string `redis:"title"`
-}
-
 // CreateNewVideo create a new video.
 //
 //	@param v *Video

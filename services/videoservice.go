@@ -77,7 +77,9 @@ func (vs *VideoService) GetVideoListByAuthorID(authorID, currentUserID int64) (i
 		return 1, "failed to get video list", nil
 	}
 
-	redis.Rdb.RPush(redis.Ctx, videoAuthorKey, videoIDList)
+	videoIDStrList, _ := utils.ConvertInt64ToString(videoIDList)
+
+	redis.Rdb.RPush(redis.Ctx, videoAuthorKey, videoIDStrList)
 	redis.Rdb.Expire(redis.Ctx, videoAuthorKey, redis.RandomDay())
 
 	return vs.GetVideoListByVideoIDList(videoIDList, currentUserID)

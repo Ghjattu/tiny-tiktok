@@ -129,8 +129,10 @@ func (fs *FavoriteService) GetFavoriteVideoListByUserID(currentUserID, queryUser
 		return 1, "failed to get favorite video id list", nil
 	}
 
+	favoriteVideoIDStrList, _ := utils.ConvertInt64ToString(favoriteVideoIDList)
+
 	// Save favorite video id list to redis.
-	redis.Rdb.RPush(redis.Ctx, favoriteVideosKey, favoriteVideoIDList)
+	redis.Rdb.RPush(redis.Ctx, favoriteVideosKey, favoriteVideoIDStrList)
 	redis.Rdb.Expire(redis.Ctx, favoriteVideosKey, redis.RandomDay())
 
 	// Get favorite video list by video id list.

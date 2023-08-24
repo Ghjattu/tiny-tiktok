@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/Ghjattu/tiny-tiktok/models"
+	"github.com/Ghjattu/tiny-tiktok/redis"
 )
 
 var (
@@ -13,9 +14,9 @@ var (
 	// testUserTwoDetail *models.UserDetail
 
 	testVideoOne      *models.Video
-	testVideoOneCache *models.VideoCache
+	testVideoOneCache *redis.VideoCache
 	testVideoTwo      *models.Video
-	testVideoTwoCache *models.VideoCache
+	testVideoTwoCache *redis.VideoCache
 
 	followerUser       *models.User
 	followerUserDetail *models.UserDetail
@@ -24,7 +25,7 @@ var (
 	followingUserDetail *models.UserDetail
 
 	testCommentOne      *models.Comment
-	testCommentOneCache *models.CommentCache
+	testCommentOneCache *redis.CommentCache
 )
 
 func setup() {
@@ -38,9 +39,9 @@ func setup() {
 
 	// Create two test videos.
 	testVideoOne, _ = models.CreateTestVideo(testUserOne.ID, time.Now(), "testOne")
-	testVideoOneCache = &models.VideoCache{ID: testVideoOne.ID, AuthorID: testVideoOne.AuthorID}
+	testVideoOneCache = &redis.VideoCache{ID: testVideoOne.ID, AuthorID: testVideoOne.AuthorID}
 	testVideoTwo, _ = models.CreateTestVideo(testUserOne.ID, time.Now(), "testTwo")
-	testVideoTwoCache = &models.VideoCache{ID: testVideoTwo.ID, AuthorID: testVideoOne.AuthorID}
+	testVideoTwoCache = &redis.VideoCache{ID: testVideoTwo.ID, AuthorID: testVideoOne.AuthorID}
 
 	// Create a test follower user.
 	followerUser, _ = models.CreateTestUser("follower", "123456")
@@ -52,5 +53,5 @@ func setup() {
 
 	// Create a test comment.
 	testCommentOne, _ = models.CreateTestComment(testUserOne.ID, testVideoOne.ID)
-	testCommentOneCache = &models.CommentCache{ID: testCommentOne.ID, Content: testCommentOne.Content}
+	testCommentOneCache = &redis.CommentCache{ID: testCommentOne.ID, Content: testCommentOne.Content}
 }

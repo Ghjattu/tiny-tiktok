@@ -149,7 +149,9 @@ func (cs *CommentService) GetCommentListByVideoID(currentUserID, videoID int64) 
 		return 0, "failed to get comment list", nil
 	}
 
-	redis.Rdb.RPush(redis.Ctx, commentVideoKey, commentIDList)
+	commentIDStrList, _ := utils.ConvertInt64ToString(commentIDList)
+
+	redis.Rdb.RPush(redis.Ctx, commentVideoKey, commentIDStrList)
 	redis.Rdb.Expire(redis.Ctx, commentVideoKey, redis.RandomDay())
 
 	return cs.GetCommentListByCommentIDList(currentUserID, commentIDList)

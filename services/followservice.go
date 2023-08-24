@@ -5,6 +5,7 @@ import (
 
 	"github.com/Ghjattu/tiny-tiktok/models"
 	"github.com/Ghjattu/tiny-tiktok/redis"
+	"github.com/Ghjattu/tiny-tiktok/utils"
 	"gorm.io/gorm"
 )
 
@@ -158,8 +159,10 @@ func (fs *FollowService) GetFollowingListByUserID(currentUserID, queryUserID int
 		return 1, "failed to get following list", nil
 	}
 
+	followingIDStrList, _ := utils.ConvertInt64ToString(followingIDList)
+
 	// Save the following id list to cache.
-	redis.Rdb.RPush(redis.Ctx, followingKey, followingIDList)
+	redis.Rdb.RPush(redis.Ctx, followingKey, followingIDStrList)
 	redis.Rdb.Expire(redis.Ctx, followingKey, redis.RandomDay())
 
 	// Get the user detail list.
@@ -221,8 +224,10 @@ func (fs *FollowService) GetFollowerListByUserID(currentUserID, queryUserID int6
 		return 1, "failed to get follower list", nil
 	}
 
+	followerIDStrList, _ := utils.ConvertInt64ToString(followerIDList)
+
 	// Save the follower id list to cache.
-	redis.Rdb.RPush(redis.Ctx, followerKey, followerIDList)
+	redis.Rdb.RPush(redis.Ctx, followerKey, followerIDStrList)
 	redis.Rdb.Expire(redis.Ctx, followerKey, redis.RandomDay())
 
 	// Get the user detail list.

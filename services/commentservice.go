@@ -172,7 +172,7 @@ func (cs *CommentService) GetCommentListByCommentIDList(currentUserID int64, com
 		result, err := redis.HashGetAll(commentKey)
 		// Cache hit.
 		if err == nil {
-			commentCache := &models.CommentCache{}
+			commentCache := &redis.CommentCache{}
 			if err := result.Scan(commentCache); err == nil {
 				commentDetail := &models.CommentDetail{
 					ID:         commentCache.ID,
@@ -227,7 +227,7 @@ func (cs *CommentService) GetCommentDetailByCommentID(currentUserID, commentID i
 
 	// Insert the comment into redis.
 	commentKey := redis.CommentKey + strconv.FormatInt(commentID, 10)
-	commentCache := &models.CommentCache{
+	commentCache := &redis.CommentCache{
 		ID:         comment.ID,
 		UserID:     comment.UserID,
 		Content:    comment.Content,

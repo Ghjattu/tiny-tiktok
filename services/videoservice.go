@@ -29,15 +29,15 @@ func (vs *VideoService) CreateNewVideo(playUrl, title string, authorID int64, pu
 		Title:       title,
 	}
 
-	// Update the WorkCount of the user in cache.
-	userKey := redis.UserKey + strconv.FormatInt(authorID, 10)
-	redis.HashIncrBy(userKey, "work_count", 1)
-
 	// Insert new video to database.
 	_, err := models.CreateNewVideo(video)
 	if err != nil {
 		return 1, "failed to create new video"
 	}
+
+	// Update the WorkCount of the user in cache.
+	userKey := redis.UserKey + strconv.FormatInt(authorID, 10)
+	redis.HashIncrBy(userKey, "work_count", 1)
 
 	// If the video is created successfully, insert the video id to redis.
 	videoAuthorKey := redis.VideosByAuthorKey + strconv.FormatInt(authorID, 10)
@@ -120,7 +120,7 @@ func (vs *VideoService) GetVideoListByVideoIDList(videoIDList []int64, currentUs
 		result, err := redis.HashGetAll(videoKey)
 		if err == nil {
 			// Cache hit.
-			videoCache := &models.VideoCache{}
+			videoCache := &redis.VideoCache{}
 			if err := result.Scan(videoCache); err == nil {
 				// Get the video's author.
 				// authorID, _ := models.GetAuthorIDByVideoID(videoID)
@@ -189,7 +189,7 @@ func (vs *VideoService) GetVideoDetailByVideoID(videoID, currentUserID int64) (*
 
 	// Insert the video to redis.
 	videoKey := redis.VideoKey + strconv.FormatInt(videoID, 10)
-	videoCache := &models.VideoCache{
+	videoCache := &redis.VideoCache{
 		ID:            videoDetail.ID,
 		AuthorID:      videoDetail.Author.ID,
 		PlayUrl:       videoDetail.PlayUrl,

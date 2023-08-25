@@ -51,28 +51,27 @@ func TestCreateNewFollowRel(t *testing.T) {
 		redis.Rdb.HSet(redis.Ctx, followerUserKey, followerUserDetail)
 		followingUserKey := redis.UserKey + strconv.FormatInt(followingUser.ID, 10)
 		redis.Rdb.HSet(redis.Ctx, followingUserKey, followingUserDetail)
+		followingKey := redis.FollowingKey + strconv.FormatInt(followerUser.ID, 10)
+		redis.Rdb.RPush(redis.Ctx, followingKey, "")
+		followerKey := redis.FollowerKey + strconv.FormatInt(followingUser.ID, 10)
+		redis.Rdb.RPush(redis.Ctx, followerKey, "")
 
 		statusCode, statusMsg :=
 			followService.CreateNewFollowRel(followerUser.ID, followingUser.ID)
-
+		waitForConsumer()
 		// Retrieve the follow count and follower count of the user from cache.
 		followCount := redis.Rdb.HGet(redis.Ctx, followerUserKey, "follow_count").Val()
 		followerCount := redis.Rdb.HGet(redis.Ctx, followingUserKey, "follower_count").Val()
-
 		// Retrieve the following id list and follower id list of the user from cache.
-		followingKey := redis.FollowingKey + strconv.FormatInt(followerUser.ID, 10)
-		followingIDList := redis.Rdb.LRange(redis.Ctx, followingKey, 0, -1).Val()
-		followerKey := redis.FollowerKey + strconv.FormatInt(followingUser.ID, 10)
-		followerIDList := redis.Rdb.LRange(redis.Ctx, followerKey, 0, -1).Val()
+		followingIDListLength := redis.Rdb.LLen(redis.Ctx, followingKey).Val()
+		followerIDListLength := redis.Rdb.LLen(redis.Ctx, followerKey).Val()
 
 		assert.Equal(t, int32(0), statusCode)
 		assert.Equal(t, "follow success", statusMsg)
 		assert.Equal(t, "1", followCount)
 		assert.Equal(t, "1", followerCount)
-		assert.Equal(t, 1, len(followingIDList))
-		assert.Equal(t, strconv.FormatInt(followingUser.ID, 10), followingIDList[0])
-		assert.Equal(t, 1, len(followerIDList))
-		assert.Equal(t, strconv.FormatInt(followerUser.ID, 10), followerIDList[0])
+		assert.Equal(t, int64(2), followingIDListLength)
+		assert.Equal(t, int64(2), followerIDListLength)
 	})
 }
 
@@ -95,28 +94,31 @@ func TestDeleteFollowRel(t *testing.T) {
 		redis.Rdb.HSet(redis.Ctx, followerUserKey, followerUserDetail)
 		followingUserKey := redis.UserKey + strconv.FormatInt(followingUser.ID, 10)
 		redis.Rdb.HSet(redis.Ctx, followingUserKey, followingUserDetail)
+		followingKey := redis.FollowingKey + strconv.FormatInt(followerUser.ID, 10)
+		redis.Rdb.RPush(redis.Ctx, followingKey, "")
+		followerKey := redis.FollowerKey + strconv.FormatInt(followingUser.ID, 10)
+		redis.Rdb.RPush(redis.Ctx, followerKey, "")
 
 		// Create a test follow relationship.
 		followService.CreateNewFollowRel(followerUser.ID, followingUser.ID)
+		waitForConsumer()
 
 		statusCode, statusMsg := followService.DeleteFollowRel(followerUser.ID, followingUser.ID)
+		waitForConsumer()
 
 		// Retrieve the follow count and follower count of the user from cache.
 		followCount := redis.Rdb.HGet(redis.Ctx, followerUserKey, "follow_count").Val()
 		followerCount := redis.Rdb.HGet(redis.Ctx, followingUserKey, "follower_count").Val()
-
 		// Retrieve the following id list and follower id list of the user from cache.
-		followingKey := redis.FollowingKey + strconv.FormatInt(followerUser.ID, 10)
-		followingIDList := redis.Rdb.LRange(redis.Ctx, followingKey, 0, -1).Val()
-		followerKey := redis.FollowerKey + strconv.FormatInt(followingUser.ID, 10)
-		followerIDList := redis.Rdb.LRange(redis.Ctx, followerKey, 0, -1).Val()
+		followingIDListLength := redis.Rdb.LLen(redis.Ctx, followingKey).Val()
+		followerIDListLength := redis.Rdb.LLen(redis.Ctx, followerKey).Val()
 
 		assert.Equal(t, int32(0), statusCode)
 		assert.Equal(t, "unfollow success", statusMsg)
 		assert.Equal(t, "0", followCount)
 		assert.Equal(t, "0", followerCount)
-		assert.Equal(t, 0, len(followingIDList))
-		assert.Equal(t, 0, len(followerIDList))
+		assert.Equal(t, int64(1), followingIDListLength)
+		assert.Equal(t, int64(1), followerIDListLength)
 	})
 }
 
@@ -139,10 +141,14 @@ func TestGetFollowingListByUserID(t *testing.T) {
 
 		statusCode, _, userList :=
 			followService.GetFollowingListByUserID(0, followerUser.ID)
+		waitForConsumer()
+		followingKey := redis.FollowingKey + strconv.FormatInt(followerUser.ID, 10)
+		followingListLength := redis.Rdb.LLen(redis.Ctx, followingKey).Val()
 
 		assert.Equal(t, int32(0), statusCode)
 		assert.Equal(t, 1, len(userList))
 		assert.Equal(t, followingUser.Name, userList[0].Name)
+		assert.Equal(t, int64(1), followingListLength)
 	})
 
 	t.Run("get following list successfully with cache hit", func(t *testing.T) {
@@ -180,10 +186,14 @@ func TestGetFollowerListByUserID(t *testing.T) {
 
 		statusCode, _, userList :=
 			followService.GetFollowerListByUserID(0, followingUser.ID)
+		waitForConsumer()
+		followerKey := redis.FollowerKey + strconv.FormatInt(followingUser.ID, 10)
+		followerListLength := redis.Rdb.LLen(redis.Ctx, followerKey).Val()
 
 		assert.Equal(t, int32(0), statusCode)
 		assert.Equal(t, 1, len(userList))
 		assert.Equal(t, followerUser.Name, userList[0].Name)
+		assert.Equal(t, int64(1), followerListLength)
 	})
 
 	t.Run("get follower list successfully with cache hit", func(t *testing.T) {

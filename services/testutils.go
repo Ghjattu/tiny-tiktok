@@ -55,3 +55,7 @@ func setup() {
 	testCommentOne, _ = models.CreateTestComment(testUserOne.ID, testVideoOne.ID)
 	testCommentOneCache = &redis.CommentCache{ID: testCommentOne.ID, Content: testCommentOne.Content}
 }
+
+func waitForConsumer() {
+	time.Sleep(100 * time.Millisecond)
+}

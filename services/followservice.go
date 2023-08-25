@@ -4,17 +4,13 @@ import (
 	"strconv"
 
 	"github.com/Ghjattu/tiny-tiktok/models"
+	"github.com/Ghjattu/tiny-tiktok/rabbitmq"
 	"github.com/Ghjattu/tiny-tiktok/redis"
-	"github.com/Ghjattu/tiny-tiktok/utils"
 	"gorm.io/gorm"
 )
 
 // FollowService implements the FollowInterface.
 type FollowService struct{}
-
-// TODO: retrieve following and follower from redis.
-// key = following:user_id
-// key = follower:user_id
 
 // CreateNewFollowRel creates a new follow relationship.
 //
@@ -43,21 +39,6 @@ func (fs *FollowService) CreateNewFollowRel(followerID, followingID int64) (int3
 		return 1, "you have already followed this user"
 	}
 
-	// Update the FollowCount and FollowerCount of the user in cache.
-	followerUserKey := redis.UserKey + strconv.FormatInt(followerID, 10)
-	redis.HashIncrBy(followerUserKey, "follow_count", 1)
-
-	followingUserKey := redis.UserKey + strconv.FormatInt(followingID, 10)
-	redis.HashIncrBy(followingUserKey, "follower_count", 1)
-
-	// Update the following id list of the user in cache.
-	followingKey := redis.FollowingKey + strconv.FormatInt(followerID, 10)
-	redis.Rdb.RPush(redis.Ctx, followingKey, followingID)
-
-	// Update the follower id list of the user in cache.
-	followerKey := redis.FollowerKey + strconv.FormatInt(followingID, 10)
-	redis.Rdb.RPush(redis.Ctx, followerKey, followerID)
-
 	// Create the follow relationship.
 	fr := &models.FollowRel{
 		FollowerID:  followerID,
@@ -67,6 +48,23 @@ func (fs *FollowService) CreateNewFollowRel(followerID, followingID int64) (int3
 	if err != nil {
 		return 1, "failed to create follow relationship"
 	}
+
+	// Update the FollowCount and FollowerCount of the user in cache.
+	followerUserKey := redis.UserKey + strconv.FormatInt(followerID, 10)
+	rabbitmq.ProduceMessage("Hash", "Incr", "", followerUserKey, "follow_count", 1)
+
+	followingUserKey := redis.UserKey + strconv.FormatInt(followingID, 10)
+	rabbitmq.ProduceMessage("Hash", "Incr", "", followingUserKey, "follower_count", 1)
+
+	// Update the following id list of the user in cache.
+	followingKey := redis.FollowingKey + strconv.FormatInt(followerID, 10)
+	followingIDList := []int64{followingID}
+	rabbitmq.ProduceMessage("List", "RPushX", "", followingKey, "", followingIDList)
+
+	// Update the follower id list of the user in cache.
+	followerKey := redis.FollowerKey + strconv.FormatInt(followingID, 10)
+	followerIDList := []int64{followerID}
+	rabbitmq.ProduceMessage("List", "RPushX", "", followerKey, "", followerIDList)
 
 	return 0, "follow success"
 }
@@ -88,26 +86,26 @@ func (fs *FollowService) DeleteFollowRel(followerID, followingID int64) (int32, 
 		return 1, "you have not followed this user"
 	}
 
-	// Update the FollowCount and FollowerCount of the user in cache.
-	followerUserKey := redis.UserKey + strconv.FormatInt(followerID, 10)
-	redis.HashIncrBy(followerUserKey, "follow_count", -1)
-
-	followingUserKey := redis.UserKey + strconv.FormatInt(followingID, 10)
-	redis.HashIncrBy(followingUserKey, "follower_count", -1)
-
-	// Update the following id list of the user in cache.
-	followingKey := redis.FollowingKey + strconv.FormatInt(followerID, 10)
-	redis.Rdb.LRem(redis.Ctx, followingKey, 0, followingID)
-
-	// Update the follower id list of the user in cache.
-	followerKey := redis.FollowerKey + strconv.FormatInt(followingID, 10)
-	redis.Rdb.LRem(redis.Ctx, followerKey, 0, followerID)
-
 	// Delete the follow relationship.
 	_, err = models.DeleteFollowRel(followerID, followingID)
 	if err != nil {
 		return 1, "failed to delete follow relationship"
 	}
+
+	// Update the FollowCount and FollowerCount of the user in cache.
+	followerUserKey := redis.UserKey + strconv.FormatInt(followerID, 10)
+	rabbitmq.ProduceMessage("Hash", "Incr", "", followerUserKey, "follow_count", -1)
+
+	followingUserKey := redis.UserKey + strconv.FormatInt(followingID, 10)
+	rabbitmq.ProduceMessage("Hash", "Incr", "", followingUserKey, "follower_count", -1)
+
+	// Update the following id list of the user in cache.
+	followingKey := redis.FollowingKey + strconv.FormatInt(followerID, 10)
+	rabbitmq.ProduceMessage("List", "LRem", "", followingKey, "", followingID)
+
+	// Update the follower id list of the user in cache.
+	followerKey := redis.FollowerKey + strconv.FormatInt(followingID, 10)
+	rabbitmq.ProduceMessage("List", "LRem", "", followerKey, "", followerID)
 
 	return 0, "unfollow success"
 }
@@ -159,11 +157,8 @@ func (fs *FollowService) GetFollowingListByUserID(currentUserID, queryUserID int
 		return 1, "failed to get following list", nil
 	}
 
-	followingIDStrList, _ := utils.ConvertInt64ToString(followingIDList)
-
 	// Save the following id list to cache.
-	redis.Rdb.RPush(redis.Ctx, followingKey, followingIDStrList)
-	redis.Rdb.Expire(redis.Ctx, followingKey, redis.RandomDay())
+	rabbitmq.ProduceMessage("List", "RPush", "", followingKey, "", followingIDList)
 
 	// Get the user detail list.
 	us := &UserService{}
@@ -224,11 +219,8 @@ func (fs *FollowService) GetFollowerListByUserID(currentUserID, queryUserID int6
 		return 1, "failed to get follower list", nil
 	}
 
-	followerIDStrList, _ := utils.ConvertInt64ToString(followerIDList)
-
 	// Save the follower id list to cache.
-	redis.Rdb.RPush(redis.Ctx, followerKey, followerIDStrList)
-	redis.Rdb.Expire(redis.Ctx, followerKey, redis.RandomDay())
+	rabbitmq.ProduceMessage("List", "RPush", "", followerKey, "", followerIDList)
 
 	// Get the user detail list.
 	us := &UserService{}

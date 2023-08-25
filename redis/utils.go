@@ -21,17 +21,16 @@ func RandomDay() time.Duration {
 //	@param key string
 //	@param field string
 //	@param incr int64
-//	@return int64 "the value at field after the increment operation"
-//	@return string "status message"
+//	@return int64 "the value of the field after the increment"
 //	@return error
-func HashIncrBy(key, field string, incr int64) (int64, string, error) {
+func HashIncrBy(key, field string, incr int64) (int64, error) {
 	if Rdb.Exists(Ctx, key).Val() == 1 {
 		res := Rdb.HIncrBy(Ctx, key, field, incr)
 
-		return res.Val(), "", res.Err()
+		return res.Val(), res.Err()
 	}
 
-	return 0, "key does not exist", nil
+	return 0, fmt.Errorf("failed to hash incr by: key %s does not exist", key)
 }
 
 // HashGetAll calls HGetAll command of redis.

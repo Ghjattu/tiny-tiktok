@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Ghjattu/tiny-tiktok/models"
+	"github.com/Ghjattu/tiny-tiktok/rabbitmq"
 	"github.com/Ghjattu/tiny-tiktok/redis"
 	"github.com/Ghjattu/tiny-tiktok/utils"
 	"gorm.io/gorm"
@@ -53,11 +54,12 @@ func (cs *CommentService) CreateNewComment(currentUserID, videoID int64, content
 
 	// Update the CommentCount of the video in cache.
 	videoKey := redis.VideoKey + strconv.FormatInt(videoID, 10)
-	redis.HashIncrBy(videoKey, "comment_count", 1)
+	rabbitmq.ProduceMessage("Hash", "Incr", "", videoKey, "comment_count", 1)
 
 	// Insert the comment id into cache.
 	commentVideoKey := redis.CommentsByVideoKey + strconv.FormatInt(videoID, 10)
-	redis.Rdb.RPushX(redis.Ctx, commentVideoKey, comment.ID).Val()
+	commentIDList := []int64{comment.ID}
+	rabbitmq.ProduceMessage("List", "RPushX", "", commentVideoKey, "", commentIDList)
 
 	// Convert the comment to a comment detail.
 	_, commentDetail := convertCommentToCommentDetail(currentUserID, comment)
@@ -94,11 +96,11 @@ func (cs *CommentService) DeleteCommentByCommentID(currentUserID, commentID int6
 
 	// Update the CommentCount of the video in cache.
 	videoKey := redis.VideoKey + strconv.FormatInt(comment.VideoID, 10)
-	redis.HashIncrBy(videoKey, "comment_count", -1)
+	rabbitmq.ProduceMessage("Hash", "Incr", "", videoKey, "comment_count", -1)
 
 	// Delete the comment id from cache.
 	commentVideoKey := redis.CommentsByVideoKey + strconv.FormatInt(comment.VideoID, 10)
-	redis.Rdb.LRem(redis.Ctx, commentVideoKey, 0, comment.ID).Val()
+	rabbitmq.ProduceMessage("List", "LRem", "", commentVideoKey, "", comment.ID)
 
 	// Delete the comment.
 	_, err = models.DeleteCommentByCommentID(commentID)
@@ -149,10 +151,8 @@ func (cs *CommentService) GetCommentListByVideoID(currentUserID, videoID int64) 
 		return 0, "failed to get comment list", nil
 	}
 
-	commentIDStrList, _ := utils.ConvertInt64ToString(commentIDList)
-
-	redis.Rdb.RPush(redis.Ctx, commentVideoKey, commentIDStrList)
-	redis.Rdb.Expire(redis.Ctx, commentVideoKey, redis.RandomDay())
+	// Insert the comment id list into cache.
+	rabbitmq.ProduceMessage("List", "RPush", "", commentVideoKey, "", commentIDList)
 
 	return cs.GetCommentListByCommentIDList(currentUserID, commentIDList)
 }
@@ -227,7 +227,7 @@ func (cs *CommentService) GetCommentDetailByCommentID(currentUserID, commentID i
 	us := &UserService{}
 	_, _, commentDetail.User = us.GetUserDetailByUserID(currentUserID, comment.UserID)
 
-	// Insert the comment into redis.
+	// Insert the comment into cache.
 	commentKey := redis.CommentKey + strconv.FormatInt(commentID, 10)
 	commentCache := &redis.CommentCache{
 		ID:         comment.ID,
@@ -235,8 +235,7 @@ func (cs *CommentService) GetCommentDetailByCommentID(currentUserID, commentID i
 		Content:    comment.Content,
 		CreateDate: comment.CreateDate.Format("01-02"),
 	}
-	redis.Rdb.HSet(redis.Ctx, commentKey, commentCache)
-	redis.Rdb.Expire(redis.Ctx, commentKey, redis.RandomDay())
+	rabbitmq.ProduceMessage("Hash", "Set", "CommentCache", commentKey, "", commentCache)
 
 	return commentDetail, nil
 }

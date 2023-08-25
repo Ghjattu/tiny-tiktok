@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Ghjattu/tiny-tiktok/models"
+	"github.com/Ghjattu/tiny-tiktok/rabbitmq"
 	"github.com/Ghjattu/tiny-tiktok/redis"
 	"github.com/Ghjattu/tiny-tiktok/utils"
 )
@@ -37,11 +38,12 @@ func (vs *VideoService) CreateNewVideo(playUrl, title string, authorID int64, pu
 
 	// Update the WorkCount of the user in cache.
 	userKey := redis.UserKey + strconv.FormatInt(authorID, 10)
-	redis.HashIncrBy(userKey, "work_count", 1)
+	rabbitmq.ProduceMessage("Hash", "Incr", "", userKey, "work_count", 1)
 
-	// If the video is created successfully, insert the video id to redis.
+	// Insert the video id to cache.
 	videoAuthorKey := redis.VideosByAuthorKey + strconv.FormatInt(authorID, 10)
-	redis.Rdb.RPush(redis.Ctx, videoAuthorKey, video.ID)
+	videoIDList := []int64{video.ID}
+	rabbitmq.ProduceMessage("List", "RPushX", "", videoAuthorKey, "", videoIDList)
 
 	return 0, "create new video successfully"
 }
@@ -77,10 +79,7 @@ func (vs *VideoService) GetVideoListByAuthorID(authorID, currentUserID int64) (i
 		return 1, "failed to get video list", nil
 	}
 
-	videoIDStrList, _ := utils.ConvertInt64ToString(videoIDList)
-
-	redis.Rdb.RPush(redis.Ctx, videoAuthorKey, videoIDStrList)
-	redis.Rdb.Expire(redis.Ctx, videoAuthorKey, redis.RandomDay())
+	rabbitmq.ProduceMessage("List", "RPush", "", videoAuthorKey, "", videoIDList)
 
 	return vs.GetVideoListByVideoIDList(videoIDList, currentUserID)
 }
@@ -200,8 +199,7 @@ func (vs *VideoService) GetVideoDetailByVideoID(videoID, currentUserID int64) (*
 		CommentCount:  videoDetail.CommentCount,
 		Title:         videoDetail.Title,
 	}
-	redis.Rdb.HSet(redis.Ctx, videoKey, videoCache)
-	redis.Rdb.Expire(redis.Ctx, videoKey, redis.RandomDay())
+	rabbitmq.ProduceMessage("Hash", "Set", "VideoCache", videoKey, "", videoCache)
 
 	return videoDetail, nil
 }

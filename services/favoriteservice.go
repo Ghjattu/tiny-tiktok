@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	"github.com/Ghjattu/tiny-tiktok/models"
+	"github.com/Ghjattu/tiny-tiktok/rabbitmq"
 	"github.com/Ghjattu/tiny-tiktok/redis"
 	"github.com/Ghjattu/tiny-tiktok/utils"
 	"gorm.io/gorm"
@@ -31,22 +32,6 @@ func (fs *FavoriteService) CreateNewFavoriteRel(userID, videoID int64) (int32, s
 		return 1, "you have already favorited this video"
 	}
 
-	// Update the TotalFavorited of the video's author in cache.
-	authorKey := redis.UserKey + strconv.FormatInt(video.AuthorID, 10)
-	redis.HashIncrBy(authorKey, "total_favorited", 1)
-
-	// Update the FavoriteCount of the user in cache.
-	userKey := redis.UserKey + strconv.FormatInt(userID, 10)
-	redis.HashIncrBy(userKey, "favorite_count", 1)
-
-	// Update the FavoriteCount of the video in cache.
-	videoKey := redis.VideoKey + strconv.FormatInt(videoID, 10)
-	redis.HashIncrBy(videoKey, "favorite_count", 1)
-
-	// Update the favorite videos id list of the user in cache.
-	favoriteVideosKey := redis.FavoriteVideosKey + strconv.FormatInt(userID, 10)
-	redis.Rdb.RPush(redis.Ctx, favoriteVideosKey, videoID)
-
 	// Create a new favorite relation.
 	fr := &models.FavoriteRel{
 		UserID:  userID,
@@ -57,6 +42,27 @@ func (fs *FavoriteService) CreateNewFavoriteRel(userID, videoID int64) (int32, s
 	if err != nil {
 		return 1, "favorite action failed"
 	}
+
+	// Update the TotalFavorited of the video's author in cache.
+	authorKey := redis.UserKey + strconv.FormatInt(video.AuthorID, 10)
+	// redis.HashIncrBy(authorKey, "total_favorited", 1)
+	rabbitmq.ProduceMessage("Hash", "Incr", "", authorKey, "total_favorited", 1)
+
+	// Update the FavoriteCount of the user in cache.
+	userKey := redis.UserKey + strconv.FormatInt(userID, 10)
+	// redis.HashIncrBy(userKey, "favorite_count", 1)
+	rabbitmq.ProduceMessage("Hash", "Incr", "", userKey, "favorite_count", 1)
+
+	// Update the FavoriteCount of the video in cache.
+	videoKey := redis.VideoKey + strconv.FormatInt(videoID, 10)
+	// redis.HashIncrBy(videoKey, "favorite_count", 1)
+	rabbitmq.ProduceMessage("Hash", "Incr", "", videoKey, "favorite_count", 1)
+
+	// Update the favorite videos id list of the user in cache.
+	favoriteVideosKey := redis.FavoriteVideosKey + strconv.FormatInt(userID, 10)
+	// redis.Rdb.RPush(redis.Ctx, favoriteVideosKey, videoID)
+	videoIDList := []int64{videoID}
+	rabbitmq.ProduceMessage("List", "RPushX", "", favoriteVideosKey, "", videoIDList)
 
 	return 0, "favorite action success"
 }
@@ -80,26 +86,26 @@ func (fs *FavoriteService) DeleteFavoriteRel(userID, videoID int64) (int32, stri
 		return 1, "you have not favorited this video"
 	}
 
-	// Update the TotalFavorited of the video's author in cache.
-	authorKey := redis.UserKey + strconv.FormatInt(video.AuthorID, 10)
-	redis.HashIncrBy(authorKey, "total_favorited", -1)
-
-	// Update the FavoriteCount of the user in cache.
-	userKey := redis.UserKey + strconv.FormatInt(userID, 10)
-	redis.HashIncrBy(userKey, "favorite_count", -1)
-
-	// Update the FavoriteCount of the video in cache.
-	videoKey := redis.VideoKey + strconv.FormatInt(videoID, 10)
-	redis.HashIncrBy(videoKey, "favorite_count", -1)
-
-	// Update the favorite videos id list of the user in cache.
-	favoriteVideosKey := redis.FavoriteVideosKey + strconv.FormatInt(userID, 10)
-	redis.Rdb.LRem(redis.Ctx, favoriteVideosKey, 0, videoID)
-
 	_, err = models.DeleteFavoriteRel(userID, videoID)
 	if err != nil {
 		return 1, "unfavorite action failed"
 	}
+
+	// Update the TotalFavorited of the video's author in cache.
+	authorKey := redis.UserKey + strconv.FormatInt(video.AuthorID, 10)
+	rabbitmq.ProduceMessage("Hash", "Incr", "", authorKey, "total_favorited", -1)
+
+	// Update the FavoriteCount of the user in cache.
+	userKey := redis.UserKey + strconv.FormatInt(userID, 10)
+	rabbitmq.ProduceMessage("Hash", "Incr", "", userKey, "favorite_count", -1)
+
+	// Update the FavoriteCount of the video in cache.
+	videoKey := redis.VideoKey + strconv.FormatInt(videoID, 10)
+	rabbitmq.ProduceMessage("Hash", "Incr", "", videoKey, "favorite_count", -1)
+
+	// Update the favorite videos id list of the user in cache.
+	favoriteVideosKey := redis.FavoriteVideosKey + strconv.FormatInt(userID, 10)
+	rabbitmq.ProduceMessage("List", "LRem", "", favoriteVideosKey, "", videoID)
 
 	return 0, "unfavorite action success"
 }
@@ -129,11 +135,8 @@ func (fs *FavoriteService) GetFavoriteVideoListByUserID(currentUserID, queryUser
 		return 1, "failed to get favorite video id list", nil
 	}
 
-	favoriteVideoIDStrList, _ := utils.ConvertInt64ToString(favoriteVideoIDList)
-
 	// Save favorite video id list to redis.
-	redis.Rdb.RPush(redis.Ctx, favoriteVideosKey, favoriteVideoIDStrList)
-	redis.Rdb.Expire(redis.Ctx, favoriteVideosKey, redis.RandomDay())
+	rabbitmq.ProduceMessage("List", "RPush", "", favoriteVideosKey, "", favoriteVideoIDList)
 
 	// Get favorite video list by video id list.
 	return vs.GetVideoListByVideoIDList(favoriteVideoIDList, currentUserID)

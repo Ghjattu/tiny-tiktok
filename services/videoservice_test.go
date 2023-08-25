@@ -23,14 +23,20 @@ func TestCreateNewVideo(t *testing.T) {
 		// Insert a test user to redis.
 		userKey := redis.UserKey + strconv.FormatInt(testUserOne.ID, 10)
 		redis.Rdb.HSet(redis.Ctx, userKey, testUserOneDetail)
+		// Insert a test video id list to redis.
+		videoAuthorKey := redis.VideosByAuthorKey + strconv.FormatInt(testUserOne.ID, 10)
+		redis.Rdb.RPush(redis.Ctx, videoAuthorKey, "")
 
 		statusCode, statusMsg :=
 			videoService.CreateNewVideo("test", "test", testUserOne.ID, time.Now())
+		waitForConsumer()
 		workCount := redis.Rdb.HGet(redis.Ctx, userKey, "work_count").Val()
+		videoIDListLength := redis.Rdb.LLen(redis.Ctx, videoAuthorKey).Val()
 
 		assert.Equal(t, int32(0), statusCode)
 		assert.Equal(t, "create new video successfully", statusMsg)
 		assert.Equal(t, "1", workCount)
+		assert.Equal(t, int64(2), videoIDListLength)
 	})
 }
 
@@ -42,9 +48,13 @@ func TestGetVideoListByAuthorID(t *testing.T) {
 
 		statusCode, _, videoList :=
 			videoService.GetVideoListByAuthorID(testUserOne.ID, 0)
+		waitForConsumer()
+		videoAuthorKey := redis.VideosByAuthorKey + strconv.FormatInt(testUserOne.ID, 10)
+		videoIDListLength := redis.Rdb.LLen(redis.Ctx, videoAuthorKey).Val()
 
 		assert.Equal(t, int32(0), statusCode)
 		assert.Equal(t, 2, len(videoList))
+		assert.Equal(t, int64(2), videoIDListLength)
 	})
 
 	t.Run("get video list successfully with cache hit", func(t *testing.T) {
@@ -102,5 +112,28 @@ func TestGetVideoListByVideoIDList(t *testing.T) {
 
 		assert.Equal(t, int32(0), statusCode)
 		assert.Equal(t, 1, len(videoList))
+	})
+}
+
+func TestGetVideoDetailByAuthorID(t *testing.T) {
+	setup()
+
+	t.Run("failed to get video", func(t *testing.T) {
+		_, err := videoService.GetVideoDetailByVideoID(0, 0)
+
+		assert.NotNil(t, err)
+	})
+
+	t.Run("get video detail successfully", func(t *testing.T) {
+		redis.Rdb.FlushDB(redis.Ctx)
+
+		video, err := videoService.GetVideoDetailByVideoID(testVideoOne.ID, 0)
+		waitForConsumer()
+		videoKey := redis.VideoKey + strconv.FormatInt(testVideoOne.ID, 10)
+		videoTitle := redis.Rdb.HGet(redis.Ctx, videoKey, "title").Val()
+
+		assert.Nil(t, err)
+		assert.Equal(t, testVideoOne.Title, video.Title)
+		assert.Equal(t, testVideoOne.Title, videoTitle)
 	})
 }

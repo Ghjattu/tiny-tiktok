@@ -40,12 +40,13 @@ func TestCreateNewComment(t *testing.T) {
 
 		statusCode, _, _ :=
 			commentService.CreateNewComment(0, testVideoOne.ID, "test", time.Now())
+		waitForConsumer()
 		commentCount := redis.Rdb.HGet(redis.Ctx, videoKey, "comment_count").Val()
-		commentList := redis.Rdb.LRange(redis.Ctx, commentVideoKey, 0, -1).Val()
+		commentListLength := redis.Rdb.LLen(redis.Ctx, commentVideoKey).Val()
 
 		assert.Equal(t, int32(0), statusCode)
 		assert.Equal(t, "1", commentCount)
-		assert.Equal(t, 2, len(commentList))
+		assert.Equal(t, int64(2), commentListLength)
 	})
 }
 
@@ -77,12 +78,13 @@ func TestDeleteCommentByCommentID(t *testing.T) {
 
 		statusCode, _, _ :=
 			commentService.DeleteCommentByCommentID(testUserOne.ID, testCommentOne.ID)
+		waitForConsumer()
 		commentCount := redis.Rdb.HGet(redis.Ctx, videoKey, "comment_count").Val()
-		commentIDList := redis.Rdb.LRange(redis.Ctx, commentVideoKey, 0, -1).Val()
+		commentIDListLength := redis.Rdb.LLen(redis.Ctx, commentVideoKey).Val()
 
 		assert.Equal(t, int32(0), statusCode)
 		assert.Equal(t, "0", commentCount)
-		assert.Equal(t, 0, len(commentIDList))
+		assert.Equal(t, int64(0), commentIDListLength)
 	})
 }
 
@@ -100,9 +102,13 @@ func TestGetCommentListByVideoID(t *testing.T) {
 
 		statusCode, _, commentList :=
 			commentService.GetCommentListByVideoID(0, testVideoOne.ID)
+		waitForConsumer()
+		commentVideoKey := redis.CommentsByVideoKey + strconv.FormatInt(testVideoOne.ID, 10)
+		commentIDListLength := redis.Rdb.LLen(redis.Ctx, commentVideoKey).Val()
 
 		assert.Equal(t, int32(0), statusCode)
 		assert.Equal(t, 1, len(commentList))
+		assert.Equal(t, int64(1), commentIDListLength)
 	})
 
 	t.Run("get comment list successfully with cache hit", func(t *testing.T) {
@@ -168,8 +174,12 @@ func TestGetCommentDetailByCommentID(t *testing.T) {
 	t.Run("get comment detail successfully", func(t *testing.T) {
 		commentDetail, err :=
 			commentService.GetCommentDetailByCommentID(0, testCommentOne.ID)
+		waitForConsumer()
+		commentKey := redis.CommentKey + strconv.FormatInt(testCommentOne.ID, 10)
+		commentContent := redis.Rdb.HGet(redis.Ctx, commentKey, "content").Val()
 
 		assert.Nil(t, err)
 		assert.Equal(t, testCommentOne.Content, commentDetail.Content)
+		assert.Equal(t, testCommentOne.Content, commentContent)
 	})
 }

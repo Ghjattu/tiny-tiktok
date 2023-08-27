@@ -54,6 +54,7 @@ func setup() {
 	r.POST("/douyin/relation/action/", jwt.AuthorizePost(), FollowAction)
 	r.GET("/douyin/relation/follow/list/", jwt.AuthorizeGet(), FollowingList)
 	r.GET("/douyin/relation/follower/list/", jwt.AuthorizeGet(), FollowerList)
+	r.GET("/douyin/relation/friend/list/", jwt.AuthorizeGet(), FriendList)
 	r.POST("/douyin/message/action/", jwt.AuthorizePost(), MessageAction)
 	r.GET("/douyin/message/chat/", jwt.AuthorizeGet(), MessageChat)
 }
@@ -86,6 +87,8 @@ func selectResponseType(req *http.Request) interface{} {
 		return &UserListResponse{}
 	case "/relation/follower/list/":
 		return &UserListResponse{}
+	case "/relation/friend/list/":
+		return &FriendListResponse{}
 	case "/message/chat/":
 		return &MessageChatResponse{}
 	default:

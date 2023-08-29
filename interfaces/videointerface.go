@@ -26,4 +26,8 @@ type VideoInterface interface {
 	// GetVideoDetailByVideoID returns the detail of the video by video id.
 	// Return video detail, error.
 	GetVideoDetailByVideoID(videoID, currentUserID int64) (*models.VideoDetail, error)
+
+	// GetVideoCountByAuthorID returns the count of videos published by the author.
+	// Return video count, error.
+	GetVideoCountByAuthorID(authorID int64) (int64, error)
 }

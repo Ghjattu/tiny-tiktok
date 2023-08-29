@@ -172,3 +172,19 @@ func (fs *FavoriteService) GetTotalFavoritedByUserID(userID int64) int64 {
 
 	return totalFavorited
 }
+
+// GetFavoriteCountByUserID returns the number of favorite by user id.
+//
+//	@receiver fs FavoriteService
+//	@param userID int64
+//	@return int64 "favorite count"
+//	@return error
+func (fs *FavoriteService) GetFavoriteCountByUserID(userID int64) (int64, error) {
+	favoriteVideoKey := redis.FavoriteVideosKey + strconv.FormatInt(userID, 10)
+	if redis.Rdb.Exists(redis.Ctx, favoriteVideoKey).Val() == 1 {
+		// Cache hit.
+		return redis.Rdb.LLen(redis.Ctx, favoriteVideoKey).Result()
+	}
+
+	return models.GetFavoriteCountByUserID(userID)
+}

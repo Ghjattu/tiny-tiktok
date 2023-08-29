@@ -18,4 +18,12 @@ type FollowInterface interface {
 	// GetFollowerListByUserID get the list of followers of a user.
 	// Return status code, status message, user detail list.
 	GetFollowerListByUserID(currentUserID, queryUserID int64) (int32, string, []models.UserDetail)
+
+	// GetFollowingCountByUserID get the number of users that a user is following.
+	// Return following count, error.
+	GetFollowingCountByUserID(userID int64) (int64, error)
+
+	// GetFollowerCountByUserID get the number of followers of a user.
+	// Return follower count, error.
+	GetFollowerCountByUserID(userID int64) (int64, error)
 }

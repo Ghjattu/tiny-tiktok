@@ -203,3 +203,19 @@ func (vs *VideoService) GetVideoDetailByVideoID(videoID, currentUserID int64) (*
 
 	return videoDetail, nil
 }
+
+// GetVideoCountByAuthorID returns the video count of the author.
+//
+//	@receiver vs *VideoService
+//	@param authorID int64
+//	@return int64 "video count"
+//	@return error
+func (vs *VideoService) GetVideoCountByAuthorID(authorID int64) (int64, error) {
+	videoAuthorKey := redis.VideosByAuthorKey + strconv.FormatInt(authorID, 10)
+	if redis.Rdb.Exists(redis.Ctx, videoAuthorKey).Val() == 1 {
+		// Cache hit.
+		return redis.Rdb.LLen(redis.Ctx, videoAuthorKey).Result()
+	}
+
+	return models.GetVideoCountByAuthorID(authorID)
+}

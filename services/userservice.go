@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	"github.com/Ghjattu/tiny-tiktok/models"
+	"github.com/Ghjattu/tiny-tiktok/rabbitmq"
 	"github.com/Ghjattu/tiny-tiktok/redis"
 	"gorm.io/gorm"
 )
@@ -44,22 +45,33 @@ func (us *UserService) GetUserByUserID(userID int64) (int32, string, *models.Use
 func (us *UserService) GetUserDetailByUserID(currentUserID, userID int64) (int32, string, *models.UserDetail) {
 	// Try to get user detail from redis.
 	userKey := redis.UserKey + strconv.FormatInt(userID, 10)
-	if redis.Rdb.Exists(redis.Ctx, userKey).Val() == 1 {
-		userDetail := &models.UserDetail{}
-		userCache := redis.Rdb.HGetAll(redis.Ctx, userKey)
-		if userCache.Err() == nil {
-			if err := userCache.Scan(userDetail); err == nil {
-				userDetail.IsFollow, _ = models.CheckFollowRelExist(currentUserID, userID)
-
-				// Update expire time.
-				redis.Rdb.Expire(redis.Ctx, userKey, redis.RandomDay())
-
-				return 0, "get user successfully", userDetail
+	result, err := redis.HashGetAll(userKey)
+	if err == nil {
+		// Cache hit.
+		userCache := &redis.UserCache{}
+		if err := result.Scan(userCache); err == nil {
+			userDetail := &models.UserDetail{
+				ID:              userCache.ID,
+				Name:            userCache.Name,
+				Avatar:          userCache.Avatar,
+				BackgroundImage: userCache.BackgroundImage,
+				Signature:       userCache.Signature,
+				FollowCount:     userCache.FollowCount,
+				FollowerCount:   userCache.FollowerCount,
+				WorkCount:       userCache.WorkCount,
+				FavoriteCount:   userCache.FavoriteCount,
+				TotalFavorited:  userCache.TotalFavorited,
 			}
+			userDetail.IsFollow, _ = models.CheckFollowRelExist(currentUserID, userID)
+
+			// Update expire time.
+			redis.Rdb.Expire(redis.Ctx, userKey, redis.RandomDay())
+
+			return 0, "get user successfully", userDetail
 		}
 	}
 
-	// Cache miss.
+	// Cache miss or some error occurs.
 	user, err := models.GetUserByUserID(userID)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -76,18 +88,20 @@ func (us *UserService) GetUserDetailByUserID(currentUserID, userID int64) (int32
 		Signature:       user.Signature,
 	}
 
-	userDetail.FollowCount, _ = models.GetFollowingCountByUserID(user.ID)
-	userDetail.FollowerCount, _ = models.GetFollowerCountByUserID(user.ID)
+	followService := &FollowService{}
+	userDetail.FollowCount, _ = followService.GetFollowingCountByUserID(user.ID)
+	userDetail.FollowerCount, _ = followService.GetFollowerCountByUserID(user.ID)
 	userDetail.IsFollow, _ = models.CheckFollowRelExist(currentUserID, user.ID)
-	userDetail.WorkCount, _ = models.GetVideoCountByAuthorID(user.ID)
-	userDetail.FavoriteCount, _ = models.GetFavoriteCountByUserID(user.ID)
 
-	fs := &FavoriteService{}
-	userDetail.TotalFavorited = fs.GetTotalFavoritedByUserID(user.ID)
+	videoService := &VideoService{}
+	userDetail.WorkCount, _ = videoService.GetVideoCountByAuthorID(user.ID)
+
+	favoriteService := &FavoriteService{}
+	userDetail.FavoriteCount, _ = favoriteService.GetFavoriteCountByUserID(user.ID)
+	userDetail.TotalFavorited = favoriteService.GetTotalFavoritedByUserID(user.ID)
 
 	// Save user detail to redis.
-	redis.Rdb.HSet(redis.Ctx, userKey, userDetail)
-	redis.Rdb.Expire(redis.Ctx, userKey, redis.RandomDay())
+	rabbitmq.ProduceMessage("Hash", "Set", "UserCache", userKey, "", userDetail)
 
 	return 0, "get user successfully", userDetail
 }

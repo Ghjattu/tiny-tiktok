@@ -234,3 +234,35 @@ func (fs *FollowService) GetFollowerListByUserID(currentUserID, queryUserID int6
 
 	return 0, "get follower user list success", userList
 }
+
+// GetFollowingCountByUserID get the number of users that a user is following.
+//
+//	@receiver fs *FollowService
+//	@param userID int64
+//	@return int64 "number of users that a user is following"
+//	@return error
+func (fs *FollowService) GetFollowingCountByUserID(userID int64) (int64, error) {
+	followingKey := redis.FollowingKey + strconv.FormatInt(userID, 10)
+	if redis.Rdb.Exists(redis.Ctx, followingKey).Val() == 1 {
+		// Cache hit.
+		return redis.Rdb.LLen(redis.Ctx, followingKey).Result()
+	}
+
+	return models.GetFollowingCountByUserID(userID)
+}
+
+// GetFollowerCountByUserID get the number of followers of a user.
+//
+//	@receiver fs *FollowService
+//	@param userID int64
+//	@return int64 "number of followers"
+//	@return error
+func (fs *FollowService) GetFollowerCountByUserID(userID int64) (int64, error) {
+	followerKey := redis.FollowerKey + strconv.FormatInt(userID, 10)
+	if redis.Rdb.Exists(redis.Ctx, followerKey).Val() == 1 {
+		// Cache hit.
+		return redis.Rdb.LLen(redis.Ctx, followerKey).Result()
+	}
+
+	return models.GetFollowerCountByUserID(userID)
+}

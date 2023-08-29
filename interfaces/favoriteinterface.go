@@ -18,4 +18,8 @@ type FavoriteInterface interface {
 	// GetTotalFavoritedByUserID get total favorited count by user id.
 	// Return count.
 	GetTotalFavoritedByUserID(userID int64) int64
+
+	// GetFavoriteCountByUserID get favorite count by user id.
+	// Return count, error.
+	GetFavoriteCountByUserID(userID int64) (int64, error)
 }

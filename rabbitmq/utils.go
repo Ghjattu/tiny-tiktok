@@ -50,7 +50,7 @@ func ConsumeMessage(message *Message) {
 			valueStrList, _ := utils.ConvertInt64ToString(valueIntList)
 
 			if err := redis.Rdb.RPush(redis.Ctx, message.Key, valueStrList).Err(); err != nil {
-				log.Println("failed to rpushx: ", err.Error())
+				log.Println("failed to rpush: ", err.Error())
 			}
 			redis.Rdb.Expire(redis.Ctx, message.Key, redis.RandomDay())
 		case "RPushX":
@@ -90,6 +90,13 @@ func CacheStructSelector(name string, messageValue interface{}) interface{} {
 		}
 
 		return commentCache
+	case "UserCache":
+		userCache := &redis.UserCache{}
+		if err := mapstructure.Decode(messageValue, userCache); err != nil {
+			log.Println("cache struct selector err: ", err.Error())
+		}
+
+		return userCache
 	default:
 		return nil
 	}

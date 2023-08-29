@@ -40,7 +40,7 @@ func TestCreateNewFavoriteRel(t *testing.T) {
 
 		// Insert test user and video to redis.
 		userKey := redis.UserKey + strconv.FormatInt(testUserOne.ID, 10)
-		redis.Rdb.HSet(redis.Ctx, userKey, testUserOneDetail)
+		redis.Rdb.HSet(redis.Ctx, userKey, testUserOneCache)
 		videoKey := redis.VideoKey + strconv.FormatInt(testVideoTwo.ID, 10)
 		redis.Rdb.HSet(redis.Ctx, videoKey, testVideoTwoCache)
 		favoriteVideosKey := redis.FavoriteVideosKey + strconv.FormatInt(testUserOne.ID, 10)
@@ -88,7 +88,7 @@ func TestDeleteFavoriteRel(t *testing.T) {
 
 		// Insert test user and video to redis.
 		userKey := redis.UserKey + strconv.FormatInt(testUserOne.ID, 10)
-		redis.Rdb.HSet(redis.Ctx, userKey, testUserOneDetail)
+		redis.Rdb.HSet(redis.Ctx, userKey, testUserOneCache)
 		videoKey := redis.VideoKey + strconv.FormatInt(testVideoTwo.ID, 10)
 		redis.Rdb.HSet(redis.Ctx, videoKey, testVideoTwoCache)
 		favoriteVideosKey := redis.FavoriteVideosKey + strconv.FormatInt(testUserOne.ID, 10)
@@ -171,7 +171,7 @@ func TestGetTotalFavoritedByUserID(t *testing.T) {
 
 		// Insert test user and video to redis.
 		userKey := redis.UserKey + strconv.FormatInt(testUserOne.ID, 10)
-		redis.Rdb.HSet(redis.Ctx, userKey, testUserOneDetail)
+		redis.Rdb.HSet(redis.Ctx, userKey, testUserOneCache)
 		videoKey := redis.VideoKey + strconv.FormatInt(testVideoTwo.ID, 10)
 		redis.Rdb.HSet(redis.Ctx, videoKey, testVideoTwoCache)
 
@@ -182,5 +182,31 @@ func TestGetTotalFavoritedByUserID(t *testing.T) {
 		totalFavorited := favoriteService.GetTotalFavoritedByUserID(testUserOne.ID)
 
 		assert.Equal(t, int64(1), totalFavorited)
+	})
+}
+
+func TestGetFavoriteCountByUserID(t *testing.T) {
+	setup()
+
+	// Create a test favorite relationship.
+	models.CreateTestFavoriteRel(testUserOne.ID, testVideoOne.ID)
+
+	t.Run("get favorite count successfully with cache miss", func(t *testing.T) {
+		redis.Rdb.FlushDB(redis.Ctx)
+
+		favoriteCount, _ := favoriteService.GetFavoriteCountByUserID(testUserOne.ID)
+
+		assert.Equal(t, int64(1), favoriteCount)
+	})
+
+	t.Run("get favorite count successfully with cache hit", func(t *testing.T) {
+		redis.Rdb.FlushDB(redis.Ctx)
+
+		favoriteVideoKey := redis.FavoriteVideosKey + strconv.FormatInt(testUserOne.ID, 10)
+		redis.Rdb.RPush(redis.Ctx, favoriteVideoKey, testVideoOne.ID)
+
+		favoriteCount, _ := favoriteService.GetFavoriteCountByUserID(testUserOne.ID)
+
+		assert.Equal(t, int64(1), favoriteCount)
 	})
 }

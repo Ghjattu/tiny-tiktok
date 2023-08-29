@@ -48,9 +48,9 @@ func TestCreateNewFollowRel(t *testing.T) {
 
 		// Insert two test users to redis.
 		followerUserKey := redis.UserKey + strconv.FormatInt(followerUser.ID, 10)
-		redis.Rdb.HSet(redis.Ctx, followerUserKey, followerUserDetail)
+		redis.Rdb.HSet(redis.Ctx, followerUserKey, followerUserCache)
 		followingUserKey := redis.UserKey + strconv.FormatInt(followingUser.ID, 10)
-		redis.Rdb.HSet(redis.Ctx, followingUserKey, followingUserDetail)
+		redis.Rdb.HSet(redis.Ctx, followingUserKey, followingUserCache)
 		followingKey := redis.FollowingKey + strconv.FormatInt(followerUser.ID, 10)
 		redis.Rdb.RPush(redis.Ctx, followingKey, "")
 		followerKey := redis.FollowerKey + strconv.FormatInt(followingUser.ID, 10)
@@ -91,9 +91,9 @@ func TestDeleteFollowRel(t *testing.T) {
 
 		// Insert two test users to redis.
 		followerUserKey := redis.UserKey + strconv.FormatInt(followerUser.ID, 10)
-		redis.Rdb.HSet(redis.Ctx, followerUserKey, followerUserDetail)
+		redis.Rdb.HSet(redis.Ctx, followerUserKey, followerUserCache)
 		followingUserKey := redis.UserKey + strconv.FormatInt(followingUser.ID, 10)
-		redis.Rdb.HSet(redis.Ctx, followingUserKey, followingUserDetail)
+		redis.Rdb.HSet(redis.Ctx, followingUserKey, followingUserCache)
 		followingKey := redis.FollowingKey + strconv.FormatInt(followerUser.ID, 10)
 		redis.Rdb.RPush(redis.Ctx, followingKey, "")
 		followerKey := redis.FollowerKey + strconv.FormatInt(followingUser.ID, 10)
@@ -209,5 +209,59 @@ func TestGetFollowerListByUserID(t *testing.T) {
 		assert.Equal(t, int32(0), statusCode)
 		assert.Equal(t, 1, len(userList))
 		assert.Equal(t, followerUser.Name, userList[0].Name)
+	})
+}
+
+func TestGetFollowingCountByUserID(t *testing.T) {
+	setup()
+
+	// Create a test follow relationship.
+	models.CreateTestFollowRel(followerUser.ID, followingUser.ID)
+
+	t.Run("get following count successfully with cache miss", func(t *testing.T) {
+		redis.Rdb.FlushDB(redis.Ctx)
+
+		followingCount, _ := followService.GetFollowingCountByUserID(followerUser.ID)
+
+		assert.Equal(t, int64(1), followingCount)
+	})
+
+	t.Run("get following count successfully with cache hit", func(t *testing.T) {
+		redis.Rdb.FlushDB(redis.Ctx)
+
+		// Insert following id list to redis.
+		followingKey := redis.FollowingKey + strconv.FormatInt(followerUser.ID, 10)
+		redis.Rdb.RPush(redis.Ctx, followingKey, followingUser.ID)
+
+		followingCount, _ := followService.GetFollowingCountByUserID(followerUser.ID)
+
+		assert.Equal(t, int64(1), followingCount)
+	})
+}
+
+func TestGetFollowerCountByUserID(t *testing.T) {
+	setup()
+
+	// Create a test follow relationship.
+	models.CreateTestFollowRel(followerUser.ID, followingUser.ID)
+
+	t.Run("get follower count successfully with cache miss", func(t *testing.T) {
+		redis.Rdb.FlushDB(redis.Ctx)
+
+		followerCount, _ := followService.GetFollowerCountByUserID(followingUser.ID)
+
+		assert.Equal(t, int64(1), followerCount)
+	})
+
+	t.Run("get follower count successfully with cache hit", func(t *testing.T) {
+		redis.Rdb.FlushDB(redis.Ctx)
+
+		// Insert follower id list to redis.
+		followerKey := redis.FollowerKey + strconv.FormatInt(followingUser.ID, 10)
+		redis.Rdb.RPush(redis.Ctx, followerKey, followerUser.ID)
+
+		followerCount, _ := followService.GetFollowerCountByUserID(followingUser.ID)
+
+		assert.Equal(t, int64(1), followerCount)
 	})
 }

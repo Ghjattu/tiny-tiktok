@@ -47,11 +47,20 @@ func TestGetUserDetailByUserID(t *testing.T) {
 	t.Run("get user successfully with cache miss", func(t *testing.T) {
 		redis.Rdb.FlushDB(redis.Ctx)
 
-		statusCode, statusMsg, userDetail := userService.GetUserDetailByUserID(0, testUserOne.ID)
+		statusCode, statusMsg, user := userService.GetUserDetailByUserID(0, testUserOne.ID)
+		waitForConsumer()
+
+		userKey := redis.UserKey + strconv.FormatInt(testUserOne.ID, 10)
+		id := redis.Rdb.HGet(redis.Ctx, userKey, "id").Val()
+		name := redis.Rdb.HGet(redis.Ctx, userKey, "name").Val()
+		workCount := redis.Rdb.HGet(redis.Ctx, userKey, "work_count").Val()
 
 		assert.Equal(t, int32(0), statusCode)
 		assert.Equal(t, "get user successfully", statusMsg)
-		assert.Equal(t, testUserOne.Name, userDetail.Name)
+		assert.Equal(t, testUserOne.Name, user.Name)
+		assert.Equal(t, strconv.FormatInt(testUserOne.ID, 10), id)
+		assert.Equal(t, testUserOne.Name, name)
+		assert.Equal(t, strconv.FormatInt(user.WorkCount, 10), workCount)
 	})
 
 	t.Run("get user successfully with cache hit", func(t *testing.T) {

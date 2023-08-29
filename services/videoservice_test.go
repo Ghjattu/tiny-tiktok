@@ -22,7 +22,7 @@ func TestCreateNewVideo(t *testing.T) {
 
 		// Insert a test user to redis.
 		userKey := redis.UserKey + strconv.FormatInt(testUserOne.ID, 10)
-		redis.Rdb.HSet(redis.Ctx, userKey, testUserOneDetail)
+		redis.Rdb.HSet(redis.Ctx, userKey, testUserOneCache)
 		// Insert a test video id list to redis.
 		videoAuthorKey := redis.VideosByAuthorKey + strconv.FormatInt(testUserOne.ID, 10)
 		redis.Rdb.RPush(redis.Ctx, videoAuthorKey, "")
@@ -135,5 +135,29 @@ func TestGetVideoDetailByAuthorID(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, testVideoOne.Title, video.Title)
 		assert.Equal(t, testVideoOne.Title, videoTitle)
+	})
+}
+
+func TestGetVideoCountByAuthorID(t *testing.T) {
+	setup()
+
+	t.Run("get video count with cache miss", func(t *testing.T) {
+		redis.Rdb.FlushDB(redis.Ctx)
+
+		videoCount, _ := videoService.GetVideoCountByAuthorID(testUserOne.ID)
+
+		assert.Equal(t, int64(2), videoCount)
+	})
+
+	t.Run("get video count with cache hit", func(t *testing.T) {
+		redis.Rdb.FlushDB(redis.Ctx)
+
+		videoAuthorKey := redis.VideosByAuthorKey + strconv.FormatInt(testUserOne.ID, 10)
+		redis.Rdb.RPush(redis.Ctx, videoAuthorKey, testVideoOne.ID)
+		redis.Rdb.RPush(redis.Ctx, videoAuthorKey, testVideoTwo.ID)
+
+		videoCount, _ := videoService.GetVideoCountByAuthorID(testUserOne.ID)
+
+		assert.Equal(t, int64(2), videoCount)
 	})
 }

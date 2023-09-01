@@ -1,9 +1,9 @@
 package models
 
 type FavoriteRel struct {
-	ID      int64 `gorm:"primaryKey;autoIncrement" json:"id"`
-	UserID  int64 `gorm:"type:int;not null" json:"user_id"`
-	VideoID int64 `gorm:"type:int;not null" json:"video_id"`
+	ID      int64 `gorm:"primaryKey;autoIncrement"`
+	UserID  int64 `gorm:"type:int;not null;index:user_id_idx;index:favorite_rel_idx"`
+	VideoID int64 `gorm:"type:int;not null;index:video_id_idx;index:favorite_rel_idx"`
 }
 
 // CreateNewFavoriteRel	create a new favorite rel.

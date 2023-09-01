@@ -4,8 +4,8 @@ import "time"
 
 type Message struct {
 	ID         int64     `gorm:"primaryKey;autoIncrement;not null"`
-	SenderID   int64     `gorm:"type:int;not null"`
-	ReceiverID int64     `gorm:"type:int;not null"`
+	SenderID   int64     `gorm:"type:int;not null;index:sender_receiver_idx"`
+	ReceiverID int64     `gorm:"type:int;not null;index:sender_receiver_idx"`
 	Content    string    `gorm:"type:varchar(255);not null"`
 	CreateDate time.Time `gorm:"type:datetime;not null"`
 }

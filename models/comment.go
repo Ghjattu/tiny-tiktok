@@ -5,7 +5,7 @@ import "time"
 type Comment struct {
 	ID         int64     `gorm:"primaryKey;autoIncrement"`
 	UserID     int64     `gorm:"type:int;not null"`
-	VideoID    int64     `gorm:"type:int;not null"`
+	VideoID    int64     `gorm:"type:int;not null;index:video_id_idx"`
 	Content    string    `gorm:"type:varchar(255);not null"`
 	CreateDate time.Time `gorm:"not null"`
 }

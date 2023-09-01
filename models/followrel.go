@@ -5,9 +5,9 @@ package models
 // If user A follows user B, then user A becomes a follower of user B,
 // and user B becomes a following of user A.
 type FollowRel struct {
-	ID          int64 `gorm:"primaryKey;autoIncrement;not null" json:"id"`
-	FollowerID  int64 `gorm:"type:int;not null" json:"follower_id"`
-	FollowingID int64 `gorm:"type:int;not null" json:"following_id"`
+	ID          int64 `gorm:"primaryKey;autoIncrement;not null"`
+	FollowerID  int64 `gorm:"type:int;not null;index:follow_rel_idx"`
+	FollowingID int64 `gorm:"type:int;not null;index:follow_rel_idx;index:following_id_idx"`
 }
 
 // CreateNewFollowRel creates a new follow relationship.

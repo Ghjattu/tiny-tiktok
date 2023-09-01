@@ -4,7 +4,7 @@ import "time"
 
 type Video struct {
 	ID          int64     `gorm:"primaryKey;autoIncrement"`
-	AuthorID    int64     `gorm:"type:int;not null"`
+	AuthorID    int64     `gorm:"type:int;not null;index:author_id_idx"`
 	PublishTime time.Time `gorm:"not null"`
 	PlayUrl     string    `gorm:"type:varchar(255);not null"`
 	CoverUrl    string    `gorm:"type:varchar(255);not null"`

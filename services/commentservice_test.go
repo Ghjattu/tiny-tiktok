@@ -183,3 +183,32 @@ func TestGetCommentDetailByCommentID(t *testing.T) {
 		assert.Equal(t, testCommentOne.Content, commentContent)
 	})
 }
+
+func BenchmarkGetCommentListByVideoID(b *testing.B) {
+	setup()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		commentService.GetCommentListByVideoID(0, testVideoOne.ID)
+	}
+}
+
+func BenchmarkGetCommentListByCommentIDList(b *testing.B) {
+	setup()
+
+	commentIDList := []int64{testCommentOne.ID}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		commentService.GetCommentListByCommentIDList(0, commentIDList)
+	}
+}
+
+func BenchmarkGetCommentDetailByCommentID(b *testing.B) {
+	setup()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		commentService.GetCommentDetailByCommentID(0, testCommentOne.ID)
+	}
+}

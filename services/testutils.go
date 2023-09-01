@@ -26,6 +26,8 @@ var (
 
 	testCommentOne      *models.Comment
 	testCommentOneCache *redis.CommentCache
+
+	// testMessage *models.Message
 )
 
 func setup() {
@@ -54,6 +56,9 @@ func setup() {
 	// Create a test comment.
 	testCommentOne, _ = models.CreateTestComment(testUserOne.ID, testVideoOne.ID)
 	testCommentOneCache = &redis.CommentCache{ID: testCommentOne.ID, Content: testCommentOne.Content}
+
+	// Create a test message.
+	models.CreateTestMessage(testUserOne.ID, testUserTwo.ID)
 }
 
 func waitForConsumer() {

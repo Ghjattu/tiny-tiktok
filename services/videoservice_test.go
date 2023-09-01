@@ -161,3 +161,32 @@ func TestGetVideoCountByAuthorID(t *testing.T) {
 		assert.Equal(t, int64(2), videoCount)
 	})
 }
+
+func BenchmarkGetVideoListByAuthorID(b *testing.B) {
+	setup()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		videoService.GetVideoListByAuthorID(testUserOne.ID, 0)
+	}
+}
+
+func BenchmarkGetVideoListByVideoIDList(b *testing.B) {
+	setup()
+
+	videoIDList := []int64{testVideoOne.ID}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		videoService.GetVideoListByVideoIDList(videoIDList, 0)
+	}
+}
+
+func BenchmarkGetVideoCountByAuthorID(b *testing.B) {
+	setup()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		videoService.GetVideoCountByAuthorID(testUserOne.ID)
+	}
+}

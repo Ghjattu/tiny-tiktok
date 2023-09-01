@@ -265,3 +265,27 @@ func TestGetFollowerCountByUserID(t *testing.T) {
 		assert.Equal(t, int64(1), followerCount)
 	})
 }
+
+func BenchmarkGetFollowingListByUserID(b *testing.B) {
+	setup()
+
+	// Create a test follow relationship.
+	models.CreateTestFollowRel(followerUser.ID, followingUser.ID)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		followService.GetFollowingListByUserID(0, followerUser.ID)
+	}
+}
+
+func BenchmarkGetFollowingCountByUserID(b *testing.B) {
+	setup()
+
+	// Create a test follow relationship.
+	models.CreateTestFollowRel(followerUser.ID, followingUser.ID)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		followService.GetFollowingCountByUserID(followerUser.ID)
+	}
+}

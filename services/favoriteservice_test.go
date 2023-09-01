@@ -210,3 +210,33 @@ func TestGetFavoriteCountByUserID(t *testing.T) {
 		assert.Equal(t, int64(1), favoriteCount)
 	})
 }
+
+func BenchmarkGetFavoriteVideoListByUserID(b *testing.B) {
+	setup()
+
+	// Create a test favorite relationship.
+	models.CreateTestFavoriteRel(testUserOne.ID, testVideoOne.ID)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		favoriteService.GetFavoriteVideoListByUserID(0, testUserOne.ID)
+	}
+}
+
+func BenchmarkGetTotalFavoritedByUserID(b *testing.B) {
+	setup()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		favoriteService.GetTotalFavoritedByUserID(testUserOne.ID)
+	}
+}
+
+func BenchmarkGetFavoriteCountByUserID(b *testing.B) {
+	setup()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		favoriteService.GetFavoriteCountByUserID(testUserOne.ID)
+	}
+}

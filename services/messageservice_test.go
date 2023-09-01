@@ -59,9 +59,6 @@ func TestGetMessageList(t *testing.T) {
 	})
 
 	t.Run("get message list successfully", func(t *testing.T) {
-		// Create a test message.
-		messageService.CreateNewMessage(testUserOne.ID, testUserTwo.ID, "Hello")
-
 		timestamp := time.Now().Add(-time.Hour)
 		statusCode, _, messageList :=
 			messageService.GetMessageList(testUserOne.ID, testUserTwo.ID, timestamp)
@@ -74,4 +71,13 @@ func TestGetMessageList(t *testing.T) {
 		assert.Equal(t, 1, len(messageList))
 		assert.NotEqual(t, "", lastMsgTimeStr)
 	})
+}
+
+func BenchmarkGetMessageList(b *testing.B) {
+	setup()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		messageService.GetMessageList(testUserOne.ID, testUserTwo.ID, time.Now())
+	}
 }

@@ -78,3 +78,12 @@ func TestGetUserDetailByUserID(t *testing.T) {
 		assert.Equal(t, testUserDetail.Name, userDetail.Name)
 	})
 }
+
+func BenchmarkGetUserDetailByUserID(b *testing.B) {
+	setup()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		userService.GetUserDetailByUserID(testUserOne.ID, testUserOne.ID)
+	}
+}

@@ -7,6 +7,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func benchmarkCommentSetup() {
+	InitDatabase(true)
+
+	for i := 0; i < 66; i++ {
+		CreateTestComment(int64(i%10+1), int64(i%10+2))
+	}
+}
+
 func TestCreateNewComment(t *testing.T) {
 	InitDatabase(true)
 
@@ -80,4 +88,31 @@ func TestGetCommentIDListByVideoID(t *testing.T) {
 	}
 
 	assert.Equal(t, testComment.ID, commentIDList[0])
+}
+
+func BenchmarkGetCommentCountByVideoID(b *testing.B) {
+	benchmarkCommentSetup()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		GetCommentCountByVideoID(6)
+	}
+}
+
+func BenchmarkGetCommentByCommentID(b *testing.B) {
+	benchmarkCommentSetup()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		GetCommentByCommentID(6)
+	}
+}
+
+func BenchmarkGetCommentIDListByVideoID(b *testing.B) {
+	benchmarkCommentSetup()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		GetCommentIDListByVideoID(6)
+	}
 }

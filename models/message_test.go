@@ -7,6 +7,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func benchmarkMessageSetup() {
+	InitDatabase(true)
+
+	for i := 0; i < 66; i++ {
+		CreateTestMessage(int64(i%10+1), int64(i%10+2))
+	}
+}
+
 func TestCreateNewMessage(t *testing.T) {
 	InitDatabase(true)
 
@@ -41,4 +49,13 @@ func TestGetMessageList(t *testing.T) {
 	}
 
 	assert.Equal(t, 1, len(messageList))
+}
+
+func BenchmarkGetMessageList(b *testing.B) {
+	benchmarkMessageSetup()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		GetMessageList(1, 2, time.Now())
+	}
 }

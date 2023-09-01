@@ -7,6 +7,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func benchmarkVideoSetup() {
+	InitDatabase(true)
+
+	for i := 0; i < 66; i++ {
+		CreateTestVideo(int64(i%10+1), time.Now(), "test")
+	}
+}
+
 func TestCreateNewVideo(t *testing.T) {
 	InitDatabase(true)
 
@@ -119,4 +127,40 @@ func TestGetVideoCountByAuthorID(t *testing.T) {
 	}
 
 	assert.Equal(t, int64(1), count)
+}
+
+func BenchmarkGetVideoIDListByAuthorID(b *testing.B) {
+	benchmarkVideoSetup()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		GetVideoIDListByAuthorID(6)
+	}
+}
+
+func BenchmarkGetAuthorIDByVideoID(b *testing.B) {
+	benchmarkVideoSetup()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		GetAuthorIDByVideoID(6)
+	}
+}
+
+func BenchmarkGetVideoByID(b *testing.B) {
+	benchmarkVideoSetup()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		GetVideoByID(int64(6))
+	}
+}
+
+func BenchmarkGetVideoCountByAuthorID(b *testing.B) {
+	benchmarkVideoSetup()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		GetVideoCountByAuthorID(int64(6))
+	}
 }

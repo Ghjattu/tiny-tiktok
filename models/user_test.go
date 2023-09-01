@@ -3,8 +3,16 @@ package models
 import (
 	"testing"
 
+	"github.com/Ghjattu/tiny-tiktok/utils"
 	"github.com/stretchr/testify/assert"
 )
+
+func benchmarkUserSetup() {
+	// Create test user.
+	for i := 1; i <= 66; i++ {
+		CreateTestUser(utils.GenerateRandomString(3), "test")
+	}
+}
 
 func TestCreateNewUser(t *testing.T) {
 	InitDatabase(true)
@@ -48,4 +56,23 @@ func TestGetUserByUserID(t *testing.T) {
 	}
 
 	assert.Equal(t, testUser.Name, returnedUser.Name)
+}
+
+func BenchmarkGetUserByName(b *testing.B) {
+	benchmarkUserSetup()
+
+	username := utils.GenerateRandomString(6)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		GetUserByName(username)
+	}
+}
+
+func BenchmarkGetUserByUserID(b *testing.B) {
+	benchmarkUserSetup()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		GetUserByUserID(int64(6))
+	}
 }

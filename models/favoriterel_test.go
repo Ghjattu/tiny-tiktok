@@ -6,6 +6,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func benchmarkFavoriteRelSetup() {
+	InitDatabase(true)
+
+	for i := 0; i < 66; i++ {
+		CreateTestFavoriteRel(int64(i%10+1), int64(i%10+2))
+	}
+}
+
 func TestCreateNewFavoriteRel(t *testing.T) {
 	InitDatabase(true)
 
@@ -99,4 +107,44 @@ func TestGetFavoriteVideoIDListByUserID(t *testing.T) {
 
 	assert.Equal(t, 1, len(videoIDList))
 	assert.Equal(t, []int64{1}, videoIDList)
+}
+
+func BenchmarkCheckFavoriteRelExist(b *testing.B) {
+	benchmarkFavoriteRelSetup()
+
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		CheckFavoriteRelExist(6, 6)
+	}
+}
+
+func BenchmarkGetFavoriteCountByVideoID(b *testing.B) {
+	benchmarkFavoriteRelSetup()
+
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		GetFavoriteCountByVideoID(6)
+	}
+}
+
+func BenchmarkGetFavoriteCountByUserID(b *testing.B) {
+	benchmarkFavoriteRelSetup()
+
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		GetFavoriteCountByUserID(6)
+	}
+}
+
+func BenchmarkGetFavoriteVideoIDListByUserID(b *testing.B) {
+	benchmarkFavoriteRelSetup()
+
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		GetFavoriteVideoIDListByUserID(6)
+	}
 }

@@ -6,6 +6,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func benchmarkFollowRelSetup() {
+	InitDatabase(true)
+
+	// Create test follow relationship.
+	for i := 1; i <= 66; i++ {
+		CreateTestFollowRel(int64(i%10+1), int64(i%10+2))
+	}
+}
+
 func TestCreateNewFollowRel(t *testing.T) {
 	InitDatabase(true)
 
@@ -115,4 +124,49 @@ func TestGetFollowerListByUserID(t *testing.T) {
 
 	assert.Equal(t, 1, len(list))
 	assert.Equal(t, testFollowRel.FollowerID, list[0])
+}
+
+func BenchmarkCheckFollowRelExist(b *testing.B) {
+	benchmarkFollowRelSetup()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		CheckFollowRelExist(1, 2)
+	}
+}
+
+func BenchmarkGetFollowingCountByUserID(b *testing.B) {
+	benchmarkFollowRelSetup()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		GetFollowingCountByUserID(1)
+	}
+}
+
+func BenchmarkGetFollowingListByUserID(b *testing.B) {
+	benchmarkFollowRelSetup()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		GetFollowingListByUserID(1)
+	}
+}
+
+func BenchmarkGetFollowerCountByUserID(b *testing.B) {
+	benchmarkFollowRelSetup()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		GetFollowerCountByUserID(2)
+	}
+}
+
+func BenchmarkGetFollowerListByUserID(b *testing.B) {
+	benchmarkFollowRelSetup()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		GetFollowerListByUserID(2)
+	}
 }

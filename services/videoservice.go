@@ -17,16 +17,18 @@ type VideoService struct{}
 //
 //	@receiver vs *VideoService
 //	@param playUrl string
+//	@param coverUrl string
 //	@param title string
 //	@param authorID int64
-//	@param publishTime  time.Time
-//	@return int32 "status_code"
-//	@return string "status_msg"
-func (vs *VideoService) CreateNewVideo(playUrl, title string, authorID int64, publishTime time.Time) (int32, string) {
+//	@param publishTime time.Time
+//	@return int32 "status code"
+//	@return string "status message"
+func (vs *VideoService) CreateNewVideo(playUrl, coverUrl, title string, authorID int64, publishTime time.Time) (int32, string) {
 	video := &models.Video{
 		AuthorID:    authorID,
 		PublishTime: publishTime,
 		PlayUrl:     playUrl,
+		CoverUrl:    coverUrl,
 		Title:       title,
 	}
 

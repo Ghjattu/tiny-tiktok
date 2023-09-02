@@ -28,7 +28,7 @@ func TestCreateNewVideo(t *testing.T) {
 		redis.Rdb.RPush(redis.Ctx, videoAuthorKey, "")
 
 		statusCode, statusMsg :=
-			videoService.CreateNewVideo("test", "test", testUserOne.ID, time.Now())
+			videoService.CreateNewVideo("test", "test", "test", testUserOne.ID, time.Now())
 		waitForConsumer()
 		workCount := redis.Rdb.HGet(redis.Ctx, userKey, "work_count").Val()
 		videoIDListLength := redis.Rdb.LLen(redis.Ctx, videoAuthorKey).Val()

@@ -164,6 +164,10 @@ func Feed(c *gin.Context) {
 	// Convert int64 to time.Time.
 	latestTime := time.Unix(latestTimeInt, 0)
 
+	if latestTime.Year() > 9999 {
+		latestTime = time.Now()
+	}
+
 	// Get most 30 videos.
 	vs := &services.VideoService{}
 	statusCode, statusMsg, nextTime, videoList := vs.GetMost30Videos(latestTime, currentUserID)

@@ -6,8 +6,10 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
+	"github.com/Ghjattu/tiny-tiktok/ffmpeg"
 	"github.com/Ghjattu/tiny-tiktok/models"
 	"github.com/Ghjattu/tiny-tiktok/oss"
 	"github.com/Ghjattu/tiny-tiktok/services"
@@ -61,19 +63,19 @@ func PublishNewVideo(c *gin.Context) {
 	// Save video to local.
 	videoName := filepath.Base(data.Filename)
 	finalVideoName := fmt.Sprintf("%s_%s_%s", currentUserIDStr, publishTimeStr, videoName)
-	savedLocalPath := filepath.Join("../public/", finalVideoName)
+	videoSavedLocalPath := filepath.Join("../public/", finalVideoName)
 
-	if err := c.SaveUploadedFile(data, savedLocalPath); err != nil {
+	if err := c.SaveUploadedFile(data, videoSavedLocalPath); err != nil {
 		c.JSON(http.StatusOK, Response{
 			StatusCode: 1,
 			StatusMsg:  err.Error(),
 		})
 		return
 	}
-	defer os.Remove(savedLocalPath)
+	defer os.Remove(videoSavedLocalPath)
 
 	// Upload video to OSS.
-	if err := oss.UploadFile(finalVideoName, savedLocalPath); err != nil {
+	if err := oss.UploadFile(finalVideoName, videoSavedLocalPath); err != nil {
 		c.JSON(http.StatusOK, Response{
 			StatusCode: 1,
 			StatusMsg:  err.Error(),
@@ -86,9 +88,29 @@ func PublishNewVideo(c *gin.Context) {
 	OSSBucketName := os.Getenv("OSS_BUCKET_NAME")
 	playUrl := fmt.Sprintf("https://%s.%s/%s", OSSBucketName, OSSEndpoint, finalVideoName)
 
+	// Get snapshot from video.
+	finalCoverName := fmt.Sprintf("%s_%s_%s_cover.jpeg",
+		currentUserIDStr, publishTimeStr, strings.Split(videoName, ".")[0])
+	coverSavedLocalPath := filepath.Join("../public/", finalCoverName)
+	coverUrl := ""
+
+	err = ffmpeg.GetSnapshot(videoSavedLocalPath, coverSavedLocalPath, 1)
+	if err == nil {
+		// Upload cover to OSS.
+		if err := oss.UploadFile(finalCoverName, coverSavedLocalPath); err == nil {
+			coverUrl = fmt.Sprintf("https://%s.%s/%s", OSSBucketName, OSSEndpoint, finalCoverName)
+		}
+	}
+	defer os.Remove(coverSavedLocalPath)
+
+	// If failed to get snapshot, or failed to upload cover to OSS, use default cover.
+	if coverUrl == "" {
+		coverUrl = fmt.Sprintf("https://%s.%s/%s", OSSBucketName, OSSEndpoint, "default_cover.png")
+	}
+
 	// Create new video.
 	vs := &services.VideoService{}
-	statusCode, statusMsg := vs.CreateNewVideo(playUrl, title, currentUserID, publishTime)
+	statusCode, statusMsg := vs.CreateNewVideo(playUrl, coverUrl, title, currentUserID, publishTime)
 
 	c.JSON(http.StatusOK, Response{
 		StatusCode: statusCode,

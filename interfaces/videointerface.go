@@ -9,7 +9,7 @@ import (
 type VideoInterface interface {
 	// CreateNewVideo creates a new video.
 	// Return status_code, status_msg.
-	CreateNewVideo(playUrl, title string, authorID int64, publishTime time.Time) (int32, string)
+	CreateNewVideo(playUrl, coverUrl, title string, authorID int64, publishTime time.Time) (int32, string)
 
 	// GetVideoListByAuthorID returns a list of videos published by the author.
 	// Return status_code, status_msg, video_list.

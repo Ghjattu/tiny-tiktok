@@ -21,8 +21,12 @@ jobs:
       with:
         go-version: '1.20'
 
-    - name: Set up MySQL
-      uses: nnhy/mysql-action@v1.0
+    - name: Install MySQL
+      run: sudo apt install mysql-server
+
+    - name: Connect to MySQL
+      run: |
+        mysql -h localhost -u root -e "CREATE DATABASE tiktok_test;"
 
     - name: Set up Redis
       uses: mihai-dinculescu/redis-action@v1.2.0

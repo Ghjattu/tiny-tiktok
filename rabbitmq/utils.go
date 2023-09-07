@@ -50,18 +50,14 @@ func ConsumeMessage(message *Message) {
 			}
 			redis.Rdb.Expire(redis.Ctx, message.Key, redis.RandomDay())
 		case "RPushX":
-			messageValue := message.Value.([]interface{})
-			valueIntList := make([]int64, 0, len(messageValue))
-			for _, v := range messageValue {
-				valueIntList = append(valueIntList, int64(v.(float64)))
-			}
-			valueStrList, _ := utils.ConvertInt64ToString(valueIntList)
+			messageValue := message.Value.([]int64)
+			valueStrList, _ := utils.ConvertInt64ToString(messageValue)
 
 			if err := redis.Rdb.RPushX(redis.Ctx, message.Key, valueStrList).Err(); err != nil {
 				log.Println("failed to rpushx: ", err.Error())
 			}
 		case "LRem":
-			element := int64(message.Value.(float64))
+			element := int64(message.Value.(int64))
 
 			if err := redis.Rdb.LRem(redis.Ctx, message.Key, 0, element).Err(); err != nil {
 				log.Println("failed to lrem: ", err.Error())

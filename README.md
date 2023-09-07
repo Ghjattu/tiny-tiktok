@@ -87,12 +87,12 @@ go test -v -race
 		```yaml
 		runs-on: ubuntu-latest
 		environment:
-			name: <your-environment-name>
+		  name: <your-environment-name>
 		env:
-			OSS_BUCKET_NAME: ${{ secrets.OSS_BUCKET_NAME }}
-			OSS_ENDPOINT: ${{ secrets.OSS_ENDPOINT }}
-			OSS_ACCESS_KEY_ID: ${{ secrets.OSS_ACCESS_KEY_ID }}
-			OSS_ACCESS_KEY_SECRET: ${{ secrets.OSS_ACCESS_KEY_SECRET }}
+		  OSS_BUCKET_NAME: ${{ secrets.OSS_BUCKET_NAME }}
+		  OSS_ENDPOINT: ${{ secrets.OSS_ENDPOINT }}
+		  OSS_ACCESS_KEY_ID: ${{ secrets.OSS_ACCESS_KEY_ID }}
+		  OSS_ACCESS_KEY_SECRET: ${{ secrets.OSS_ACCESS_KEY_SECRET }}
 		```
 	4. 在 [Marketplace](https://github.com/marketplace?type=actions) 中选择相应的 MySQL、Redis 和 RabbitMQ 插件并在 `go.yml` 文件中添加相应的配置，同时在 `env:` 中添加相应的环境变量使其能够被程序代码中的 `os.Getenv()` 函数获取到。
 	5. 在 `name: Test` 这一步中将代码修改为：
@@ -105,7 +105,7 @@ go test -v -race
 		- name: Upload coverage reports to Codecov
 		  uses: codecov/codecov-action@v3
 		  env:
-			CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+		    CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 		```
 一旦你完成了上述步骤，GitHub Actions 工作流将在每次推送到主分支时自动触发。你可以在 GitHub 仓库的 Actions 标签页中查看工作流的运行情况，以及在 Codecov 平台上查看生成的代码覆盖率报告。
 

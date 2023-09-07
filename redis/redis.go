@@ -14,15 +14,22 @@ var Ctx = context.Background()
 
 func init() {
 	godotenv.Load("../.env")
-	godotenv.Load("../../.env")
 
-	redis_ip := os.Getenv("REDIS_IP")
-	redis_port := os.Getenv("REDIS_PORT")
-	redis_password := os.Getenv("REDIS_PASSWORD")
+	REDIS_IP := os.Getenv("REDIS_IP")
+	if REDIS_IP == "" {
+		REDIS_IP = "127.0.0.1"
+	}
+
+	REDIS_PORT := os.Getenv("REDIS_PORT")
+	if REDIS_PORT == "" {
+		REDIS_PORT = "6379"
+	}
+
+	REDIS_PASSWORD := os.Getenv("REDIS_PASSWORD")
 
 	Rdb = redis.NewClient(&redis.Options{
-		Addr:     redis_ip + ":" + redis_port,
-		Password: redis_password,
+		Addr:     REDIS_IP + ":" + REDIS_PORT,
+		Password: REDIS_PASSWORD,
 		DB:       0,
 	})
 

@@ -13,9 +13,9 @@ func TestConsumeMessage(t *testing.T) {
 
 		message := &Message{
 			Type:       "Hash",
-			SubType:    "set",
+			SubType:    "Set",
 			Key:        "test",
-			StructName: "video",
+			StructName: "VideoCache",
 			Value:      &redis.VideoCache{ID: 1},
 		}
 		ConsumeMessage(message)
@@ -46,11 +46,11 @@ func TestConsumeMessage(t *testing.T) {
 		assert.Equal(t, "2", id)
 	})
 
-	t.Run("type is list and sub type is RPush", func(t *testing.T) {
+	t.Run("type is List and sub type is RPush", func(t *testing.T) {
 		redis.Rdb.FlushDB(redis.Ctx)
 
 		message := &Message{
-			Type:    "list",
+			Type:    "List",
 			SubType: "RPush",
 			Key:     "test",
 			Value:   []int64{1, 2, 3},
@@ -65,24 +65,24 @@ func TestConsumeMessage(t *testing.T) {
 }
 
 func TestCacheStructSelector(t *testing.T) {
-	t.Run("name is video", func(t *testing.T) {
+	t.Run("name is VideoCache", func(t *testing.T) {
 		redis.Rdb.FlushDB(redis.Ctx)
 
 		videoCache := &redis.VideoCache{ID: 1}
 
-		got := CacheStructSelector("video", videoCache)
+		got := CacheStructSelector("VideoCache", videoCache)
 		returnedValue, ok := got.(*redis.VideoCache)
 
 		assert.True(t, ok)
 		assert.Equal(t, videoCache.ID, returnedValue.ID)
 	})
 
-	t.Run("name is comment", func(t *testing.T) {
+	t.Run("name is CommentCache", func(t *testing.T) {
 		redis.Rdb.FlushDB(redis.Ctx)
 
 		commentCache := &redis.CommentCache{ID: 1}
 
-		got := CacheStructSelector("comment", commentCache)
+		got := CacheStructSelector("CommentCache", commentCache)
 		returnedValue, ok := got.(*redis.CommentCache)
 
 		assert.True(t, ok)

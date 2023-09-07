@@ -13,11 +13,17 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    environment:
+      name: test
     env:
+        OSS_BUCKET_NAME: ${{ secrets.OSS_BUCKET_NAME }}
+        OSS_ENDPOINT: ${{ secrets.OSS_ENDPOINT }}
+        OSS_ACCESS_KEY_ID: ${{ secrets.OSS_ACCESS_KEY_ID }}
+        OSS_ACCESS_KEY_SECRET: ${{ secrets.OSS_ACCESS_KEY_SECRET }}
         MYSQL_IP: 127.0.0.1
         MYSQL_PORT: 3306
         MYSQL_USERNAME: root
-        MYSQL_DB_NAME: tiktok_test
+        MYSQL_DB_NAME_TEST: tiktok_test
         REDIS_IP: 127.0.0.1
         REDIS_PORT: 6379
         RABBITMQ_USERNAME: guest

@@ -33,7 +33,7 @@ func ConsumeMessage(message *Message) {
 			}
 			redis.Rdb.Expire(redis.Ctx, message.Key, redis.RandomDay())
 		case "Incr":
-			incr := int64(message.Value.(float64))
+			incr := int64(message.Value.(int64))
 
 			if _, err := redis.HashIncrBy(message.Key, message.Field, incr); err != nil {
 				log.Println("failed to hash incr by: ", err.Error())
@@ -42,12 +42,8 @@ func ConsumeMessage(message *Message) {
 	case "List":
 		switch message.SubType {
 		case "RPush":
-			messageValue := message.Value.([]interface{})
-			valueIntList := make([]int64, 0, len(messageValue))
-			for _, v := range messageValue {
-				valueIntList = append(valueIntList, int64(v.(float64)))
-			}
-			valueStrList, _ := utils.ConvertInt64ToString(valueIntList)
+			messageValue := message.Value.([]int64)
+			valueStrList, _ := utils.ConvertInt64ToString(messageValue)
 
 			if err := redis.Rdb.RPush(redis.Ctx, message.Key, valueStrList).Err(); err != nil {
 				log.Println("failed to rpush: ", err.Error())

@@ -13,6 +13,23 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    environment:
+      name: test
+    env:
+        OSS_BUCKET_NAME: ${{ secrets.OSS_BUCKET_NAME }}
+        OSS_ENDPOINT: ${{ secrets.OSS_ENDPOINT }}
+        OSS_ACCESS_KEY_ID: ${{ secrets.OSS_ACCESS_KEY_ID }}
+        OSS_ACCESS_KEY_SECRET: ${{ secrets.OSS_ACCESS_KEY_SECRET }}
+        MYSQL_IP: 127.0.0.1
+        MYSQL_PORT: 3306
+        MYSQL_USERNAME: root
+        MYSQL_DB_NAME_TEST: tiktok_test
+        REDIS_IP: 127.0.0.1
+        REDIS_PORT: 6379
+        RABBITMQ_USERNAME: guest
+        RABBITMQ_PASSWORD: guest
+        RABBITMQ_IP: 127.0.0.1
+        RABBITMQ_PORT: 5672
     steps:
     - uses: actions/checkout@v3
 
@@ -21,14 +38,26 @@ jobs:
       with:
         go-version: '1.20'
 
+    - name: Setup MySQL
+      uses: shogo82148/actions-setup-mysql@v1
+      with:
+        mysql-version: "8.0"
+    - run: mysql -u root -e "CREATE DATABASE tiktok_test;"
+
+    - name: Set up Redis
+      uses: pustovitDmytro/redis-github-action@v1.0.1
+
+    - name: Set up RabbitMQ
+      uses: mer-team/rabbitmq-mng-action@v1.2
+
     - name: Build
       run: go build -v ./...
 
     - name: Test
-      run: go test -v ./...
-      
+      run: go test -v -p 1 ./...
+
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-        
+

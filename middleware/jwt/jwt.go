@@ -26,7 +26,7 @@ func init() {
 
 	tokenLifespan, _ = strconv.Atoi(os.Getenv("TOKEN_LIFESPAN"))
 	if tokenLifespan == 0 {
-		tokenLifespan = 1
+		tokenLifespan = 24
 	}
 }
 

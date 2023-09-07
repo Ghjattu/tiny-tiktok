@@ -15,10 +15,20 @@ var db *gorm.DB
 
 func getDatabaseName(isTest bool) string {
 	if isTest {
-		return os.Getenv("MYSQL_DB_NAME_TEST")
+		MYSQL_DB_NAME_TEST := os.Getenv("MYSQL_DB_NAME_TEST")
+		if MYSQL_DB_NAME_TEST == "" {
+			MYSQL_DB_NAME_TEST = "tiktok_test"
+		}
+
+		return MYSQL_DB_NAME_TEST
 	}
 
-	return os.Getenv("MYSQL_DB_NAME")
+	MYSQL_DB_NAME := os.Getenv("MYSQL_DB_NAME")
+	if MYSQL_DB_NAME == "" {
+		MYSQL_DB_NAME = "tiktok"
+	}
+
+	return MYSQL_DB_NAME
 }
 
 // InitDatabase initializes the database,
@@ -36,14 +46,27 @@ func InitDatabase(isTest bool) {
 	// So we need to load the environment variables manually.
 	godotenv.Load("../.env")
 
-	mysql_username := os.Getenv("MYSQL_USERNAME")
-	mysql_password := os.Getenv("MYSQL_PASSWORD")
-	mysql_ip := os.Getenv("MYSQL_IP")
-	mysql_port := os.Getenv("MYSQL_PORT")
-	mysql_db_name := getDatabaseName(isTest)
+	MySQL_USERNAME := os.Getenv("MYSQL_USERNAME")
+	if MySQL_USERNAME == "" {
+		MySQL_USERNAME = "root"
+	}
 
-	dsn := mysql_username + ":" + mysql_password +
-		"@tcp(" + mysql_ip + ":" + mysql_port + ")" + "/" + mysql_db_name +
+	MySQL_PASSWORD := os.Getenv("MYSQL_PASSWORD")
+
+	MySQL_IP := os.Getenv("MYSQL_IP")
+	if MySQL_IP == "" {
+		MySQL_IP = "127.0.0.1"
+	}
+
+	MySQL_PORT := os.Getenv("MYSQL_PORT")
+	if MySQL_PORT == "" {
+		MySQL_PORT = "3306"
+	}
+
+	MySQL_DB_NAME := getDatabaseName(isTest)
+
+	dsn := MySQL_USERNAME + ":" + MySQL_PASSWORD +
+		"@tcp(" + MySQL_IP + ":" + MySQL_PORT + ")" + "/" + MySQL_DB_NAME +
 		"?charset=utf8mb4&parseTime=True&loc=Local"
 
 	newLogger := logger.New(

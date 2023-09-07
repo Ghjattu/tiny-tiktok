@@ -33,7 +33,10 @@ func ConsumeMessage(message *Message) {
 			}
 			redis.Rdb.Expire(redis.Ctx, message.Key, redis.RandomDay())
 		case "Incr":
-			incr := int64(message.Value.(int64))
+			incr, err := utils.ConvertInterfaceToInt64(message.Value)
+			if err != nil {
+				log.Println("Hash Incr error: ", err.Error())
+			}
 
 			if _, err := redis.HashIncrBy(message.Key, message.Field, incr); err != nil {
 				log.Println("failed to hash incr by: ", err.Error())
@@ -42,22 +45,31 @@ func ConsumeMessage(message *Message) {
 	case "List":
 		switch message.SubType {
 		case "RPush":
-			messageValue := message.Value.([]int64)
-			valueStrList, _ := utils.ConvertInt64ToString(messageValue)
+			valueList, err := utils.ConvertInterfaceToInt64Slice(message.Value)
+			if err != nil {
+				log.Println("List RPush error: ", err.Error())
+			}
+			valueStrList, _ := utils.ConvertInt64ToString(valueList)
 
 			if err := redis.Rdb.RPush(redis.Ctx, message.Key, valueStrList).Err(); err != nil {
 				log.Println("failed to rpush: ", err.Error())
 			}
 			redis.Rdb.Expire(redis.Ctx, message.Key, redis.RandomDay())
 		case "RPushX":
-			messageValue := message.Value.([]int64)
-			valueStrList, _ := utils.ConvertInt64ToString(messageValue)
+			valueList, err := utils.ConvertInterfaceToInt64Slice(message.Value)
+			if err != nil {
+				log.Println("List RPushX error: ", err.Error())
+			}
+			valueStrList, _ := utils.ConvertInt64ToString(valueList)
 
 			if err := redis.Rdb.RPushX(redis.Ctx, message.Key, valueStrList).Err(); err != nil {
 				log.Println("failed to rpushx: ", err.Error())
 			}
 		case "LRem":
-			element := int64(message.Value.(int64))
+			element, err := utils.ConvertInterfaceToInt64(message.Value)
+			if err != nil {
+				log.Println("List LRem error: ", err.Error())
+			}
 
 			if err := redis.Rdb.LRem(redis.Ctx, message.Key, 0, element).Err(); err != nil {
 				log.Println("failed to lrem: ", err.Error())

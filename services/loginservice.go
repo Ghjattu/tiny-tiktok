@@ -1,6 +1,7 @@
 package services
 
 import (
+	"github.com/Ghjattu/tiny-tiktok/bloomfilter"
 	"github.com/Ghjattu/tiny-tiktok/middleware/jwt"
 	"github.com/Ghjattu/tiny-tiktok/models"
 	"golang.org/x/crypto/bcrypt"
@@ -44,6 +45,9 @@ func (ls *LoginService) Login(username, password string) (int64, int32, string, 
 	if err != nil {
 		return -1, 1, "failed to generate a token", ""
 	}
+
+	// Add the user id to bloom filter.
+	bloomfilter.Add(bloomfilter.UserBloomFilter, user.ID)
 
 	return user.ID, 0, "login successfully", token
 }

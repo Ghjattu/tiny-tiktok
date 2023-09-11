@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/Ghjattu/tiny-tiktok/bloomfilter"
 	"github.com/Ghjattu/tiny-tiktok/models"
 	"github.com/Ghjattu/tiny-tiktok/rabbitmq"
 	"github.com/Ghjattu/tiny-tiktok/redis"
@@ -51,6 +52,9 @@ func (cs *CommentService) CreateNewComment(currentUserID, videoID int64, content
 	if err != nil {
 		return 1, "failed to create new comment", nil
 	}
+
+	// Add the comment id to bloom filter.
+	bloomfilter.Add(bloomfilter.CommentBloomFilter, comment.ID)
 
 	// Update the CommentCount of the video in cache.
 	videoKey := redis.VideoKey + strconv.FormatInt(videoID, 10)

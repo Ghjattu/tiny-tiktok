@@ -31,6 +31,7 @@ var (
 )
 
 func setup() {
+	os.Setenv("TESTING", "true")
 	models.InitDatabase(true)
 
 	// Register a test user.

@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Ghjattu/tiny-tiktok/bloomfilter"
 	"github.com/Ghjattu/tiny-tiktok/redis"
 	"github.com/stretchr/testify/assert"
 )
@@ -38,15 +39,17 @@ func TestCreateNewComment(t *testing.T) {
 		commentVideoKey := redis.CommentsByVideoKey + strconv.FormatInt(testVideoOne.ID, 10)
 		redis.Rdb.RPush(redis.Ctx, commentVideoKey, "")
 
-		statusCode, _, _ :=
+		statusCode, _, comment :=
 			commentService.CreateNewComment(0, testVideoOne.ID, "test", time.Now())
 		waitForConsumer()
 		commentCount := redis.Rdb.HGet(redis.Ctx, videoKey, "comment_count").Val()
 		commentListLength := redis.Rdb.LLen(redis.Ctx, commentVideoKey).Val()
+		exist := bloomfilter.CheckInt64Exist(bloomfilter.CommentBloomFilter, comment.ID)
 
 		assert.Equal(t, int32(0), statusCode)
 		assert.Equal(t, "1", commentCount)
 		assert.Equal(t, int64(2), commentListLength)
+		assert.True(t, exist)
 	})
 }
 

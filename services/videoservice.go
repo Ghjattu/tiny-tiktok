@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/Ghjattu/tiny-tiktok/bloomfilter"
 	"github.com/Ghjattu/tiny-tiktok/models"
 	"github.com/Ghjattu/tiny-tiktok/rabbitmq"
 	"github.com/Ghjattu/tiny-tiktok/redis"
@@ -37,6 +38,9 @@ func (vs *VideoService) CreateNewVideo(playUrl, coverUrl, title string, authorID
 	if err != nil {
 		return 1, "failed to create new video"
 	}
+
+	// Add the video id to bloom filter.
+	bloomfilter.Add(bloomfilter.VideoBloomFilter, video.ID)
 
 	// Update the WorkCount of the user in cache.
 	userKey := redis.UserKey + strconv.FormatInt(authorID, 10)

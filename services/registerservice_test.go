@@ -3,6 +3,7 @@ package services
 import (
 	"testing"
 
+	"github.com/Ghjattu/tiny-tiktok/bloomfilter"
 	"github.com/Ghjattu/tiny-tiktok/models"
 	"github.com/stretchr/testify/assert"
 )
@@ -13,6 +14,7 @@ var (
 
 func TestRegister(t *testing.T) {
 	models.InitDatabase(true)
+	bloomfilter.ClearAll()
 	// Create a test user.
 	testUser, _ := models.CreateTestUser("test", "123456")
 
@@ -76,9 +78,11 @@ func TestRegister(t *testing.T) {
 	})
 
 	t.Run("valid username and password", func(t *testing.T) {
-		_, statusCode, statusMsg, _ := registerService.Register(testUser.Name+"1", "123456")
+		id, statusCode, statusMsg, _ := registerService.Register(testUser.Name+"1", "123456")
+		exist := bloomfilter.CheckInt64Exist(bloomfilter.UserBloomFilter, id)
 
 		assert.Equal(t, int32(0), statusCode)
 		assert.Equal(t, "register successfully", statusMsg)
+		assert.True(t, exist)
 	})
 }

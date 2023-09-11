@@ -3,6 +3,7 @@ package services
 import (
 	"time"
 
+	"github.com/Ghjattu/tiny-tiktok/bloomfilter"
 	"github.com/Ghjattu/tiny-tiktok/models"
 	"github.com/Ghjattu/tiny-tiktok/redis"
 )
@@ -32,6 +33,7 @@ var (
 
 func setup() {
 	models.InitDatabase(true)
+	bloomfilter.ClearAll()
 
 	// Create two test users.
 	testUserOne, _ = models.CreateTestUser("testOne", "123456")

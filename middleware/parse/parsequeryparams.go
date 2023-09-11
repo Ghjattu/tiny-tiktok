@@ -2,7 +2,9 @@ package parse
 
 import (
 	"net/http"
+	"os"
 
+	"github.com/Ghjattu/tiny-tiktok/bloomfilter"
 	"github.com/Ghjattu/tiny-tiktok/utils"
 	"github.com/gin-gonic/gin"
 )
@@ -50,6 +52,32 @@ func ParseQueryParams() gin.HandlerFunc {
 				c.Abort()
 				return
 			}
+
+			// If the value is less than 0, it is invalid.
+			if valueInt < 0 {
+				c.JSON(http.StatusOK, Response{
+					StatusCode: 1,
+					StatusMsg:  "invalid int param",
+				})
+				c.Abort()
+				return
+			}
+
+			// Check if the int key exists in the bloom filter.
+			isTesting := os.Getenv("TESTING")
+			if isTesting == "" {
+				bloomFilterType := selectBloomFilterType(key)
+				if bloomFilterType != 0 && !bloomfilter.CheckInt64Exist(bloomFilterType, valueInt) {
+					// If not, it is invalid.
+					c.JSON(http.StatusOK, Response{
+						StatusCode: 1,
+						StatusMsg:  "invalid int param",
+					})
+					c.Abort()
+					return
+				}
+			}
+
 			queryValues[key] = valueInt
 		}
 
@@ -63,5 +91,22 @@ func ParseQueryParams() gin.HandlerFunc {
 		}
 
 		c.Next()
+	}
+}
+
+// selectBloomFilterType selects a bloom filter type by the key name.
+//
+//	@param keyName string
+//	@return uint "bloom filter type"
+func selectBloomFilterType(keyName string) uint {
+	switch keyName {
+	case "user_id", "to_user_id":
+		return bloomfilter.UserBloomFilter
+	case "video_id":
+		return bloomfilter.VideoBloomFilter
+	case "comment_id":
+		return bloomfilter.CommentBloomFilter
+	default:
+		return 0
 	}
 }

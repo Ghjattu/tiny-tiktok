@@ -22,18 +22,26 @@ func init() {
 }
 
 func TestUploadFile(t *testing.T) {
-	err := UploadFile("test_bear.mp4", "../data/bear.mp4")
-	if err != nil {
-		t.Fatalf("upload file failed, err:%v\n", err)
-	}
+	t.Run("upload file failed", func(t *testing.T) {
+		err := UploadFile("test_bear.mp4", "../data/fake.mp4")
 
-	url := "https://" + bucketName + "." + endpoint + "/test_bear.mp4"
-	res, err := http.Get(url)
-	if err != nil {
-		t.Fatalf("http request failed, err:%v\n", err)
-	}
-	defer res.Body.Close()
+		assert.NotNil(t, err)
+	})
 
-	assert.Equal(t, http.StatusOK, res.StatusCode)
-	assert.Equal(t, "video/mp4", res.Header.Get("Content-Type"))
+	t.Run("upload file successfully", func(t *testing.T) {
+		err := UploadFile("test_bear.mp4", "../data/bear.mp4")
+		if err != nil {
+			t.Fatalf("upload file failed, err:%v\n", err)
+		}
+
+		url := "https://" + bucketName + "." + endpoint + "/test_bear.mp4"
+		res, err := http.Get(url)
+		if err != nil {
+			t.Fatalf("http request failed, err:%v\n", err)
+		}
+		defer res.Body.Close()
+
+		assert.Equal(t, http.StatusOK, res.StatusCode)
+		assert.Equal(t, "video/mp4", res.Header.Get("Content-Type"))
+	})
 }

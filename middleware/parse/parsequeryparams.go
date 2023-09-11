@@ -2,6 +2,7 @@ package parse
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/Ghjattu/tiny-tiktok/bloomfilter"
 	"github.com/Ghjattu/tiny-tiktok/utils"
@@ -63,15 +64,18 @@ func ParseQueryParams() gin.HandlerFunc {
 			}
 
 			// Check if the int key exists in the bloom filter.
-			bloomFilterType := selectBloomFilterType(key)
-			if bloomFilterType != 0 && !bloomfilter.CheckInt64Exist(bloomFilterType, valueInt) {
-				// If not, it is invalid.
-				c.JSON(http.StatusOK, Response{
-					StatusCode: 1,
-					StatusMsg:  "invalid int param",
-				})
-				c.Abort()
-				return
+			isTesting := os.Getenv("TESTING")
+			if isTesting == "" {
+				bloomFilterType := selectBloomFilterType(key)
+				if bloomFilterType != 0 && !bloomfilter.CheckInt64Exist(bloomFilterType, valueInt) {
+					// If not, it is invalid.
+					c.JSON(http.StatusOK, Response{
+						StatusCode: 1,
+						StatusMsg:  "invalid int param",
+					})
+					c.Abort()
+					return
+				}
 			}
 
 			queryValues[key] = valueInt

@@ -1,6 +1,5 @@
 # Tiny-Tiktok
 
-<div style="display:flex; column-gap:20px">
 
 [![Go](https://github.com/Ghjattu/tiny-tiktok/actions/workflows/go.yml/badge.svg)](https://github.com/Ghjattu/tiny-tiktok/actions/workflows/go.yml)
 
@@ -8,9 +7,10 @@
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/Ghjattu/tiny-tiktok)](https://goreportcard.com/report/github.com/Ghjattu/tiny-tiktok)
 
-</div>
 
 Tiny-Tiktok 是一个基于 Golang 的极简版抖音后端，用户可以在平台上发布短视频，也可以观看其他用户发布的短视频。本项目基于 Gin 框架，使用了 MySQL、Redis、RabbitMQ 和阿里云 OSS 等技术，实现了用户注册、登录、视频上传、视频点赞、视频评论、关注用户、发送消息等功能。
+
+[青训营大项目答辩汇报文档](https://v1e4jqvg2bf.feishu.cn/docx/IoPkdB4T5oxWg1xxH4Hct0HTnDd?from=from_copylink)
 
 ## Development Environment
 - OS: Ubuntu 20.04 & macOS
